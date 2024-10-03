@@ -1,0 +1,99 @@
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <variant>
+
+/** El tipo del token del analizador léxico. **/
+enum class TokenType : unsigned char {
+    END,
+    BOOL,
+    FOR,
+    FUNCTION,
+    IF,
+    INPUT,
+    OUTPUT,
+    RETURN,
+    INT,
+    STRING,
+    VAR,
+    VOID,
+    IDENTIFIER,
+    ASSIGN,
+    CUMULATIVE_ASSIGN,
+    SUM,
+    SUB,
+    AND,
+    OR,
+    LESS,
+    GREATER,
+    TRUE,
+    FALSE,
+    COMMA,
+    SEMICOLON,
+    PARENTHESIS_OPEN,
+    PARENTHESIS_CLOSE,
+    CURLY_BRACKET_OPEN,
+    CURLY_BRACKET_CLOSE,
+    CINT,
+    CSTR
+};
+
+/**
+ * La unidad básica del analizador léxico. Definido
+ * mediante el tipo de token y su contenido.
+ */
+struct Token {
+    /** El identificador del token. **/
+    TokenType type {};
+
+    /**
+     * El contenido del token. Dependiendo del tipo
+     * puede ser un entero, una cadena o estar vacío.
+     */
+    std::variant<std::monostate, std::string, int32_t> attribute {};
+};
+
+/**
+ * Devuelve una cadena con el nombre del token.
+ * @param token El tipo del token.
+ * @return El identificador del token.
+ */
+constexpr const char* ToString(const TokenType token) {
+    using enum TokenType;
+
+    switch (token) {
+    case END: return "eof";
+    case BOOL: return "bool";
+    case FOR: return "for";
+    case FUNCTION: return "fn";
+    case IF: return "if";
+    case INPUT: return "in";
+    case OUTPUT: return "out";
+    case RETURN: return "ret";
+    case INT: return "int";
+    case STRING: return "str";
+    case VAR: return "var";
+    case VOID: return "void";
+    case IDENTIFIER: return "id";
+    case ASSIGN: return "ass";
+    case CUMULATIVE_ASSIGN: return "cumass";
+    case SUM: return "sum";
+    case SUB: return "sub";
+    case AND: return "and";
+    case OR: return "or";
+    case LESS: return "ls";
+    case GREATER: return "gr";
+    case TRUE: return "nocap";
+    case FALSE: return "cap";
+    case COMMA: return "com";
+    case SEMICOLON: return "scol";
+    case PARENTHESIS_OPEN: return "po";
+    case PARENTHESIS_CLOSE: return "pc";
+    case CURLY_BRACKET_OPEN: return "cbo";
+    case CURLY_BRACKET_CLOSE: return "cbc";
+    case CINT: return "cint";
+    case CSTR: return "cstr";
+    default: throw std::exception();
+    }
+}
