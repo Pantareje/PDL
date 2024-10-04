@@ -163,16 +163,18 @@ public:
 
                     // 6 : cesc : 5
                     const int escapedChar = EscapedToAscii(m_lastChar);
+
+                    // Carácter ilegal.
                     if (escapedChar == -1)
                         throw LexicalException(
                             m_line, m_column,
                             m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
                                 ? std::format(
-                                    "Error en la cadena. El carácter de escape '\\{}' no es válido.",
+                                    "Error en la cadena. La secuencia de escape '\\{}' no es válida.",
                                     CodepointToUtf8(m_lastChar)
                                 )
                                 : std::format(
-                                    "Carácter ilegal en la cadena de escape (U+{:04X}).",
+                                    "Error en la cadena. Carácter ilegal en la secuencia de escape (U+{:04X}).",
                                     static_cast<uint64_t>(m_lastChar)
                                 )
 
@@ -183,10 +185,26 @@ public:
                     Read();
                 }
                 // 5 : oc : 5
-                else {
+                else if (!IsAscii(m_lastChar) || IsPrintAscii(m_lastChar) || m_lastChar == ' ') {
                     str += CodepointToUtf8(m_lastChar);
                     counter += 1;
                     Read();
+                }
+                // Carácter ilegal.
+                else {
+                    throw LexicalException(
+                        m_line, m_column,
+                        m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
+                            ? std::format(
+                                "Error en la cadena. Carácter no permitido («{}», U+{:04X}).",
+                                CodepointToUtf8(m_lastChar),
+                                static_cast<uint64_t>(m_lastChar)
+                            )
+                            : std::format(
+                                "Error en la cadena. Carácter no permitido (U+{:04X}).",
+                                static_cast<uint64_t>(m_lastChar)
+                            )
+                    );
                 }
             }
 
