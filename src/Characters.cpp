@@ -1,5 +1,5 @@
 // Para una explicación detallada sobre las codificaciones unicode:
-// https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-3/#G7404#include "Characters.h"
+// https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-3/#G7404#include
 
 #include "Characters.h"
 
