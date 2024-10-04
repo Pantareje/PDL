@@ -4,9 +4,10 @@ project(PDL)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(PDL main.cpp
-        Lexer.h
-        Token.h
-        LexicalException.h
-        Characters.h
-        Characters.cpp)
+add_executable(PDL
+        src/main.cpp
+        src/Lexer.h
+        src/Token.h
+        src/LexicalException.h
+        src/Characters.h
+        src/Characters.cpp)
