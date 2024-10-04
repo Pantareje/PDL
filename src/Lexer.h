@@ -195,7 +195,7 @@ public:
                 else {
                     throw LexicalException(
                         m_line, m_column,
-                        m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
+                        IsPrintUnicode(m_lastChar)
                             ? std::format(
                                 "Error en la cadena. Carácter no permitido («{}», U+{:04X}).",
                                 CodepointToUtf8(m_lastChar),
@@ -331,7 +331,7 @@ public:
         // Carácter desconocido.
         throw LexicalException(
             m_line, m_column,
-            m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
+            IsPrintUnicode(m_lastChar)
                 ? std::format(
                     "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
                     CodepointToUtf8(m_lastChar),
