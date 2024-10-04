@@ -4,7 +4,7 @@
 #include <istream>
 
 constexpr bool IsAscii(const char32_t c) {
-    return (c & 0x80) == 0;
+    return (c & ~0x7F) == 0;
 }
 
 constexpr bool IsPrint(const char32_t c) {
