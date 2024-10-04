@@ -88,14 +88,14 @@ public:
         ReadDelAndComments();
 
         // 0 : l : 1
-        if (IsAlphaAscii(m_lastChar)) {
+        if (IsAlphaUnicode(m_lastChar)) {
             std::string lex;
             lex += static_cast<char>(m_lastChar);
 
             Read();
 
             // 1 : l, d, _ : 1
-            while (IsAlnumAscii(m_lastChar) || m_lastChar == '_') {
+            while (IsAlnumUnicode(m_lastChar) || m_lastChar == '_') {
                 lex += static_cast<char>(m_lastChar);
                 Read();
             }
