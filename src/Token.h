@@ -50,10 +50,10 @@ struct Token {
     TokenType type {};
 
     /**
-     * El contenido del token. Dependiendo del tipo
-     * puede ser un entero, una cadena o estar vacío.
+     * El contenido del token. Dependiendo del tipo puede estar vacío
+     * o ser un identificador, una cadena, o un entero de 16 bits con signo.
      */
-    std::variant<std::monostate, size_t, std::string, int32_t> attribute {};
+    std::variant<std::monostate, size_t, std::string, int16_t> attribute {};
 };
 
 /**

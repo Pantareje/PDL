@@ -118,16 +118,30 @@ public:
         // 0 : d : 3
         if (IsDigitAscii(m_lastChar)) {
             int32_t num = static_cast<unsigned char>(m_lastChar) - '0';
+            bool numberTooBig = false;
             Read();
 
             // 3 : d : 3
             while (IsDigitAscii(m_lastChar)) {
-                num = num * 10 + (static_cast<unsigned char>(m_lastChar) - '0');
+                if (!numberTooBig) {
+                    num = num * 10 + (static_cast<unsigned char>(m_lastChar) - '0');
+
+                    if (num > INT16_MAX) {
+                        numberTooBig = true;
+                    }
+                }
+
                 Read();
             }
 
             // 3 : oc : 4
-            return { TokenType::CINT, num };
+            if (numberTooBig)
+                throw LexicalException(
+                    m_line, m_column,
+                    "El valor del entero es demasiado grande."
+                );
+
+            return { TokenType::CINT, static_cast<int16_t>(num) };
         }
 
         // 0 : ' : 5
