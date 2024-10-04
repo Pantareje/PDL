@@ -170,12 +170,13 @@ public:
                             m_line, m_column,
                             m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
                                 ? std::format(
-                                    "Error en la cadena. La secuencia de escape '\\{}' no es válida.",
-                                    CodepointToUtf8(m_lastChar)
+                                    "Error en la cadena. La secuencia de escape '\\{}' (U+{:04X}) no es válida.",
+                                    CodepointToUtf8(m_lastChar),
+                                    static_cast<int32_t>(m_lastChar)
                                 )
                                 : std::format(
                                     "Error en la cadena. Carácter ilegal en la secuencia de escape (U+{:04X}).",
-                                    static_cast<uint64_t>(m_lastChar)
+                                    static_cast<int32_t>(m_lastChar)
                                 )
 
                         );
@@ -198,11 +199,11 @@ public:
                             ? std::format(
                                 "Error en la cadena. Carácter no permitido («{}», U+{:04X}).",
                                 CodepointToUtf8(m_lastChar),
-                                static_cast<uint64_t>(m_lastChar)
+                                static_cast<int32_t>(m_lastChar)
                             )
                             : std::format(
                                 "Error en la cadena. Carácter no permitido (U+{:04X}).",
-                                static_cast<uint64_t>(m_lastChar)
+                                static_cast<int32_t>(m_lastChar)
                             )
                     );
                 }
@@ -334,11 +335,11 @@ public:
                 ? std::format(
                     "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
                     CodepointToUtf8(m_lastChar),
-                    static_cast<uint64_t>(m_lastChar)
+                    static_cast<int32_t>(m_lastChar)
                 )
                 : std::format(
                     "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
-                    static_cast<uint64_t>(m_lastChar)
+                    static_cast<int32_t>(m_lastChar)
                 )
         );
     }
