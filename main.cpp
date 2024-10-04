@@ -14,7 +14,7 @@ namespace {
         return std::visit(
             []<typename U>(U&& arg) -> std::string {
                 if constexpr (std::is_same_v<std::decay_t<U>, std::string>)
-                    return std::format("{:?} ({})", arg, CountCodepointsUtf8(arg));
+                    return std::format("\'{}\'", EscapeUtf8String(arg));
                 else if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>)
                     return "";
                 else
@@ -47,7 +47,7 @@ int main(const int argc, const char* argv[]) {
     while (isRunning) {
         try {
             const auto [type, val] = lexer.GetToken();
-            std::cout << ToString(type) << ' ' << VariantToString(val) << std::endl;
+            std::cout << "<" << ToString(type) << ", " << VariantToString(val) << ">" << std::endl;
             if (type == TokenType::END) isRunning = false;
         } catch (const LexicalException& e) {
             std::cout << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;

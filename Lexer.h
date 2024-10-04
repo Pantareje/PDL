@@ -24,24 +24,6 @@ class Lexer {
         }
     }
 
-    static int EscapeToAscii(char32_t c) {
-        switch (c) {
-        case '\\': return '\\';
-        case '\'': return '\'';
-
-        case '0': return '\0';
-
-        case 'n': return '\n';
-        case 'a': return '\a';
-        case 't': return '\t';
-        case 'v': return '\v';
-        case 'f': return '\f';
-        case 'r': return '\r';
-
-        default: return -1;
-        }
-    }
-
     void ReadDelAndComments() {
         while (true) {
             // 0 : del : 0
@@ -161,7 +143,7 @@ public:
                     Read();
 
                     // 6 : cesc : 5
-                    const int escapedChar = EscapeToAscii(m_lastChar);
+                    const int escapedChar = EscapedToAscii(m_lastChar);
                     if (escapedChar == -1) throw std::exception();
                     str += ToUtf8(escapedChar);
                     counter += 1;
