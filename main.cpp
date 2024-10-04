@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <format>
 
 namespace {
     /**
@@ -12,9 +13,12 @@ namespace {
     constexpr std::string VariantToString(const auto& val) {
         return std::visit(
             []<typename U>(U&& arg) -> std::string {
-                if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>) return "";
-                else if constexpr (std::is_same_v<std::decay_t<U>, std::string>) return arg;
-                else return std::to_string(arg);
+                if constexpr (std::is_same_v<std::decay_t<U>, std::string>)
+                    return std::format("{:?} ({})", arg, CountCodepointsUtf8(arg));
+                else if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>)
+                    return "";
+                else
+                    return std::to_string(arg);
             },
             val
         );
@@ -37,14 +41,20 @@ int main(const int argc, const char* argv[]) {
 
     Lexer lexer(argc == 1 ? std::cin : fileStream);
 
-    while (true) {
+    int status = 0;
+
+    bool isRunning = true;
+    while (isRunning) {
         try {
             const auto [type, val] = lexer.GetToken();
             std::cout << ToString(type) << ' ' << VariantToString(val) << std::endl;
-            if (type == TokenType::END) return 0;
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
+            if (type == TokenType::END) isRunning = false;
+        } catch (const LexicalException& e) {
+            std::cout << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
+            lexer.SkipChar();
+            status = 1;
         }
     }
+
+    return status;
 }

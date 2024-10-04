@@ -1,18 +1,30 @@
 #pragma once
 
+#include "Characters.h"
 #include "Token.h"
+#include "LexicalException.h"
 
-#include <istream>
+#include <format>
 
 class Lexer {
     std::istream& m_input;
-    int m_lastChar = ' ';
+    char32_t m_lastChar = U' ';
 
-    void Read() { m_lastChar = m_input.get(); }
+    unsigned m_line = 0;
+    unsigned m_column = 0;
 
-    static bool IsCommentChar(const int c) { return std::isgraph(c) || std::isspace(c); }
+    void Read() {
+        m_lastChar = ReadUtf8(m_input);
 
-    static int EscapeToAscii(const int c) {
+        if (m_lastChar == '\n') {
+            m_column = 0;
+            m_line += 1;
+        } else {
+            m_column += 1;
+        }
+    }
+
+    static int EscapeToAscii(char32_t c) {
         switch (c) {
         case '\\': return '\\';
         case '\'': return '\'';
@@ -33,17 +45,24 @@ class Lexer {
     void ReadDelAndComments() {
         while (true) {
             // 0 : del : 0
-            if (std::isspace(m_lastChar))
+            if (IsSpace(m_lastChar))
                 Read();
 
-                // 0 : / : 15
+            // 0 : / : 15
             else if (m_lastChar == '/') {
                 Read();
 
                 // 15 : * : 16
-                if (m_lastChar != '*') throw std::exception();
+                if (m_lastChar != '*')
+                    throw LexicalException(
+                        m_line,
+                        m_column,
+                        "Carácter inesperado tras «/». Se esperaba «*» para hacer un comentario."
+                    );
+
                 Read();
 
+                // Procesamos el resto de transiciones como un bucle.
                 bool m_loop = true;
                 bool m_awaitExit = false;
                 while (m_loop) {
@@ -58,7 +77,7 @@ class Lexer {
                             Read();
                         }
                         // 17 : cc : 16
-                        else if (IsCommentChar(m_lastChar)) {
+                        else if (IsSource(m_lastChar)) {
                             m_awaitExit = false;
                             Read();
                         } else {
@@ -68,7 +87,7 @@ class Lexer {
                         if (m_lastChar == '*') {
                             m_awaitExit = true;
                             Read();
-                        } else if (IsCommentChar(m_lastChar)) {
+                        } else if (IsSource(m_lastChar)) {
                             m_awaitExit = false;
                             Read();
                         } else {
@@ -90,31 +109,31 @@ public:
         ReadDelAndComments();
 
         // 0 : l : 1
-        if (std::isalpha(m_lastChar)) {
+        if (IsAlpha(m_lastChar)) {
             std::string lex;
             lex += static_cast<char>(m_lastChar);
 
             Read();
 
             // 1 : l, d, _ : 1
-            while (std::isalnum(m_lastChar) || m_lastChar == '_') {
+            while (IsAlnum(m_lastChar) || m_lastChar == '_') {
                 lex += static_cast<char>(m_lastChar);
                 Read();
             }
 
             // 1 : oc : 2
             // TODO: Tabla de símbolos y mirar si es palabra reservada
-            return { TokenType::IDENTIFIER, lex };
+            return { TokenType::IDENTIFIER, {  } };
         }
 
         // 0 : d : 3
-        if (std::isdigit(m_lastChar)) {
-            int32_t num = m_lastChar - '0';
+        if (IsDigit(m_lastChar)) {
+            int32_t num = static_cast<unsigned char>(m_lastChar) - '0';
             Read();
 
             // 3 : d : 3
-            while (std::isdigit(m_lastChar)) {
-                num = num * 10 + (m_lastChar - '0');
+            while (IsDigit(m_lastChar)) {
+                num = num * 10 + (static_cast<unsigned char>(m_lastChar) - '0');
                 Read();
             }
 
@@ -124,13 +143,13 @@ public:
 
         // 0 : ' : 5
         if (m_lastChar == '\'') {
-            // std::string tiene un contador interno, que se incrementa
-            // en uno cada vez que añadimos un carácter.
-            std::string lex;
+            std::string str;
+            size_t counter = 0;
             Read();
 
             while (m_lastChar != '\'') {
-                if (!std::isprint(m_lastChar)) throw std::exception();
+                if (IsAscii(m_lastChar) && !IsPrint(m_lastChar))
+                    throw std::exception();
 
                 // 5 : \ : 6
                 if (m_lastChar == '\\') {
@@ -139,22 +158,24 @@ public:
                     // 6 : cesc : 5
                     const int escapedChar = EscapeToAscii(m_lastChar);
                     if (escapedChar == -1) throw std::exception();
-                    lex += static_cast<char>(escapedChar);
+                    str += ToUtf8(escapedChar);
+                    counter += 1;
                     Read();
                 }
                 // 5 : oc : 5
                 else {
-                    lex += static_cast<char>(m_lastChar);
+                    str += ToUtf8(m_lastChar);
+                    counter += 1;
                     Read();
                 }
             }
 
             // Comprobamos el contador y, si es mayor que 64, lanzamos un error.
-            if (lex.size() > 64) throw std::exception();
+            if (counter > 64) throw std::exception();
 
             // 5 : ' : 7
             Read();
-            return { TokenType::CSTR, lex };
+            return { TokenType::CSTR, str };
         }
 
         // 0 : + : 8
@@ -254,6 +275,16 @@ public:
             return { TokenType::END };
 
         // Carácter desconocido.
-        throw std::exception();
+        throw LexicalException(
+            m_line,
+            m_column,
+            std::format(
+                "Carácter inesperado («{}», 0x{:x}).",
+                ToUtf8(m_lastChar),
+                static_cast<uint64_t>(m_lastChar)
+            )
+        );
     }
+
+    void SkipChar() { Read(); }
 };
