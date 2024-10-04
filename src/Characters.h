@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unicode/uchar.h>
+
 #include <string>
 #include <istream>
 
@@ -29,6 +31,10 @@ constexpr bool IsAlnumAscii(const char32_t c) {
 
 constexpr bool IsDigitAscii(const char32_t c) {
     return IsAscii(c) && std::isdigit(static_cast<unsigned char>(c));
+}
+
+constexpr bool IsPrintUnicode(const char32_t c) {
+    return u_isprint(std::bit_cast<UChar32>(c));
 }
 
 

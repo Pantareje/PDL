@@ -29,10 +29,10 @@ class Lexer {
     void ReadDelAndComments() {
         while (true) {
             // 0 : del : 0
-            if (IsSpaceAscii(m_lastChar))
+            if (IsSpaceAscii(m_lastChar)) {
                 Read();
-
-                // 0 : / : 15
+            }
+            // 0 : / : 15
             else if (m_lastChar == '/') {
                 Read();
 
@@ -143,15 +143,6 @@ public:
                         "Fin de fichero inesperado intentando leer la cadena."
                     );
 
-                if (IsAscii(m_lastChar) && !IsPrintAscii(m_lastChar))
-                    throw LexicalException(
-                        m_line, m_column,
-                        std::format(
-                            "Carácter ilegal en la cadena (U+{:04X}).",
-                            static_cast<uint64_t>(m_lastChar)
-                        )
-                    );
-
                 // 5 : \ : 6
                 if (m_lastChar == '\\') {
                     Read();
@@ -161,15 +152,16 @@ public:
                     if (escapedChar == -1)
                         throw LexicalException(
                             m_line, m_column,
-                            IsPrintAscii(m_lastChar)
+                            m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
                                 ? std::format(
                                     "Error en la cadena. El carácter de escape '\\{}' no es válido.",
                                     CodepointToUtf8(m_lastChar)
                                 )
                                 : std::format(
-                                    "Carácter ilegal en la cadena (U+{:04X}).",
+                                    "Carácter ilegal en la cadena de escape (U+{:04X}).",
                                     static_cast<uint64_t>(m_lastChar)
                                 )
+
                         );
 
                     str += CodepointToUtf8(escapedChar);
@@ -306,19 +298,17 @@ public:
         // Carácter desconocido.
         throw LexicalException(
             m_line, m_column,
-            IsAscii(m_lastChar) && !IsPrintAscii(m_lastChar)
+            m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
                 ? std::format(
-                    "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
-                    static_cast<uint64_t>(m_lastChar)
-                )
-                : std::format(
                     "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
                     CodepointToUtf8(m_lastChar),
                     static_cast<uint64_t>(m_lastChar)
                 )
+                : std::format(
+                    "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
+                    static_cast<uint64_t>(m_lastChar)
+                )
         );
-
-
     }
 
     void SkipChar() { Read(); }
