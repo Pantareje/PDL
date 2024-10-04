@@ -25,8 +25,16 @@ constexpr bool IsAlphaAscii(const char32_t c) {
     return IsAscii(c) && std::isalpha(static_cast<unsigned char>(c));
 }
 
+constexpr bool IsAlphaUnicode(const char32_t c) {
+    return u_isalpha(static_cast<UChar32>(c));
+}
+
 constexpr bool IsAlnumAscii(const char32_t c) {
     return IsAscii(c) && std::isalnum(static_cast<unsigned char>(c));
+}
+
+constexpr bool IsAlnumUnicode(const char32_t c) {
+    return u_isalnum(static_cast<UChar32>(c));
 }
 
 constexpr bool IsDigitAscii(const char32_t c) {
@@ -34,7 +42,7 @@ constexpr bool IsDigitAscii(const char32_t c) {
 }
 
 constexpr bool IsPrintUnicode(const char32_t c) {
-    return u_isprint(std::bit_cast<UChar32>(c));
+    return u_isprint(static_cast<UChar32>(c));
 }
 
 
