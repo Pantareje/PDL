@@ -2,15 +2,17 @@
 
 #include "Characters.h"
 #include "Token.h"
+#include "SymbolTable.h"
 #include "LexicalException.h"
 
 #include <format>
+
 
 class Lexer {
     std::istream& m_input;
     char32_t m_lastChar = U' ';
 
-    unsigned m_line = 0;
+    unsigned m_line = 1;
     unsigned m_column = 0;
 
     void Read() {
@@ -30,15 +32,14 @@ class Lexer {
             if (IsSpace(m_lastChar))
                 Read();
 
-            // 0 : / : 15
+                // 0 : / : 15
             else if (m_lastChar == '/') {
                 Read();
 
                 // 15 : * : 16
                 if (m_lastChar != '*')
                     throw LexicalException(
-                        m_line,
-                        m_column,
+                        m_line, m_column,
                         "Carácter inesperado tras «/». Se esperaba «*» para hacer un comentario."
                     );
 
@@ -59,21 +60,17 @@ class Lexer {
                             Read();
                         }
                         // 17 : cc : 16
-                        else if (IsSource(m_lastChar)) {
+                        else {
                             m_awaitExit = false;
                             Read();
-                        } else {
-                            throw std::exception();
                         }
                     } else {
                         if (m_lastChar == '*') {
                             m_awaitExit = true;
                             Read();
-                        } else if (IsSource(m_lastChar)) {
+                        } else {
                             m_awaitExit = false;
                             Read();
-                        } else {
-                            throw std::exception();
                         }
                     }
                 }
@@ -87,30 +84,35 @@ class Lexer {
 public:
     explicit Lexer(std::istream& input) : m_input(input) {}
 
-    Token GetToken() {
+    Token GetToken(SymbolTable& symbolTable) {
         ReadDelAndComments();
 
         // 0 : l : 1
         if (IsAlpha(m_lastChar)) {
-            std::string identifier;
-            identifier += static_cast<char>(m_lastChar);
+            std::string lex;
+            lex += static_cast<char>(m_lastChar);
 
             Read();
 
             // 1 : l, d, _ : 1
             while (IsAlnum(m_lastChar) || m_lastChar == '_') {
-                identifier += static_cast<char>(m_lastChar);
+                lex += static_cast<char>(m_lastChar);
                 Read();
             }
 
             // 1 : oc : 2
-            const TokenType type = KeywordToToken(identifier);
+            const TokenType type = KeywordToToken(lex);
 
             if (type != TokenType::IDENTIFIER)
                 return { type };
 
-            // TODO: Tabla de símbolos y mirar si es palabra reservada
-            return { type, identifier };
+
+            auto pos = symbolTable.SearchSymbol(lex);
+
+            if (!pos.has_value())
+                pos = { symbolTable.AddSymbol(lex) };
+
+            return { type, pos.value() };
         }
 
         // 0 : d : 3
@@ -135,8 +137,20 @@ public:
             Read();
 
             while (m_lastChar != '\'') {
+                if (m_lastChar == static_cast<char32_t>(EOF))
+                    throw LexicalException(
+                        m_line, m_column,
+                        "Fin de fichero inesperado intentando leer la cadena."
+                    );
+
                 if (IsAscii(m_lastChar) && !IsPrint(m_lastChar))
-                    throw std::exception();
+                    throw LexicalException(
+                        m_line, m_column,
+                        std::format(
+                            "Carácter ilegal en la cadena (U+{:04X}).",
+                            static_cast<uint64_t>(m_lastChar)
+                        )
+                    );
 
                 // 5 : \ : 6
                 if (m_lastChar == '\\') {
@@ -144,7 +158,20 @@ public:
 
                     // 6 : cesc : 5
                     const int escapedChar = EscapedToAscii(m_lastChar);
-                    if (escapedChar == -1) throw std::exception();
+                    if (escapedChar == -1)
+                        throw LexicalException(
+                            m_line, m_column,
+                            IsPrint(m_lastChar)
+                                ? std::format(
+                                    "Error en la cadena. El carácter de escape '\\{}' no es válido.",
+                                    ToUtf8(m_lastChar)
+                                )
+                                : std::format(
+                                    "Carácter ilegal en la cadena (U+{:04X}).",
+                                    static_cast<uint64_t>(m_lastChar)
+                                )
+                        );
+
                     str += ToUtf8(escapedChar);
                     counter += 1;
                     Read();
@@ -157,10 +184,18 @@ public:
                 }
             }
 
-            // Comprobamos el contador y, si es mayor que 64, lanzamos un error.
-            if (counter > 64) throw std::exception();
-
             // 5 : ' : 7
+
+            // Comprobamos el contador y, si es mayor que 64, lanzamos un error.
+            if (counter > 64)
+                throw LexicalException(
+                    m_line, m_column,
+                    std::format(
+                        "La longitud de cadena excede el límite de 64 caracteres ({}).",
+                        counter
+                    )
+                );
+
             Read();
             return { TokenType::CSTR, str };
         }
@@ -207,18 +242,25 @@ public:
             Read();
 
             // 11 : & : 12
-            if (m_lastChar == '&')
-                return { TokenType::AND };
+            if (m_lastChar != '&')
+                throw LexicalException(
+                    m_line, m_column,
+                    "Se esperaba «&» después de «&» para formar un operador."
+                );
 
-            throw std::exception();
+            return { TokenType::AND };
         }
 
         // 0 : | : 13
         if (m_lastChar == '|') {
             Read();
-            if (m_lastChar == '|')
-                return { TokenType::OR };
-            throw std::exception();
+            if (m_lastChar != '|')
+                throw LexicalException(
+                    m_line, m_column,
+                    "Se esperaba «|» después «|» para formar un operador."
+                );
+
+            return { TokenType::OR };
         }
 
         // 0 : , : 18
@@ -263,13 +305,17 @@ public:
 
         // Carácter desconocido.
         throw LexicalException(
-            m_line,
-            m_column,
-            std::format(
-                "Carácter inesperado («{}», 0x{:x}).",
-                ToUtf8(m_lastChar),
-                static_cast<uint64_t>(m_lastChar)
-            )
+            m_line, m_column,
+            IsAscii(m_lastChar) && !IsPrint(m_lastChar)
+                ? std::format(
+                    "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
+                    static_cast<uint64_t>(m_lastChar)
+                )
+                : std::format(
+                    "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
+                    ToUtf8(m_lastChar),
+                    static_cast<uint64_t>(m_lastChar)
+                )
         );
     }
 

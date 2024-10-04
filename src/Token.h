@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <string>
 #include <variant>
@@ -52,7 +53,7 @@ struct Token {
      * El contenido del token. Dependiendo del tipo
      * puede ser un entero, una cadena o estar vacío.
      */
-    std::variant<std::monostate, std::string, int32_t> attribute {};
+    std::variant<std::monostate, size_t, std::string, int32_t> attribute {};
 };
 
 /**
@@ -71,6 +72,9 @@ constexpr TokenType KeywordToToken(const std::string_view str) {
     if (str == "var") return TokenType::VAR;
     if (str == "void") return TokenType::VOID;
 
+    if (str == "false") return TokenType::FALSE;
+    if (str == "true") return TokenType::TRUE;
+
     return TokenType::IDENTIFIER;
 }
 
@@ -79,7 +83,7 @@ constexpr TokenType KeywordToToken(const std::string_view str) {
  * @param token El tipo del token.
  * @return El identificador del token.
  */
-constexpr const char* ToString(const TokenType token) {
+constexpr const char* ToString(const TokenType token) noexcept {
     using enum TokenType;
 
     switch (token) {
@@ -114,6 +118,8 @@ constexpr const char* ToString(const TokenType token) {
     case CURLY_BRACKET_CLOSE: return "cbc";
     case CINT: return "cint";
     case CSTR: return "cstr";
-    default: throw std::exception();
     }
+
+    assert(false);
+    abort();
 }

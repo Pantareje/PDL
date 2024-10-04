@@ -10,4 +10,5 @@ add_executable(PDL
         src/Token.h
         src/LexicalException.h
         src/Characters.h
-        src/Characters.cpp)
+        src/Characters.cpp
+        src/SymbolTable.h)

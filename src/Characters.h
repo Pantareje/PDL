@@ -31,11 +31,6 @@ constexpr bool IsDigit(const char32_t c) {
     return IsAscii(c) && std::isdigit(static_cast<unsigned char>(c));
 }
 
-constexpr bool IsSource(const char32_t c) {
-    if (c == static_cast<char32_t>(EOF)) return false;
-    return !IsAscii(c) || IsSpace(c) || IsGraph(c);
-}
-
 
 /**
  * Convierte el carácter ASCII escapado tras la
@@ -66,7 +61,7 @@ constexpr int EscapedToAscii(const char32_t c) {
  * @param c El carácter ASCII a escapar.
  * @return La secuencia escapada.
  */
-constexpr std::string EscapeAsciiChar(char c) {
+constexpr std::string EscapeAsciiChar(const char c) {
     switch (c) {
     case '\\': return "\\\\";
     case '\'': return "\\\'";
@@ -80,7 +75,7 @@ constexpr std::string EscapeAsciiChar(char c) {
     case '\f': return "\\f";
     case '\r': return "\\r";
 
-    default: return { 1, c };
+    default: return { c };
     }
 }
 
@@ -93,10 +88,11 @@ constexpr std::string EscapeUtf8String(const std::string_view str) {
     std::string result;
 
     for (const char& c : str) {
-        if (!IsAscii(c))
+        if (!IsAscii(c)) {
             result += c;
-        else
+        } else {
             result += EscapeAsciiChar(c);
+        }
     }
 
     return result;
