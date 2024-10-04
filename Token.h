@@ -39,6 +39,7 @@ enum class TokenType : unsigned char {
     CSTR
 };
 
+
 /**
  * La unidad básica del analizador léxico. Definido
  * mediante el tipo de token y su contenido.
@@ -53,6 +54,25 @@ struct Token {
      */
     std::variant<std::monostate, std::string, int32_t> attribute {};
 };
+
+/**
+ * Convierte un token identificador a uno correspondiente
+ * a una palabra reservada si es necesaria.
+ */
+constexpr TokenType KeywordToToken(const std::string_view str) {
+    if (str == "bool") return TokenType::BOOL;
+    if (str == "for") return TokenType::FOR;
+    if (str == "function") return TokenType::FUNCTION;
+    if (str == "if") return TokenType::IF;
+    if (str == "input") return TokenType::INPUT;
+    if (str == "int") return TokenType::INT;
+    if (str == "return") return TokenType::RETURN;
+    if (str == "string") return TokenType::STRING;
+    if (str == "var") return TokenType::VAR;
+    if (str == "void") return TokenType::VOID;
+
+    return TokenType::IDENTIFIER;
+}
 
 /**
  * Devuelve una cadena con el nombre del token.

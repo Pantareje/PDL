@@ -110,20 +110,25 @@ public:
 
         // 0 : l : 1
         if (IsAlpha(m_lastChar)) {
-            std::string lex;
-            lex += static_cast<char>(m_lastChar);
+            std::string identifier;
+            identifier += static_cast<char>(m_lastChar);
 
             Read();
 
             // 1 : l, d, _ : 1
             while (IsAlnum(m_lastChar) || m_lastChar == '_') {
-                lex += static_cast<char>(m_lastChar);
+                identifier += static_cast<char>(m_lastChar);
                 Read();
             }
 
             // 1 : oc : 2
+            const TokenType type = KeywordToToken(identifier);
+
+            if (type != TokenType::IDENTIFIER)
+                return { type };
+
             // TODO: Tabla de símbolos y mirar si es palabra reservada
-            return { TokenType::IDENTIFIER, lex };
+            return { type, identifier };
         }
 
         // 0 : d : 3
