@@ -16,7 +16,7 @@ class Lexer {
     unsigned m_column = 0;
 
     void Read() {
-        m_lastChar = ReadUtf8(m_input);
+        m_lastChar = ReadUtf8Codepoint(m_input);
 
         if (m_lastChar == '\n') {
             m_column = 0;
@@ -29,7 +29,7 @@ class Lexer {
     void ReadDelAndComments() {
         while (true) {
             // 0 : del : 0
-            if (IsSpace(m_lastChar))
+            if (IsSpaceAscii(m_lastChar))
                 Read();
 
                 // 0 : / : 15
@@ -88,14 +88,14 @@ public:
         ReadDelAndComments();
 
         // 0 : l : 1
-        if (IsAlpha(m_lastChar)) {
+        if (IsAlphaAscii(m_lastChar)) {
             std::string lex;
             lex += static_cast<char>(m_lastChar);
 
             Read();
 
             // 1 : l, d, _ : 1
-            while (IsAlnum(m_lastChar) || m_lastChar == '_') {
+            while (IsAlnumAscii(m_lastChar) || m_lastChar == '_') {
                 lex += static_cast<char>(m_lastChar);
                 Read();
             }
@@ -116,12 +116,12 @@ public:
         }
 
         // 0 : d : 3
-        if (IsDigit(m_lastChar)) {
+        if (IsDigitAscii(m_lastChar)) {
             int32_t num = static_cast<unsigned char>(m_lastChar) - '0';
             Read();
 
             // 3 : d : 3
-            while (IsDigit(m_lastChar)) {
+            while (IsDigitAscii(m_lastChar)) {
                 num = num * 10 + (static_cast<unsigned char>(m_lastChar) - '0');
                 Read();
             }
@@ -143,7 +143,7 @@ public:
                         "Fin de fichero inesperado intentando leer la cadena."
                     );
 
-                if (IsAscii(m_lastChar) && !IsPrint(m_lastChar))
+                if (IsAscii(m_lastChar) && !IsPrintAscii(m_lastChar))
                     throw LexicalException(
                         m_line, m_column,
                         std::format(
@@ -161,10 +161,10 @@ public:
                     if (escapedChar == -1)
                         throw LexicalException(
                             m_line, m_column,
-                            IsPrint(m_lastChar)
+                            IsPrintAscii(m_lastChar)
                                 ? std::format(
                                     "Error en la cadena. El carácter de escape '\\{}' no es válido.",
-                                    ToUtf8(m_lastChar)
+                                    CodepointToUtf8(m_lastChar)
                                 )
                                 : std::format(
                                     "Carácter ilegal en la cadena (U+{:04X}).",
@@ -172,13 +172,13 @@ public:
                                 )
                         );
 
-                    str += ToUtf8(escapedChar);
+                    str += CodepointToUtf8(escapedChar);
                     counter += 1;
                     Read();
                 }
                 // 5 : oc : 5
                 else {
-                    str += ToUtf8(m_lastChar);
+                    str += CodepointToUtf8(m_lastChar);
                     counter += 1;
                     Read();
                 }
@@ -306,17 +306,19 @@ public:
         // Carácter desconocido.
         throw LexicalException(
             m_line, m_column,
-            IsAscii(m_lastChar) && !IsPrint(m_lastChar)
+            IsAscii(m_lastChar) && !IsPrintAscii(m_lastChar)
                 ? std::format(
                     "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
                     static_cast<uint64_t>(m_lastChar)
                 )
                 : std::format(
                     "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
-                    ToUtf8(m_lastChar),
+                    CodepointToUtf8(m_lastChar),
                     static_cast<uint64_t>(m_lastChar)
                 )
         );
+
+
     }
 
     void SkipChar() { Read(); }

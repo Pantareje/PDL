@@ -29,7 +29,7 @@ namespace {
     }
 }
 
-char32_t ReadUtf8(std::istream& input) {
+char32_t ReadUtf8Codepoint(std::istream& input) {
     const int readChar = input.get();
     if (readChar == EOF) return static_cast<char32_t>(EOF);
     char32_t codepoint;
@@ -72,7 +72,7 @@ char32_t ReadUtf8(std::istream& input) {
     return codepoint;
 }
 
-std::string ToUtf8(const char32_t codepoint) {
+std::string CodepointToUtf8(const char32_t codepoint) {
     std::string result;
 
     // Carácter ASCII.
@@ -103,14 +103,4 @@ std::string ToUtf8(const char32_t codepoint) {
     }
 
     return result;
-}
-
-size_t CountCodepointsUtf8(const std::string& str) {
-    std::istringstream iss(str);
-    size_t count = 0;
-
-    while (ReadUtf8(iss) != static_cast<char32_t>(EOF))
-        count += 1;
-
-    return count;
 }
