@@ -123,7 +123,7 @@ public:
 
             // 1 : oc : 2
             // TODO: Tabla de símbolos y mirar si es palabra reservada
-            return { TokenType::IDENTIFIER, {  } };
+            return { TokenType::IDENTIFIER, lex };
         }
 
         // 0 : d : 3
