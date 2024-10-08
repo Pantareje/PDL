@@ -33,6 +33,12 @@ class SymbolTable {
 
             return m_nameMap[name];
         }
+
+        void WriteSymbols(std::ostream& output) const {
+            for (const auto& symbol : m_symbols) {
+                output << "*'" << symbol.lex << "'\n";
+            }
+        }
     };
 
     SubTable m_table;
@@ -44,5 +50,11 @@ public:
 
     size_t AddSymbol(const std::string& symbol) {
         return m_table.AddSymbol(symbol);
+    }
+
+    // TODO: Convertirlo en una función para subtablas al añadir múltiples.
+    void WriteTable(std::ostream& output) const {
+        output << "Tabla Global #" << 0 << ":\n";
+        m_table.WriteSymbols(output);
     }
 };

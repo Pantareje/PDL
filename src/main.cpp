@@ -48,6 +48,7 @@ int main(const int argc, const char* argv[]) {
     SymbolTable symbolTable;
 
     std::ofstream tokenFile("tokens.txt", std::ios::binary);
+    std::ofstream symbolsFile("symbols.txt", std::ios::binary);
 
     int status = 0;
 
@@ -67,6 +68,8 @@ int main(const int argc, const char* argv[]) {
             status = 1;
         }
     }
+
+    symbolTable.WriteTable(symbolsFile);
 
     return status;
 }
