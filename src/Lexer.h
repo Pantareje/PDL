@@ -273,6 +273,7 @@ public:
                     "Se esperaba «&» después de «&» para formar un operador."
                 );
 
+            Read();
             return { TokenType::AND };
         }
 
@@ -285,6 +286,7 @@ public:
                     "Se esperaba «|» después «|» para formar un operador."
                 );
 
+            Read();
             return { TokenType::OR };
         }
 
