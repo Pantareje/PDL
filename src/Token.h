@@ -61,11 +61,12 @@ struct Token {
  * a una palabra reservada si es necesaria.
  */
 constexpr TokenType KeywordToToken(const std::string_view str) {
-    if (str == "bool") return TokenType::BOOL;
+    if (str == "boolean") return TokenType::BOOL;
     if (str == "for") return TokenType::FOR;
     if (str == "function") return TokenType::FUNCTION;
     if (str == "if") return TokenType::IF;
     if (str == "input") return TokenType::INPUT;
+    if (str == "output") return TokenType::OUTPUT;
     if (str == "int") return TokenType::INT;
     if (str == "return") return TokenType::RETURN;
     if (str == "string") return TokenType::STRING;
