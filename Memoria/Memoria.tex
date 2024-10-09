@@ -3,27 +3,124 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{indentfirst}
+\usepackage{enumitem} % Cargar el paquete enumitem
+\usepackage{fancyhdr}
+\pagestyle{fancy}
 
 \usetikzlibrary{automata, positioning}
 
+\fancyhead[L]{Grupo 7}
+\fancyhead[C]{}
+\fancyfoot[L]{Página \thepage}
+\fancyfoot[C]{}
+\fancyfoot[R]{Práctica 1 - Procesadores de Lenguajes}
 
-\title{\textbf{Memoria: Analizador léxico}}
+\title{PDL}
+
+\begin{document}
+\textbf{Memoria: Analizador léxico}
 \author{Carmen Toribio Pérez, 22M009\\Sergio Gil Atienza, 22M046\\María Moronta Carrión, 22M111}
 \date{}
 
 
-\begin{document}
+
 
 \maketitle
 
 \section{Introducción}
+
 La primera entrega de esta práctica consiste en la implementación de un Analizador Léxico y una Tabla de Símbolos. Para ello hemos creado una Gramática Regular, con la que hemos diseñado un Autómata Finito Determinista, asociado con unas determinadas Acciones Semánticas. Por otro lado hemos organizado la Tabla de Símbolos y estudiado posibles casos de error, para poder manejar correctamente la detección y el reporte de errores léxicos. 
 
+\vspace{0.5cm}
 
-Hemos decidido usar C++ como lenguaje de programación porque consideramos este proyecto como una gran oportunidad para practicar con un lenguaje distinto. Además, la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM. También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. Comparado con Javascript, es un lenguaje más eficiente que permite un mayor control sobre los recursos del sistema, algo crucial en proyectos que requieren optimización de bajo nivel. 
+Hemos decidido usar C++ como lenguaje de programación porque consideramos este proyecto como una gran oportunidad para practicar con un lenguaje distinto. Además, la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM. También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. Comparado con JavaScript, es un lenguaje más eficiente que permite un mayor control sobre los recursos del sistema, algo crucial en proyectos que requieren optimización de bajo nivel. 
+
+\vspace{0.5cm}
+
+Como integrantes del grupo 7, hemos tenido que que cumplir con las siguientes especificaciones: 
+\begin{itemize} [left=2cm]
+    \item Sentencias: Sentencia repetitiva (for)
+    \item Operadores especiales: Asignación con suma (+=)
+    \item Técnicas de Análisis Sintáctico: Descendente Recursivo
+    \item Comentarios: Comentario de bloque (/* */)
+    \item Cadenas: Con comillas simples (' ')
+\end{itemize}
+
+
+
+
+\section{Tokens}
+El primer paso a la hora de construir un Analizador Léxico es la identificación de los tokens. Para hacer la lista nos hemos basado en la actividad práctica de la plataforma Draco:
+
+\newpage
+
+Tokens obligatorios:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Elemento} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
+        boolean & bool & - \\ \hline
+        for & for & - \\ \hline
+        function & fn & - \\ \hline
+        if & if & - \\ \hline
+        input & in & - \\ \hline
+        int & int & - \\ \hline
+        output & out & - \\ \hline
+        return & ret & - \\ \hline
+        string & str & - \\ \hline
+        var & var & - \\ \hline
+        void & void & - \\ \hline
+        constante entera & cint & Número \\ \hline
+        Cadena (') & cstr & Cadena ("c*") \\ \hline
+        Identificador & id & Número \\ \hline
+        += & cumass & - \\ \hline
+        = & ass & - \\ \hline
+        , & com & - \\ \hline
+        ; & scol & - \\ \hline
+        ( & po & - \\ \hline
+        ) & pc & - \\ \hline
+        \{ & cbo & - \\ \hline
+        \} & cbc & - \\ \hline
+    \end{tabular}
+\end{table}
+
+Tokens de operadores aritméticos, lógicos y relcionales:
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Grupo de Opciones} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
+        Grupo Operadores Aritméticos: Suma (+) & sum & - \\ \hline
+        Grupo Operadores Aritméticos: Resta (-) & sub & - \\ \hline
+        Grupo Operadores Lógicos: Y lógico (\&\&) & and & - \\ \hline
+        Grupo Operadores Lógicos: O lógico (\texttt{||}) & or & - \\ \hline
+        Grupo Operadores Relacionales: Menor (<) & ls & - \\ \hline
+        Grupo Operadores Relacionales: Mayor (>) & gr & - \\ \hline
+    \end{tabular}
+\end{table}
+
+Tokens opcionales:
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Grupo de Opciones} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
+        Menos Unario (-) & sub & - \\ \hline
+        Más Unario (+) & sum & - \\ \hline
+        false & cap & - \\ \hline
+        true & nocap & - \\ \hline
+        EOF & eof & - \\ \hline
+    \end{tabular}
+\end{table}
+
+
+
 
 \section{Gramática}
-Aquí ponemos algo blablabla. \\
+Tras identificar los tokens del lenguaje 
 Aquí ponemos GR = {todas las cosas de la \underline{gramatica} (gramática)} y definimos todo enplan serio fuap.
 
 \section{Autómata Finito Determinista}
