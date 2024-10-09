@@ -7,7 +7,7 @@ class LexicalException : public std::runtime_error {
     unsigned m_columnNumber;
 
 public:
-    explicit LexicalException(
+    LexicalException(
         const unsigned lineNumber,
         const unsigned columnNumber,
         const std::string& message
@@ -16,7 +16,7 @@ public:
           m_lineNumber(lineNumber),
           m_columnNumber(columnNumber) {}
 
-    explicit LexicalException(
+    LexicalException(
         const unsigned lineNumber,
         const unsigned columnNumber,
         const char* message
