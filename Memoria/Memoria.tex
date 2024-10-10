@@ -1,45 +1,60 @@
 \documentclass{article}
 
 \usepackage[margin=1in]{geometry}
-\usepackage{graphicx}
-\usepackage{tikz}
 \usepackage{indentfirst}
-\usepackage{enumitem} % Cargar el paquete enumitem
+\usepackage{enumitem}
 \usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{hyperref}
+
+\fancypagestyle{plain}{ % Estilo para la primera página
+    \fancyhead[L]{}
+    \fancyhead[C]{}
+    \fancyhead[R]{}
+    \renewcommand{\headrulewidth}{0pt}
+    \fancyfoot[R]{\thepage}
+    \fancyfoot[C]{}
+    \fancyfoot[L]{Práctica 1 - Procesadores de Lenguajes}
+}
+
 \pagestyle{fancy}
-
-\usetikzlibrary{automata, positioning}
-
 \fancyhead[L]{Grupo 7}
 \fancyhead[C]{}
-\fancyfoot[L]{Página \thepage}
+\fancyfoot[R]{\thepage}
 \fancyfoot[C]{}
-\fancyfoot[R]{Práctica 1 - Procesadores de Lenguajes}
+\fancyfoot[L]{Práctica 1 - Procesadores de Lenguajes}
 
-\title{PDL}
+\title{Práctica 1 - Procesadores de Lenguajes}
+\author{Carmen Toribio Pérez, 22M009\\Sergio Gil Atienza, 22M046\\María Moronta Carrión, 22M111}
+\date{} % Dejar vacío para que no se muestre la fecha
 
 \begin{document}
-\textbf{Memoria: Analizador léxico}
-\author{Carmen Toribio Pérez, 22M009\\Sergio Gil Atienza, 22M046\\María Moronta Carrión, 22M111}
-\date{}
-
-
-
 
 \maketitle
 
 \section{Introducción}
 
-La primera entrega de esta práctica consiste en la implementación de un Analizador Léxico y una Tabla de Símbolos. Para ello hemos creado una Gramática Regular, con la que hemos diseñado un Autómata Finito Determinista, asociado con unas determinadas Acciones Semánticas. Por otro lado hemos organizado la Tabla de Símbolos y estudiado posibles casos de error, para poder manejar correctamente la detección y el reporte de errores léxicos. 
+La primera entrega de esta práctica consiste en la implementación de un Analizador Léxico y una Tabla de Símbolos. Para ello, hemos seguido los siguientes pasos: 
+\begin{enumerate}
+    \item \textbf{Identificar los Tokens} del lenguaje fuente, teniendo en cuenta las especificaciones de nuestro grupo.
+    \item Construir la \textbf{Gramática Regular} que los genera.
+    \item Diseñar el \textbf{Autómata Finito Determinista} equivalente a la gramática. Hemos realizado una representación de este a través de un \textbf{diagrama de estados}.
+    \item Añadir las \textbf{Acciones Semánticas}, asociadas a cada una de las transiciones del diagrama de estados.
+    \item Estudiar los posibles \textbf{casos de error}, para poder manejar correctamente la detección y el reporte de errores léxicos. 
+\end{enumerate}
 
-\vspace{0.5cm}
+ \vspace{0.5cm}
+ 
+ Por otro lado, hemos comenzado con la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.
 
-Hemos decidido usar C++ como lenguaje de programación porque consideramos este proyecto como una gran oportunidad para practicar con un lenguaje distinto. Además, la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM. También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. Comparado con JavaScript, es un lenguaje más eficiente que permite un mayor control sobre los recursos del sistema, algo crucial en proyectos que requieren optimización de bajo nivel. 
+ \vspace{0.5cm}
+ 
+ Finalmente, presentamos una serie de casos de prueba que demuestran el correcto funcionamiento del Procesador, así como su capacidad para manejar errores léxicos.
+ 
+ \vspace{0.5cm}
 
-\vspace{0.5cm}
-
-Como integrantes del grupo 7, hemos tenido que que cumplir con las siguientes especificaciones: 
-\begin{itemize} [left=2cm]
+Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguientes especificaciones: 
+\begin{itemize}[left=2cm]
     \item Sentencias: Sentencia repetitiva (for)
     \item Operadores especiales: Asignación con suma (+=)
     \item Técnicas de Análisis Sintáctico: Descendente Recursivo
@@ -47,13 +62,14 @@ Como integrantes del grupo 7, hemos tenido que que cumplir con las siguientes es
     \item Cadenas: Con comillas simples (' ')
 \end{itemize}
 
+\vspace{0.5cm}
 
-
-
-\section{Tokens}
-El primer paso a la hora de construir un Analizador Léxico es la identificación de los tokens. Para hacer la lista nos hemos basado en la actividad práctica de la plataforma Draco:
+Hemos decidido usar C++ como lenguaje de programación porque consideramos este proyecto como una gran oportunidad para practicar con un lenguaje distinto a los que estamos acostumbrados. Además, la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM (Low Level Virtual Machine). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, algo crucial en proyectos como este (que requieren optimización de bajo nivel). 
 
 \newpage
+
+\section{Tokens}
+El primer paso a la hora de construir un Analizador Léxico es la identificación de los tokens. Para hacer la lista nos hemos basado en la actividad práctica de la plataforma Draco. Hemos decidido utilizar el mismo formato en tablas con tal de facilitar su legibilidad.
 
 Tokens obligatorios:
 
@@ -87,7 +103,7 @@ Tokens obligatorios:
     \end{tabular}
 \end{table}
 
-Tokens de operadores aritméticos, lógicos y relacionales:
+Tokens de operadores aritméticos, lógicos y relcionales:
 \begin{table}[h!]
     \centering
     \begin{tabular}{|l|l|l|}
@@ -116,10 +132,9 @@ Tokens opcionales:
     \end{tabular}
 \end{table}
 
+Por tanto, los siguientes tipos de expresiones no serán identificados como tokens: los delimitadores (como los espacios en blanco o las tabulaciones), los comentarios de bloque (/* */), los saltos de línea (\textbackslash n) o las cadenas de texto vacías (' ').
 
-
-
-\section{Gramática}
+\section{Gramática Regular}
 Tras identificar los tokens del lenguaje 
 Aquí ponemos GR = {todas las cosas de la \underline{gramatica} (gramática)} y definimos todo enplan serio fuap.
 
