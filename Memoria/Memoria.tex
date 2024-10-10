@@ -146,18 +146,18 @@ En esta sección, describimos la Gramática Regular (gramática de tipo 3 según
 \vspace{0.1cm}
 
 \begin{center}
-    \begin{tcolorbox}[title=Símbolos no terminales, width=0.4\textwidth]
+    \begin{tcolorbox}[title=Símbolos no terminales, width=0.57\textwidth]
         $d$ := 0...9
         
         $l$ := a..z, A...Z
         
-        $c_1$ := cualquier carácter menos \textbackslash
+        $c_1$ := espacio o cualquier carácter imprimible menos \textbackslash
         
-        $cesc$ := carácter escapable (' o \textbackslash )
+        $cesc$ := carácter escapable (', 0, n, a, t, v, f, r, \textbackslash )
         
-        $c_2$ := cualquier carácter menos *
+        $c_2$ := cualquier carácter menos * y eof
         
-        $c_3$ := cualquier carácter menos * y /
+        $c_3$ := cualquier carácter menos *, / y eof
     \end{tcolorbox}
 \end{center}
 
