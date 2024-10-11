@@ -5,6 +5,7 @@
 \usepackage{enumitem}
 \usepackage{fancyhdr}
 \usepackage{array}
+\usepackage[table]{xcolor}
 \usepackage{hyperref}
 \usepackage{tikz}
 \usepackage{tcolorbox}
@@ -82,6 +83,7 @@ Tokens obligatorios:
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
+		\rowcolor{gray!20} % color grisaceo en la cabecera de la tabla
         \textbf{Elemento} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
         boolean & bool & - \\ \hline
         for & for & - \\ \hline
@@ -96,7 +98,7 @@ Tokens obligatorios:
         void & void & - \\ \hline
         constante entera & cint & Número \\ \hline
         Cadena (') & cstr & Cadena ("c*") \\ \hline
-        Identificador & id & Número \\ \hline
+		Identificador & id & Número (posición en la TS) \\ \hline
         += & cumass & - \\ \hline
         = & ass & - \\ \hline
         , & com & - \\ \hline
@@ -113,6 +115,7 @@ Tokens de operadores aritméticos, lógicos y relcionales:
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
+		\rowcolor{gray!20} % color grisaceo en la cabecera de la tabla
         \textbf{Grupo de Opciones} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
         Grupo Operadores Aritméticos: Suma (+) & sum & - \\ \hline
         Grupo Operadores Aritméticos: Resta (-) & sub & - \\ \hline
@@ -128,6 +131,7 @@ Tokens opcionales:
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
+		\rowcolor{gray!20} % color grisaceo en la cabecera de la tabla
         \textbf{Grupo de Opciones} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
         Menos Unario (-) & sub & - \\ \hline
         Más Unario (+) & sum & - \\ \hline
