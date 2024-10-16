@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(ICU REQUIRED COMPONENTS uc)
 
 add_executable(PDL
-        src/main.cpp
+        src/Main.cpp
         src/Lexer.h
         src/Token.h
         src/LexicalException.h
