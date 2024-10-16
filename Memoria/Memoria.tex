@@ -48,16 +48,10 @@ La primera entrega de esta práctica consiste en la implementación de un Analiz
     \item Añadir las \textbf{Acciones Semánticas}, asociadas a cada una de las transiciones del diagrama de estados.
     \item Estudiar los posibles \textbf{casos de error}, para poder manejar correctamente la detección y el reporte de errores léxicos. 
 \end{enumerate}
-
- \vspace{0.5cm}
  
- Por otro lado, hemos comenzado con la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.
+ Por otro lado, hemos comenzado con la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.\\
 
- \vspace{0.5cm}
- 
- Finalmente, presentamos una serie de casos de prueba que demuestran el correcto funcionamiento del Procesador, así como su capacidad para manejar errores léxicos.
-
- \vspace{0.5cm}
+ Finalmente, presentamos una serie de casos de prueba que demuestran el correcto funcionamiento del Procesador, así como su capacidad para manejar errores léxicos.\\
 
 Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguientes especificaciones: 
 \begin{itemize}[left=2cm]
@@ -68,15 +62,12 @@ Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguient
     \item Cadenas: Con comillas simples (' ')
 \end{itemize}
 
-\vspace{0.5cm}
-
 Hemos decidido usar C++ como lenguaje de programación porque la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM (Low Level Virtual Machine). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, algo crucial en proyectos como este (que requieren optimización de bajo nivel). Además, consideramos este proyecto como una gran oportunidad para practicar y aprender un lenguaje completamente distinto a los que estamos acostumbrados.
 
 \newpage
 
 \section{Tokens}
-El primer paso a la hora de construir un Analizador Léxico es la identificación de los tokens. Para hacer la lista nos hemos basado en la actividad práctica de la plataforma Draco. Hemos decidido utilizar el mismo formato en tablas con tal de facilitar su legibilidad.
-
+El primer paso a la hora de construir un Analizador Léxico es la identificación de los tokens. Para hacer la lista nos hemos basado en la actividad práctica de la plataforma Draco. Hemos decidido utilizar el mismo formato en tablas con tal de facilitar su legibilidad.\\
 Tokens obligatorios:
 
 \begin{table}[h!]
@@ -197,137 +188,75 @@ Una vez definida la gramática regular, el siguiente paso es construir el Autóm
 \input{AFD.tex}
 
 \section{Acciones semánticas}
-A lo largo de esta sección, describimos las acciones semánticas que hemos añadido a las transiciones del Autómata Finito Determinista. Estas acciones permiten que se lleven a cabo acciones como la lectura, la identificación de los tokens o, en su lugar, una correcta gestión de los errores léxicos. A continuación, detallamos las operaciones utilizadas y, por legibilidad en el AFD, las transiciones en las que se realizan:
-
-\vspace{0.3cm}
-
-\textbf{Leer}
-
-    car := leer() \hspace{3.5cm}	// Todas las transiciones salvo 0:19, 1:2, 3:4 y 8:9 con un caracter distinto de '='
-
-\vspace{0.3cm}
-
-\textbf{Concatenar}
-
-    lex := car  \hspace{4cm}	// Transición 0:1\\
-	lex := $\emptyset$ \hspace{4.5cm}		// Transición 0:5\\
-    lex := lex $\oplus$  car \hspace{3cm}	// Transición 1:1
-
-
-\vspace{0.3cm}
-
-\textbf{Contador }
-
-    cont := 0 \hspace{4cm} // Transición 0:5 
-    
-    cont := cont + 1; \hspace{2.7cm}	// Transiciones 5:5, 6:5 
-
-
-\vspace{0.3cm}
-
-\textbf{Valor número}
- 
-    num := val(car) \hspace{2.9cm} 	// Transición 0:3
-    
-    num := num * 10 + val(car) \hspace{0.9cm} 	// Transición 3:3
-
-
-\vspace{0.3cm}
-
-\textbf{Generar token}
-
-{\small 
-    
-    \vspace{0.1cm}
-    
-    // Cadenas y enteros 
-    
-    \vspace{0.1cm}
-
-    \begin{tabular}{p{1cm} p{5cm} p{7cm}}
-    
-        G1 & \multicolumn{2}{l}{ if (len(lex) \(>\) 64) then error (COD\_ERROR\_STRLEN, lex)} \\
-        & else Gen\_token(cstr, lex)  & // Transición 1:2 \\
-        G2 & Gen\_token(cint, num) & // Transición 3:4 
-    \end{tabular}
-    
-    \vspace{0.2cm}
-    
-    // Delimitadores y operadores de control 
-    
-    \vspace{0.1cm}
-    
-    \begin{tabular}{p{1cm} p{5cm} p{3cm}}
-        G3 & Gen\_token(cumass, -) & // Transición 8:9 \\
-        G4 & Gen\_token(ass, -) & // Transición 8:9 \\
-        G5 & Gen\_token(com, -) & // Transición 0:18 \\
-        G6 & Gen\_token(scol, -) & // Transición 0:18 \\
-        G7 & Gen\_token(po, -) & // Transición 0:18 \\
-        G8 & Gen\_token(pc, -) & // Transición 0:18 \\
-        G9 & Gen\_token(cbo, -) & // Transición 0:18 \\
-        G10 & Gen\_token(cbc, -) & // Transición 0:18 \\
-    \end{tabular}
-    
-    \vspace{0.2cm}
-    
-    // Operadores Aritméticos, Lógicos y Relacionales 
-    
-    \vspace{0.1cm}
-    
-    \begin{tabular}{p{1cm} p{5cm} p{3cm}}
-        G11 & Gen\_token(sum, -) & // Transición 0:10 \\
-        G13 & Gen\_token(sub, -) & // Transición 0:10 \\
-        G16 & Gen\_token(and, -) & // Transición 0:10 \\
-        G17 & Gen\_token(or, -) & // Transición 0:10 \\
-        G19 & Gen\_token(ls, -) & // Transición 0:10 \\
-        G21 & Gen\_token(gr, -) & // Transición 0:10 \\
-    \end{tabular}
-    
-    \vspace{0.2cm}
-    
-    //EOF 
-    
-    \vspace{0.1cm}
-    
-    \begin{tabular}{p{1cm} p{5cm} p{3cm}}
-        G25 & Gen\_token(EOF,-) & // Transición 0:19 \\
-    \end{tabular}
-    
-    \vspace{0.2cm}
-    
-    // Palabras reservadas	\hspace{3.5cm}	// Transición 1:2 
-    
-    \vspace{0.1cm}
-    
-    G26 type := keywordToToken(lex) \hspace{1cm} //Función 1, explicada al final
-    
-    if type == IDENTIFIER then \{ \\
-    
-    \hspace{0.5cm} pos := SearchSymbol(lex) \hspace{1cm} //Función 2, explicada al final \\
-    
-    \hspace{0.5cm} if pos == NULL then pos := AddSymbol(lex) \\
-    
-    \hspace{0.5cm} Gen\_token(type, pos) \\
-    
-    \} else Gen\_token(type, -)
-    
-}
-
-\vspace{0.5cm}
-
-Funciones: //Esto lo pondré más bonito, explicando las funciones que se usan
-
-1. keywordToToken devuelve el código de token de la palabra reservada con la que coincida lex, o el codigo de ID si no lo es 
-
-2. SearchSymbol ... 
-
-
-
-
-
-
-
-
+A lo largo de esta sección, describimos las acciones semánticas que hemos añadido a las transiciones del Autómata Finito Determinista. Estas acciones permiten que se lleven a cabo acciones como la lectura, la identificación de los tokens o, en su lugar, una correcta gestión de los errores léxicos. A continuación, detallamos las operaciones utilizadas y, por legibilidad en el AFD, las transiciones en las que se realiza cada una:\\
+\begin{tabbing}
+    \hspace{1cm}\=\hspace{5cm}\=\kill
+    \textbf{Leer:} \\
+    \> car := leer(); \> // Todas las transiciones salvo 1:2, 3:4, 6:5, 8:9 con un carácter\\
+    \> \hspace{5cm}// distinto de '=', y 0:19\\
+    \> car := leerCesc(); \> // Transición 6:5. Leído un caracter de escape, devuelve el carácter\\
+    \> \hspace{5cm}// correspondiente (por ejemplo un 'n' devuelve un eol)
+    \\
+    \textbf{Concatenar:} \\
+    \> lex := car; \> // Transición 0:1 \\
+    \> lex := $\emptyset$; \> // Transición 0:5 \\
+    \> lex := lex $\oplus$  car; \> // Transiciones 1:1, 5:5 y 6:5\\
+    \\
+    \textbf{Contador:} \\
+    \> // Utilizado para contar el número de caracteres de la cadena \\
+    \> cont := 0; \> // Transición 0:5. Inicializa el contador a 0\\
+    \> cont := cont + 1; \> // Transiciones 5:5 y 6:5 \\
+    \\
+    \textbf{Calcular valor entero:} \\
+    \> // La función val(car) devuelve el valor entero del dígito correspondiente al carácter car\\
+    \> num := val(car); \> // Transición 0:3 \\
+    \> num := num * 10 + val(car); \> // Transición 3:3 \\
+    \\
+    \hspace{1cm}\=\hspace{1cm}\=\hspace{7cm}\=\kill %cambio la indentación porque ahora habrá más tabulaciones que hacer
+    \textbf{Generar token:} \\
+    \textit{Cadenas y enteros} \\
+    \> G1 \> if (cont $>$ 64) \> // Transición 5:7 \\
+    \> \hspace{1.5cm} then error (COD\_ERROR\_STRLEN, lex) \\
+    \> \hspace{1cm}else Gen\_token(cstr, lex) \\
+    \> G2 \> Gen\_token(cint, num) \> // Transición 3:4 \\
+    \textit{Delimitadores y operadores de control} \\
+    \> G3 \> Gen\_token(cumass, -) \> // Transición 8:9 con el carácter '='\\
+    \> G4 \> Gen\_token(ass, -) \> // Transición 0:10 con el carácter '='\\
+    \> G5 \> Gen\_token(com, -) \> // Transición 0:18 con el carácter ','\\
+    \> G6 \> Gen\_token(scol, -) \> // Transición 0:18 con el carácter ';'\\
+    \> G7 \> Gen\_token(po, -) \> // Transición 0:18 con el carácter '('\\
+    \> G8 \> Gen\_token(pc, -) \> // Transición 0:18 con el carácter ')'\\
+    \> G9 \> Gen\_token(cbo, -) \> // Transición 0:18 con el carácter '\{'\\
+    \> G10 \> Gen\_token(cbc, -) \> // Transición 0:18 con el carácter '\}' \\
+    \textit{Operadores Aritméticos, Lógicos y Relacionales} \\
+    \> G11 \> Gen\_token(sum, -) \> // Transición 8:9 con un carácter distinto de '='\\
+    \> G12 \> Gen\_token(sub, -) \> // Transición 0:10 con el carácter '-'\\
+    \> G13 \> Gen\_token(and, -) \> // Transición 11:12 \\
+    \> G14 \> Gen\_token(or, -) \> // Transición 13:14 \\
+    \> G15 \> Gen\_token(ls, -) \> // Transición 0:10 con el carácter '$<$'\\
+    \> G16 \> Gen\_token(gr, -) \> // Transición 0:10 con el carácter '$>$'\\
+    \textit{Fin de fichero (EOF)} \\
+    \> G17 \> Gen\_token(eof, -) \> // Transición 0:19 \\
+\end{tabbing}
+\newpage
+\begin{tabbing}
+    \hspace{1cm}\=\hspace{1cm}\=\hspace{7cm}\=\kill
+    \textit{Identificadores y palabras reservadas} \\
+    \> G18 \> type := GetTokenCode(lex);*\> // Transición 1:2\\
+    \> \hspace{1cm}if type = id then\\
+    \> \hspace{2cm}pos := SearchST(lex);**\\
+    \> \hspace{2cm}if pos = NULL then\\
+    \> \hspace{3cm}pos := AddID(lex);***\\
+    \> \hspace{2cm}Gen\_Token(type, pos);\\
+    \> \hspace{1cm}else\\
+    \> \hspace{2cm}Gen\_Token(type, -);\\
+    \>* La función GetTokenCode(lex) devuelve el código de token de la palabra reservada \\
+    \>con la que coincida lex, o el código de ID si no es palabra reservada\\
+    \>** La función SearchST(lex) devuelve la posición del identificador lex en la tabla \\
+    \>de símbolos, o NULL si no ha sido insertado aún\\
+    \>*** La función AddID(lex) inserta el identificador lex en la tabla de símbolos y \\
+    \>devuelve su posición\\
+\end{tabbing}
 
 \section{Gestión de errores}
 Explicando los casos de error posibles, los códigos de error asignados a cada caso, etc.
@@ -337,13 +266,5 @@ Solo tiene identificadores y su posición, de momento. "muchotexto mimimi".
 
 \section{Funcionamiento del programa}
 Breve explicación de lo que hace nuestro programa.
-
-\section{Carmen nini}
-¿La de las tildes te la sabes? Jejéjèjê.
-
-\section{Sergio nini}
-Sí me la sé :( ¿La de venir a clase te la sabes? Ñejejejejeje.
-
-PUAJAJSJAJAJA se lo dijo
 
 \end{document}
