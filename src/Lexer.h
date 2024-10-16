@@ -49,6 +49,10 @@ class Lexer {
                 bool m_loop = true;
                 bool m_awaitExit = false;
                 while (m_loop) {
+                    if (m_lastChar == EOF)
+                        throw LexicalException(
+                            m_line, m_column,
+                            "Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.");
                     if (m_awaitExit) {
                         // 17 : / : 0
                         if (m_lastChar == '/') {
