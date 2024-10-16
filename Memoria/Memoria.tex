@@ -121,8 +121,8 @@ Tokens de operadores aritméticos, lógicos y relcionales:
         Grupo Operadores Aritméticos: Resta (-) & sub & - \\ \hline
         Grupo Operadores Lógicos: Y lógico (\&\&) & and & - \\ \hline
         Grupo Operadores Lógicos: O lógico (\texttt{||}) & or & - \\ \hline
-        Grupo Operadores Relacionales: Menor (<) & ls & - \\ \hline
-        Grupo Operadores Relacionales: Mayor (>) & gr & - \\ \hline
+        Grupo Operadores Relacionales: Menor (\textless) & ls & - \\ \hline
+        Grupo Operadores Relacionales: Mayor (\textgreater) & gr & - \\ \hline
     \end{tabular}
 \end{table}
 
@@ -197,7 +197,137 @@ Una vez definida la gramática regular, el siguiente paso es construir el Autóm
 \input{AFD.tex}
 
 \section{Acciones semánticas}
-Mucho texto y la transición a la que corresponde cada acción.
+A lo largo de esta sección, describimos las acciones semánticas que hemos añadido a las transiciones del Autómata Finito Determinista. Estas acciones permiten que se lleven a cabo acciones como la lectura, la identificación de los tokens o, en su lugar, una correcta gestión de los errores léxicos. A continuación, detallamos las operaciones utilizadas:
+
+\vspace{0.3cm}
+
+\textbf{Leer}
+
+    car := leer() \hspace{3.5cm}	// Todas las transiciones salvo 0:19, 1:2, 3:4, 5:5, 8:9, 16:16, 17:16
+
+\vspace{0.3cm}
+
+\textbf{Concatenar}
+
+    lex := car  \hspace{4cm}	// Transición 0:1
+    
+    lex := $ lex \oplus  car $ \hspace{3cm}	// Transición 1:1
+
+
+\vspace{0.3cm}
+
+\textbf{Contador }
+
+    cont := 0 \hspace{4cm} // Transición 0:5 
+    
+    cont := cont + 1; \hspace{2.7cm}	// Transiciones 5:5, 6:5 
+
+
+\vspace{0.3cm}
+
+\textbf{Valor número}
+ 
+    num := val(car) \hspace{2.9cm} 	// Transición 0:3
+    
+    num := num * 10 + val(car) \hspace{0.9cm} 	// Transición 3:3
+
+
+\vspace{0.3cm}
+
+\textbf{Generar token}
+
+{\small 
+    
+    \vspace{0.1cm}
+    
+    // Cadenas y enteros 
+    
+    \vspace{0.1cm}
+
+    \begin{tabular}{p{1cm} p{5cm} p{7cm}}
+    
+        G1 & \multicolumn{2}{l}{ if (len(lex) \(>\) 64) then error (COD\_ERROR\_STRLEN, lex)} \\
+        & else Gen\_token(cstr, lex)  & // Transición 1:2 \\
+        G2 & Gen\_token(cint, num) & // Transición 3:4 
+    \end{tabular}
+    
+    \vspace{0.2cm}
+    
+    // Delimitadores y operadores de control 
+    
+    \vspace{0.1cm}
+    
+    \begin{tabular}{p{1cm} p{5cm} p{3cm}}
+        G3 & Gen\_token(cumass, -) & // Transición 8:9 \\
+        G4 & Gen\_token(ass, -) & // Transición 8:9 \\
+        G5 & Gen\_token(com, -) & // Transición 0:18 \\
+        G6 & Gen\_token(scol, -) & // Transición 0:18 \\
+        G7 & Gen\_token(po, -) & // Transición 0:18 \\
+        G8 & Gen\_token(pc, -) & // Transición 0:18 \\
+        G9 & Gen\_token(cbo, -) & // Transición 0:18 \\
+        G10 & Gen\_token(cbc, -) & // Transición 0:18 \\
+    \end{tabular}
+    
+    \vspace{0.2cm}
+    
+    // Operadores Aritméticos, Lógicos y Relacionales 
+    
+    \vspace{0.1cm}
+    
+    \begin{tabular}{p{1cm} p{5cm} p{3cm}}
+        G11 & Gen\_token(sum, -) & // Transición 0:10 \\
+        G13 & Gen\_token(sub, -) & // Transición 0:10 \\
+        G16 & Gen\_token(and, -) & // Transición 0:10 \\
+        G17 & Gen\_token(or, -) & // Transición 0:10 \\
+        G19 & Gen\_token(ls, -) & // Transición 0:10 \\
+        G21 & Gen\_token(gr, -) & // Transición 0:10 \\
+    \end{tabular}
+    
+    \vspace{0.2cm}
+    
+    //EOF 
+    
+    \vspace{0.1cm}
+    
+    \begin{tabular}{p{1cm} p{5cm} p{3cm}}
+        G25 & Gen\_token(EOF,-) & // Transición 0:19 \\
+    \end{tabular}
+    
+    \vspace{0.2cm}
+    
+    // Palabras reservadas	\hspace{3.5cm}	// Transición 1:2 
+    
+    \vspace{0.1cm}
+    
+    G26 type := keywordToToken(lex) \hspace{1cm} //Función 1, explicada al final
+    
+    if type == IDENTIFIER then \{ \\
+    
+    \hspace{0.5cm} pos := SearchSymbol(lex) \hspace{1cm} //Función 2, explicada al final \\
+    
+    \hspace{0.5cm} if pos == NULL then pos := AddSymbol(lex) \\
+    
+    \hspace{0.5cm} Gen\_token(type, pos) \\
+    
+    \} else Gen\_token(type, -)
+    
+}
+
+\vspace{0.5cm}
+
+Funciones: //Esto lo pondré más bonito, explicando las funciones que se usan
+
+1. keywordToToken devuelve el código de token de la palabra reservada con la que coincida lex, o el codigo de ID si no lo es 
+
+2. SearchSymbol ... 
+
+
+
+
+
+
+
+
 
 \section{Gestión de errores}
 Explicando los casos de error posibles, los códigos de error asignados a cada caso, etc.
