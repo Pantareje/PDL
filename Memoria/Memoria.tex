@@ -70,7 +70,7 @@ Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguient
 
 \vspace{0.5cm}
 
-Hemos decidido usar C++ como lenguaje de programación porque consideramos este proyecto como una gran oportunidad para practicar con un lenguaje distinto a los que estamos acostumbrados. Además, la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM (Low Level Virtual Machine). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, algo crucial en proyectos como este (que requieren optimización de bajo nivel). 
+Hemos decidido usar C++ como lenguaje de programación porque la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM (Low Level Virtual Machine). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, algo crucial en proyectos como este (que requieren optimización de bajo nivel). Además, consideramos este proyecto como una gran oportunidad para practicar y aprender un lenguaje completamente distinto a los que estamos acostumbrados.
 
 \newpage
 
@@ -197,21 +197,21 @@ Una vez definida la gramática regular, el siguiente paso es construir el Autóm
 \input{AFD.tex}
 
 \section{Acciones semánticas}
-A lo largo de esta sección, describimos las acciones semánticas que hemos añadido a las transiciones del Autómata Finito Determinista. Estas acciones permiten que se lleven a cabo acciones como la lectura, la identificación de los tokens o, en su lugar, una correcta gestión de los errores léxicos. A continuación, detallamos las operaciones utilizadas:
+A lo largo de esta sección, describimos las acciones semánticas que hemos añadido a las transiciones del Autómata Finito Determinista. Estas acciones permiten que se lleven a cabo acciones como la lectura, la identificación de los tokens o, en su lugar, una correcta gestión de los errores léxicos. A continuación, detallamos las operaciones utilizadas y, por legibilidad en el AFD, las transiciones en las que se realizan:
 
 \vspace{0.3cm}
 
 \textbf{Leer}
 
-    car := leer() \hspace{3.5cm}	// Todas las transiciones salvo 0:19, 1:2, 3:4, 5:5, 8:9, 16:16, 17:16
+    car := leer() \hspace{3.5cm}	// Todas las transiciones salvo 0:19, 1:2, 3:4 y 8:9 con un caracter distinto de '='
 
 \vspace{0.3cm}
 
 \textbf{Concatenar}
 
-    lex := car  \hspace{4cm}	// Transición 0:1
-    
-    lex := $ lex \oplus  car $ \hspace{3cm}	// Transición 1:1
+    lex := car  \hspace{4cm}	// Transición 0:1\\
+	lex := $\emptyset$ \hspace{4.5cm}		// Transición 0:5\\
+    lex := lex $\oplus$  car \hspace{3cm}	// Transición 1:1
 
 
 \vspace{0.3cm}
