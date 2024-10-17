@@ -158,7 +158,7 @@ public:
                 if (m_lastChar == static_cast<char32_t>(EOF))
                     throw LexicalException(
                         m_line, m_column,
-                        "Fin de fichero inesperado intentando leer la cadena."
+                        "Fin de fichero inesperado. Se esperaba «'» para cerrar la cadena."
                     );
 
                 // 5 : \ : 6
@@ -220,7 +220,7 @@ public:
                 throw LexicalException(
                     m_line, m_column,
                     std::format(
-                        "La longitud de cadena excede el límite de 64 caracteres ({}).",
+                        "La longitud de cadena excede el límite de 64 caracteres ({} caracteres).",
                         counter
                     )
                 );
