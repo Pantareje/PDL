@@ -1,0 +1,39 @@
+\begin{center}
+    \begin{tcolorbox}[title=Símbolos no terminales, width=0.57\textwidth]
+        $d$ := 0...9
+        
+        $l$ := a..z, A...Z
+        
+        $c_1$ := espacio o cualquier carácter imprimible menos \textbackslash
+        
+        $cesc$ := carácter escapable (', 0, n, a, t, v, f, r, \textbackslash )
+        
+        $c_2$ := cualquier carácter menos * y eof
+        
+        $c_3$ := cualquier carácter menos *, / y eof
+    \end{tcolorbox}
+\end{center}
+
+\begin{tcolorbox}[title=Gramática Regular]
+    \hspace{0.5cm} S → del S \texttt{|} $l$A \texttt{|} $d$B \texttt{|} 'C \texttt{|} +D\texttt{|} - \texttt{|} = \texttt{|} \(>\) \texttt{|} \(<\) \texttt{|} \&E \texttt{|} \texttt{|}F \texttt{|} /G \texttt{|} \} \texttt{|} \{ \texttt{|} ) \texttt{|} ( \texttt{|} ; \texttt{|} , \texttt{|} eof
+    
+    \hspace{0.5cm} A → $l$A \texttt{|} $d$A \texttt{|} \_A \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} B → $d$B \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} C → $c_1$C \texttt{|} \textbackslash C' \texttt{|} '
+    
+    \hspace{0.5cm} C' → $cesc$C
+    
+    \hspace{0.5cm} D → = \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} E → \&
+    
+    \hspace{0.5cm} F → \texttt{|}
+    
+    \hspace{0.5cm} G → *H
+    
+    \hspace{0.5cm} H → $c_2$H \texttt{|} *I
+    
+    \hspace{0.5cm} I → /S \texttt{|} $c_3$H \texttt{|} *I
+\end{tcolorbox}
