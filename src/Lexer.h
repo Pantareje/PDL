@@ -274,7 +274,7 @@ public:
             if (m_lastChar != '&')
                 throw LexicalException(
                     m_line, m_column,
-                    "Se esperaba «&» después de «&» para formar un operador."
+                    "ERROR: Se esperaba «&» después de «&» para formar un operador."
                 );
 
             Read();
@@ -287,7 +287,7 @@ public:
             if (m_lastChar != '|')
                 throw LexicalException(
                     m_line, m_column,
-                    "Se esperaba «|» después «|» para formar un operador."
+                    "ERROR: Se esperaba «|» después «|» para formar un operador."
                 );
 
             Read();
@@ -339,12 +339,12 @@ public:
             m_line, m_column,
             IsPrintUnicode(m_lastChar)
                 ? std::format(
-                    "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
+                    "ERROR: Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
                     CodepointToUtf8(m_lastChar),
                     static_cast<int32_t>(m_lastChar)
                 )
                 : std::format(
-                    "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
+                    "ERROR: Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
                     static_cast<int32_t>(m_lastChar)
                 )
         );
