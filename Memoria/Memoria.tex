@@ -1,5 +1,11 @@
 \documentclass{article}
 
+% Soporte para Unicode.
+% En vez de usar pdflatex, usa el comando xelatex.
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+
 \usepackage[margin=1in]{geometry} % márgenes de la página
 \usepackage{enumitem} % para listas personalizadas
 \usepackage{fancyhdr} % para encabezados y pies de página
@@ -8,7 +14,6 @@
 \usepackage{hyperref} % para enlaces
 \usepackage{tikz} % para dibujar diagramas (AFD)
 \usepackage{tcolorbox} % para cajas de texto
-\usepackage[T1]{fontenc} %para poder usar «comillas angulares» (entre otras cosas)
 
 \setlength{\headheight}{13.07225pt}
 \addtolength{\topmargin}{-1.07225pt}
@@ -52,7 +57,7 @@ Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguient
     \item Cadenas: Con comillas simples (' ')
 \end{itemize}
 
-Hemos decidido usar C++ como lenguaje de programación porque la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo el proyecto LLVM (Low Level Virtual Machine). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, algo crucial en proyectos como este (que requieren optimización de bajo nivel). Además, consideramos este proyecto como una gran oportunidad para practicar y aprender un lenguaje completamente distinto a los que estamos acostumbrados.
+Hemos decidido usar C++ como lenguaje de programación ya que la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo MSVC (desarrollado por Microsoft) y el proyecto LLVM (utilizado por Google en Android). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, a la vez que se mantiene versátil y permite escribir código legible.
 
 \newpage
 
@@ -88,7 +93,9 @@ A lo largo de esta sección, describimos las acciones semánticas que hemos aña
 Dado que en esta parte de la práctica solo se debe implementar el analizador léxico, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.
 
 \section{Funcionamiento del programa}
+TODO:
 Breve explicación de lo que hace nuestro programa.
 \section{Conclusión(?)}
+TODO:
 Esto te lo dejo a ti, María. Por tener un parrafillo de cierre i guess.
 \end{document}
