@@ -14,6 +14,8 @@
 \usepackage{hyperref} % para enlaces
 \usepackage{tikz} % para dibujar diagramas (AFD)
 \usepackage{tcolorbox} % para cajas de texto
+\usepackage{indentfirst} % para la sangría al iniciar una sección
+\usepackage{listings} % para los códigos del anexo
 
 \setlength{\headheight}{13.07225pt}
 \addtolength{\topmargin}{-1.07225pt}
@@ -89,13 +91,317 @@ A lo largo de esta sección, describimos las acciones semánticas que hemos aña
 \section{Gestión de errores}
 \input{Errores.tex}
 
+Para ilustrar mejor el comportamiento del programa, en la sección 8 presentamos varios casos en los que demostramos cómo el analizador maneja la detección de errores.
+
 \section{Tabla de Símbolos}
 Dado que en esta parte de la práctica solo se debe implementar el analizador léxico, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.
 
 \section{Funcionamiento del programa}
-TODO:
-Breve explicación de lo que hace nuestro programa.
-\section{Conclusión(?)}
-TODO:
-Esto te lo dejo a ti, María. Por tener un parrafillo de cierre i guess.
+El programa que hemos elaborado comienza leyendo el código fuente que le proporcionamos. Lo analiza carácter por carácter, reconociendo los tokens que hemos definido en el punto 2. Para ello, el Analizador Léxico se basa en la gramática regular que genera nuestro Autómata Finito Determinista.
+
+A medida que encuentra identificadores los almacena en la tabla de símbolos. Si encuentra delimitadores o comentarios de bloque, los ignora. Además, el programa está preparado para detectar errores, generando mensajes claros que indican el tipo y la ubicación exacta, con tal de facilitar la corrección por parte del usuario. Al finalizar la ejecución, queda completo un informe con todos los tokens que el programa ha reconocido durante el análisis, o los posibles errores que haya encontrado.
+
+En el \textbf{anexo} es posible encontrar distintos casos que demuestran el funcionamiento correcto del programa. Los tres primeros son favorables y los tres últimos muestran distintos casos de error. A continuación incluimos una breve explicación de cada uno:
+
+\begin{itemize}
+    \item \textbf{Caso 1:} El programa reconoce declaraciones válidas, como la asignación de tipos a variables y la asignación de identificadores, como lo que ocurre con el tipo «boolean» (tratado como un identificador).
+    
+    \item \textbf{Caso 2:} Muestra el funcionamiento adecuado de una función println (para imprimir mensajes), con lo que se puede apreciar la correcta gestión de cadenas y el uso de saltos de línea.
+    
+    \item \textbf{Caso 3:} Demuestra la capacidad del programa para comparar variables de entrada y ejecutar operaciones matemáticas.
+    
+    \item \textbf{Caso 4:} Ilustra un error léxico causado por un comentario de bloque no cerrado, que resulta en un fin de fichero inesperado.
+    
+    \item \textbf{Caso 5:} Muestra que hay caracteres no permitidos al inicio de un token y que se produce un error si declaramos variables que no cumplen con las convenciones, como empezar por «\_».
+    
+    \item \textbf{Caso 6:} Resalta cómo el programa continúa buscando tokens válidos a pesar de haber errores en el código, lo que permite depurar varios errores en una sola ejecución.
+\end{itemize}
+
+Con esto, demostramos el funcionamiento del programa en diferentes situaciones, desde el reconocimiento de declaraciones válidas hasta la gestión de errores léxicos. Estos resultados serán completados gracias a la segunda entrega del proyecto, que se centrará en el desarrollo del Analizador Sintáctico.
+
+\newpage
+
+\appendix
+\section*{Anexo}
+
+\lstset{
+  language=C,
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  escapeinside={(*@}{@*)},
+}
+
+\begin{enumerate}
+    \item \textbf{Caso 1:} Funcionamiento correcto
+    
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+        /* Declaraciones válidas */
+        var bool a;
+        var int b;
+        var string d;
+        
+        /* Se reasigna la variable «a», pero no es error léxico. */
+        var int a;
+        
+        /* El tipo «boolean» no existe, se trata como identificador. */
+        var boolean a;
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        <var, >\\
+        <id, 0>\\
+        <id, 1>\\
+        <scol, >\\
+        <var, >\\
+        <int, >\\
+        <id, 2>\\
+        <scol, >\\
+        <var, >\\
+        <str, >\\
+        <id, 3>\\
+        <scol, >\\
+        <var, >\\
+        <int, >\\
+        <id, 1>\\
+        <scol, >\\
+        <var, >\\
+        <bool, >\\
+        <id, 1>\\
+        <scol, >\\
+        <eof, >
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        Tabla Global \#0: \\
+        *'bool' \\
+        *'a' \\
+        *'b' \\
+        *'d'
+    \end{tcolorbox}
+
+    \newpage
+    
+    \item \textbf{Caso 2:} Funcionamiento correcto
+    
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+            function void println(string s) {
+                output s;
+                output '\n';
+            }
+            
+            println('¡Hola mundo!');
+            println('Eso son llamadas a \'output\' usando una función.');
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        <fn, >\\
+        <void, >\\
+        <id, 0>\\
+        <po, >\\
+        <str, >\\
+        <id, 1>\\
+        <pc, >\\
+        <cbo, >\\
+        <out, >\\
+        <id, 1>\\
+        <scol, >\\
+        <out, >\\
+        <cstr, "\textbackslash n">\\
+        <scol, >\\
+        <cbc, >\\
+        <id, 0>\\
+        <po, >\\
+        <cstr, "¡Hola mundo!">\\
+        <pc, >\\
+        <scol, >\\
+        <id, 0>\\
+        <po, >\\
+        <cstr, "Eso son llamadas a \'output\' usando una función.">\\
+        <pc, >\\
+        <scol, >\\
+        <eof, >
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        Tabla Global \#0:\\
+        *'println'\\
+        *'s'
+    \end{tcolorbox}
+
+    \newpage
+    
+    \item \textbf{Caso 3:} Funcionamiento correcto
+
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+            /* Leemos dos números del usuario. 
+            Las variables sin declarar se suponen globales y enteras. */
+            input a;
+            input b;
+            
+            /* Comparamos los números entre sí. */
+            if (a < b) {
+                output '\'a\' es menor que \'b\'.';
+            }
+            else if (a > b) {
+                output '\'a\' es mayor que \'b\'.';
+            }
+            else {
+                output '\'a\' es igual que \'b\'.';
+            }
+            
+            output '\n';
+            
+            /* Operamos con los números. */
+            
+            output 'a + b: ';
+            output a + b;
+            
+            output 'a - b: ';
+            output a - b;
+            
+            output '\n';
+        \end{lstlisting}        
+    \end{tcolorbox}
+
+    En el siguiente volcado cada token tendría que estar en una línea, pero lo hemos puesto seguido debido a su larga longitud. 
+    
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        <in, >
+        <id, 0>
+        <scol, >
+        <in, >
+        <id, 1>
+        <scol, >
+        <if, >
+        <po, >
+        <id, 0>
+        <ls, >
+        <id, 1>
+        <pc, >
+        <cbo, >
+        <out, >
+        <cstr, "\'a\' es menor que \'b\'.">
+        <scol, >
+        <cbc, >
+        <id, 2>
+        <if, >
+        <po, >
+        <id, 0>
+        <gr, >
+        <id, 1>
+        <pc, >
+        <cbo, >
+        <out, >
+        <cstr, "\'a\' es mayor que \'b\'.">
+        <scol, >
+        <cbc, >
+        <id, 2>
+        <cbo, >
+        <out, >
+        <cstr, "\'a\' es igual que \'b\'.">
+        <scol, >
+        <cbc, >
+        <out, >
+        <cstr, "\textbackslash n">
+        <scol, >
+        <out, >
+        <cstr, "a + b: ">
+        <scol, >
+        <out, >
+        <id, 0>
+        <sum, >
+        <id, 1>
+        <scol, >
+        <out, >
+        <cstr, "a - b: ">
+        <scol, >
+        <out, >
+        <id, 0>
+        <sub, >
+        <id, 1>
+        <scol, >
+        <out, >
+        <cstr, "\textbackslash n">
+        <scol, >
+        <eof, >
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        Tabla Global \#0: \\
+        *'a' \\
+        *'b' \\
+        *'else'
+    \end{tcolorbox}
+
+    \newpage
+    
+    \item \textbf{Caso 4:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+            /* Un comentario de bloque sin cerrar es un error léxico, 
+            ya que se recibe un EOF inesperado.
+        \end{lstlisting}      
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        (2:1) ERROR Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.
+    \end{tcolorbox}
+
+    \vspace{3cm}
+
+    \item \textbf{Caso 5:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+            /* Hay algunos símbolos por los que un token no puede empezar. */
+            $ % @ # ?
+            
+            /* En especial, las variables no pueden empezar con «_». */
+            var int _error;
+        \end{lstlisting}      
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        (2:1) ERROR: Carácter inesperado al buscar el siguiente símbolo («\$», U+0024).\\
+        (2:3) ERROR: Carácter inesperado al buscar el siguiente símbolo («\%», U+0025).\\
+        (2:5) ERROR: Carácter inesperado al buscar el siguiente símbolo («@», U+0040).\\
+        (2:7) ERROR: Carácter inesperado al buscar el siguiente símbolo («\#», U+0023).\\
+        (2:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).\\
+        (5:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («\_», U+005F).
+    \end{tcolorbox}
+
+    \newpage
+    
+    \item \textbf{Caso 6:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+            /* Aunque el código esté malformado y no compile, 
+            se siguen buscando y generando tokens */
+            var string a = $ 'Esta cadena se lee correctamente'
+            
+            /* Esto es útil para depurar los errores 
+            sin detenerse sólo en el primero. */
+            var int a = 2?;
+            
+            /* En algunos casos, es imposible recuperar tokens 
+            en un estado válido y seguir procesando. */
+            var string s = 'Si se escapa la comilla de cierre sin querer, 
+            el string continúa hasta dar error\n \'; $$ $$ /**/ ;;
+            
+            /* Al llegar al un salto de línea lanza un error y se recupera. */
+            var string s2 = 'Esta cadena se procesa bien';
+        \end{lstlisting}      
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        (2:16) ERROR: Carácter inesperado al buscar el siguiente símbolo («\$», U+0024).\\
+        (5:14) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).\\
+        (8:117) ERROR: Error en la cadena. Carácter no permitido (U+000D).
+    \end{tcolorbox}
+\end{enumerate}
+
 \end{document}
