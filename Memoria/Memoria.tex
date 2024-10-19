@@ -8,6 +8,7 @@
 \usepackage{hyperref} % para enlaces
 \usepackage{tikz} % para dibujar diagramas (AFD)
 \usepackage{tcolorbox} % para cajas de texto
+\usepackage[T1]{fontenc} %para poder usar «comillas angulares» (entre otras cosas)
 
 \setlength{\headheight}{13.07225pt}
 \addtolength{\topmargin}{-1.07225pt}
@@ -81,14 +82,7 @@ A lo largo de esta sección, describimos las acciones semánticas que hemos aña
 \input{AccSemanticas.tex}
 
 \section{Gestión de errores}
-Los casos de error posibles son todas aquellas transiciones no recogidas por nuestro AFD. En estos casos, se generará un error léxico y se informará al usuario de la existencia de un error en el código fuente, junto con el número de línea y columna en la que se ha detectado el error. A continuación, detallamos los errores que hemos identificado y los mensajes de error correspondientes a cada uno:\\
-\begin{itemize}[left=1cm]
-    \item \textbf{Caracteres no reconocidos.} En caso de que el carácter leído no coincida con ninguna transición del AFD, de manera que no pueda transitar desde el estado 0, se generará un error léxico con el siguiente mensaje: \textcolor{red}{(línea:columna) ERROR: Carácter inesperado al buscar el siguiente símbolo ("caracter inesperado", U+20AC).}
-    \item \textbf{Cadena de caracteres demasiado larga.} Si la longitud de la cadena supera los 64 caracteres, se generará un error léxico con el siguiente mensaje: \textcolor{red}{(línea:columna) ERROR:}
-    \item \textbf{Comentario de bloque no cerrado.} Si se detecta un comentario de bloque sin cerrar, se generará un error léxico con el siguiente mensaje: \textcolor{red}{(línea:columna) ERROR: }
-    \item \textbf{Cadena de caracteres no cerrada.} Si se detecta una cadena de caracteres sin cerrar, se generará un error léxico con el siguiente mensaje: \textcolor{red}{(línea:columna) ERROR:}
-    \item \textbf{Operadores lógicos incorrectos.} En caso de haber un \verb!&! en lugar de \verb!&&! o un \verb!|! en lugar de \verb!||!, se generará un error léxico con el siguiente mensaje: 
-\end{itemize}
+\input{Errores.tex}
 
 \section{Tabla de Símbolos}
 Dado que en esta parte de la práctica solo se debe implementar el analizador léxico, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.

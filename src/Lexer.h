@@ -40,7 +40,7 @@ class Lexer {
                 if (m_lastChar != '*')
                     throw LexicalException(
                         m_line, m_column,
-                        "Carácter inesperado tras «/». Se esperaba «*» para hacer un comentario."
+                        "ERROR: Carácter inesperado tras «/». Se esperaba «*» para abrir un comentario de bloque."
                     );
 
                 Read();
@@ -52,7 +52,7 @@ class Lexer {
                     if (m_lastChar == EOF)
                         throw LexicalException(
                             m_line, m_column,
-                            "Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.");
+                            "ERROR: Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.");
                     if (m_awaitExit) {
                         // 17 : / : 0
                         if (m_lastChar == '/') {
@@ -142,7 +142,7 @@ public:
             if (numberTooBig)
                 throw LexicalException(
                     m_line, m_column,
-                    "El valor del entero es demasiado grande."
+                    "ERROR: El valor del entero es demasiado grande. Rango permitido: [-32768, 32767]."
                 );
 
             return { TokenType::CINT, static_cast<int16_t>(num) };
@@ -158,7 +158,7 @@ public:
                 if (m_lastChar == static_cast<char32_t>(EOF))
                     throw LexicalException(
                         m_line, m_column,
-                        "Fin de fichero inesperado. Se esperaba «'» para cerrar la cadena."
+                        "ERROR: Fin de fichero inesperado. Se esperaba «'» para cerrar la cadena."
                     );
 
                 // 5 : \ : 6
@@ -174,12 +174,12 @@ public:
                             m_line, m_column,
                             m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
                                 ? std::format(
-                                    "Error en la cadena. La secuencia de escape '\\{}' (U+{:04X}) no es válida.",
+                                    "ERROR: en la cadena, la secuencia de escape '\\{}' (U+{:04X}) no es válida.",
                                     CodepointToUtf8(m_lastChar),
                                     static_cast<int32_t>(m_lastChar)
                                 )
                                 : std::format(
-                                    "Error en la cadena. Carácter ilegal en la secuencia de escape (U+{:04X}).",
+                                    "ERROR: en la cadena, carácter ilegal en la secuencia de escape (U+{:04X}).",
                                     static_cast<int32_t>(m_lastChar)
                                 )
 
@@ -201,12 +201,12 @@ public:
                         m_line, m_column,
                         IsPrintUnicode(m_lastChar)
                             ? std::format(
-                                "Error en la cadena. Carácter no permitido («{}», U+{:04X}).",
+                                "ERROR: en la cadena, carácter no permitido («{}», U+{:04X}).",
                                 CodepointToUtf8(m_lastChar),
                                 static_cast<int32_t>(m_lastChar)
                             )
                             : std::format(
-                                "Error en la cadena. Carácter no permitido (U+{:04X}).",
+                                "ERROR: en la cadena, carácter no permitido (U+{:04X}).",
                                 static_cast<int32_t>(m_lastChar)
                             )
                     );
@@ -220,7 +220,7 @@ public:
                 throw LexicalException(
                     m_line, m_column,
                     std::format(
-                        "La longitud de cadena excede el límite de 64 caracteres ({} caracteres).",
+                        "ERROR: La longitud de cadena excede el límite de 64 caracteres ({} caracteres).",
                         counter
                     )
                 );
