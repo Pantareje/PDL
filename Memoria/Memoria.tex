@@ -135,39 +135,39 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
 /* Declaraciones válidas */
-var bool a;
+var boolean a;
 var int b;
 var string d;
 
-/* Se reasigna la variable «a», pero no es error léxico. */
+/* Se vuelve a declarar la variable «a», pero no es error léxico. */
 var int a;
 
-/* El tipo «boolean» no existe, se trata como identificador. */
-var boolean a;
+/* El tipo «bool» no existe, se trata como identificador. */
+var bool err;
         \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
         \begin{lstlisting}
 <var, >
+<bool, >
 <id, 0>
-<id, 1>
 <scol, >
 <var, >
 <int, >
-<id, 2>
+<id, 1>
 <scol, >
 <var, >
 <str, >
-<id, 3>
+<id, 2>
 <scol, >
 <var, >
 <int, >
-<id, 1>
+<id, 0>
 <scol, >
 <var, >
-<bool, >
-<id, 1>
+<id, 3>
+<id, 4>
 <scol, >
 <eof, >
         \end{lstlisting}
@@ -176,10 +176,11 @@ var boolean a;
     \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
         \begin{lstlisting}
 Tabla Global #0:
-*'bool'
 *'a'
 *'b'
 *'d'
+*'bool'
+*'err'
         \end{lstlisting}
     \end{tcolorbox}
 
