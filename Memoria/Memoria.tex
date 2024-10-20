@@ -5,6 +5,7 @@
 
 \usepackage{fontspec}
 \setmainfont{Latin Modern Roman}
+\setmonofont{JetBrains Mono}
 
 \usepackage[margin=1in]{geometry} % márgenes de la página
 \usepackage{enumitem} % para listas personalizadas
@@ -126,7 +127,8 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
 
 \lstset{
   language=C,
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=,
   showstringspaces=false,
   escapeinside={(*@}{@*)},
 }
@@ -136,49 +138,53 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
     
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-        /* Declaraciones válidas */
-        var bool a;
-        var int b;
-        var string d;
-        
-        /* Se reasigna la variable «a», pero no es error léxico. */
-        var int a;
-        
-        /* El tipo «boolean» no existe, se trata como identificador. */
-        var boolean a;
+/* Declaraciones válidas */
+var bool a;
+var int b;
+var string d;
+
+/* Se reasigna la variable «a», pero no es error léxico. */
+var int a;
+
+/* El tipo «boolean» no existe, se trata como identificador. */
+var boolean a;
         \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
-        <var, >\\
-        <id, 0>\\
-        <id, 1>\\
-        <scol, >\\
-        <var, >\\
-        <int, >\\
-        <id, 2>\\
-        <scol, >\\
-        <var, >\\
-        <str, >\\
-        <id, 3>\\
-        <scol, >\\
-        <var, >\\
-        <int, >\\
-        <id, 1>\\
-        <scol, >\\
-        <var, >\\
-        <bool, >\\
-        <id, 1>\\
-        <scol, >\\
-        <eof, >
+        \begin{lstlisting}
+<var, >
+<id, 0>
+<id, 1>
+<scol, >
+<var, >
+<int, >
+<id, 2>
+<scol, >
+<var, >
+<str, >
+<id, 3>
+<scol, >
+<var, >
+<int, >
+<id, 1>
+<scol, >
+<var, >
+<bool, >
+<id, 1>
+<scol, >
+<eof, >
+        \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
-        Tabla Global \#0: \\
-        *'bool' \\
-        *'a' \\
-        *'b' \\
-        *'d'
+        \begin{lstlisting}
+Tabla Global \#0:
+*'bool'
+*'a'
+*'b'
+*'d'
+        \end{lstlisting}
     \end{tcolorbox}
 
     \newpage
@@ -187,49 +193,53 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
     
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-            function void println(string s) {
-                output s;
-                output '\n';
-            }
-            
-            println('¡Hola mundo!');
-            println('Eso son llamadas a \'output\' usando una función.');
+function void println(string s) {
+    output s;
+    output '\n';
+}
+
+println('¡Hola mundo!');
+println('Eso son llamadas a \'output\' usando una función.');
         \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
-        <fn, >\\
-        <void, >\\
-        <id, 0>\\
-        <po, >\\
-        <str, >\\
-        <id, 1>\\
-        <pc, >\\
-        <cbo, >\\
-        <out, >\\
-        <id, 1>\\
-        <scol, >\\
-        <out, >\\
-        <cstr, "\textbackslash n">\\
-        <scol, >\\
-        <cbc, >\\
-        <id, 0>\\
-        <po, >\\
-        <cstr, "¡Hola mundo!">\\
-        <pc, >\\
-        <scol, >\\
-        <id, 0>\\
-        <po, >\\
-        <cstr, "Eso son llamadas a \'output\' usando una función.">\\
-        <pc, >\\
-        <scol, >\\
-        <eof, >
+        \begin{lstlisting}
+<fn, >
+<void, >
+<id, 0>
+<po, >
+<str, >
+<id, 1>
+<pc, >
+<cbo, >
+<out, >
+<id, 1>
+<scol, >
+<out, >
+<cstr, "\n">
+<scol, >
+<cbc, >
+<id, 0>
+<po, >
+<cstr, "¡Hola mundo!">
+<pc, >
+<scol, >
+<id, 0>
+<po, >
+<cstr, "Eso son llamadas a \'output\' usando una función.">
+<pc, >
+<scol, >
+<eof, >
+        \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
-        Tabla Global \#0:\\
-        *'println'\\
-        *'s'
+        \begin{lstlisting}
+Tabla Global #0:
+*'println'
+*'s'
+        \end{lstlisting}
     \end{tcolorbox}
 
     \newpage
@@ -238,104 +248,108 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
 
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-            /* Leemos dos números del usuario. 
-            Las variables sin declarar se suponen globales y enteras. */
-            input a;
-            input b;
-            
-            /* Comparamos los números entre sí. */
-            if (a < b) {
-                output '\'a\' es menor que \'b\'.';
-            }
-            else if (a > b) {
-                output '\'a\' es mayor que \'b\'.';
-            }
-            else {
-                output '\'a\' es igual que \'b\'.';
-            }
-            
-            output '\n';
-            
-            /* Operamos con los números. */
-            
-            output 'a + b: ';
-            output a + b;
-            
-            output 'a - b: ';
-            output a - b;
-            
-            output '\n';
+/* Leemos dos números del usuario.
+Las variables sin declarar se suponen globales y enteras. */
+input a;
+input b;
+
+/* Comparamos los números entre sí. */
+if (a < b) {
+    output '\'a\' es menor que \'b\'.';
+}
+else if (a > b) {
+    output '\'a\' es mayor que \'b\'.';
+}
+else {
+    output '\'a\' es igual que \'b\'.';
+}
+
+output '\n';
+
+/* Operamos con los números. */
+
+output 'a + b: ';
+output a + b;
+
+output 'a - b: ';
+output a - b;
+
+output '\n';
         \end{lstlisting}        
     \end{tcolorbox}
 
     En el siguiente volcado cada token tendría que estar en una línea, pero lo hemos puesto seguido debido a su larga longitud. 
     
     \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
-        <in, >
-        <id, 0>
-        <scol, >
-        <in, >
-        <id, 1>
-        <scol, >
-        <if, >
-        <po, >
-        <id, 0>
-        <ls, >
-        <id, 1>
-        <pc, >
-        <cbo, >
-        <out, >
-        <cstr, "\'a\' es menor que \'b\'.">
-        <scol, >
-        <cbc, >
-        <id, 2>
-        <if, >
-        <po, >
-        <id, 0>
-        <gr, >
-        <id, 1>
-        <pc, >
-        <cbo, >
-        <out, >
-        <cstr, "\'a\' es mayor que \'b\'.">
-        <scol, >
-        <cbc, >
-        <id, 2>
-        <cbo, >
-        <out, >
-        <cstr, "\'a\' es igual que \'b\'.">
-        <scol, >
-        <cbc, >
-        <out, >
-        <cstr, "\textbackslash n">
-        <scol, >
-        <out, >
-        <cstr, "a + b: ">
-        <scol, >
-        <out, >
-        <id, 0>
-        <sum, >
-        <id, 1>
-        <scol, >
-        <out, >
-        <cstr, "a - b: ">
-        <scol, >
-        <out, >
-        <id, 0>
-        <sub, >
-        <id, 1>
-        <scol, >
-        <out, >
-        <cstr, "\textbackslash n">
-        <scol, >
-        <eof, >
+        \begin{lstlisting}
+<in, >
+<id, 0>
+<scol, >
+<in, >
+<id, 1>
+<scol, >
+<if, >
+<po, >
+<id, 0>
+<ls, >
+<id, 1>
+<pc, >
+<cbo, >
+<out, >
+<cstr, "\'a\' es menor que \'b\'.">
+<scol, >
+<cbc, >
+<id, 2>
+<if, >
+<po, >
+<id, 0>
+<gr, >
+<id, 1>
+<pc, >
+<cbo, >
+<out, >
+<cstr, "\'a\' es mayor que \'b\'.">
+<scol, >
+<cbc, >
+<id, 2>
+<cbo, >
+<out, >
+<cstr, "\'a\' es igual que \'b\'.">
+<scol, >
+<cbc, >
+<out, >
+<cstr, "\n">
+<scol, >
+<out, >
+<cstr, "a + b: ">
+<scol, >
+<out, >
+<id, 0>
+<sum, >
+<id, 1>
+<scol, >
+<out, >
+<cstr, "a - b: ">
+<scol, >
+<out, >
+<id, 0>
+<sub, >
+<id, 1>
+<scol, >
+<out, >
+<cstr, "\n">
+<scol, >
+<eof, >
+        \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
-        Tabla Global \#0: \\
-        *'a' \\
-        *'b' \\
-        *'else'
+        \begin{lstlisting}
+Tabla Global \#0:
+*'a'
+*'b'
+*'else'
+        \end{lstlisting}
     \end{tcolorbox}
 
     \newpage
@@ -343,13 +357,15 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
     \item \textbf{Caso 4:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-            /* Un comentario de bloque sin cerrar es un error léxico, 
-            ya que se recibe un EOF inesperado.
+/* Un comentario de bloque sin cerrar es un error léxico,
+ya que se recibe un EOF inesperado.
         \end{lstlisting}      
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Errores detectados}, colback=white]
-        (2:1) ERROR Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.
+        \begin{lstlisting}
+(2:1) ERROR: Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.
+        \end{lstlisting}
     \end{tcolorbox}
 
     \vspace{3cm}
@@ -357,21 +373,23 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
     \item \textbf{Caso 5:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-            /* Hay algunos símbolos por los que un token no puede empezar. */
-            $ % @ # ?
-            
-            /* En especial, las variables no pueden empezar con «_». */
-            var int _error;
+/* Hay algunos símbolos por los que un token no puede empezar. */
+$ % @ # ?
+
+/* En especial, las variables no pueden empezar con «_». */
+var int _error;
         \end{lstlisting}      
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Errores detectados}, colback=white]
-        (2:1) ERROR: Carácter inesperado al buscar el siguiente símbolo («\$», U+0024).\\
-        (2:3) ERROR: Carácter inesperado al buscar el siguiente símbolo («\%», U+0025).\\
-        (2:5) ERROR: Carácter inesperado al buscar el siguiente símbolo («@», U+0040).\\
-        (2:7) ERROR: Carácter inesperado al buscar el siguiente símbolo («\#», U+0023).\\
-        (2:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).\\
-        (5:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («\_», U+005F).
+        \begin{lstlisting}
+(2:1) ERROR: Carácter inesperado al buscar el siguiente símbolo («$», U+0024).
+(2:3) ERROR: Carácter inesperado al buscar el siguiente símbolo («%», U+0025).
+(2:5) ERROR: Carácter inesperado al buscar el siguiente símbolo («@», U+0040).
+(2:7) ERROR: Carácter inesperado al buscar el siguiente símbolo («#», U+0023).
+(2:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).
+(5:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («_», U+005F).
+        \end{lstlisting}
     \end{tcolorbox}
 
     \newpage
@@ -379,28 +397,30 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
     \item \textbf{Caso 6:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-            /* Aunque el código esté malformado y no compile, 
-            se siguen buscando y generando tokens */
-            var string a = $ 'Esta cadena se lee correctamente'
-            
-            /* Esto es útil para depurar los errores 
-            sin detenerse sólo en el primero. */
-            var int a = 2?;
-            
-            /* En algunos casos, es imposible recuperar tokens 
-            en un estado válido y seguir procesando. */
-            var string s = 'Si se escapa la comilla de cierre sin querer, 
-            el string continúa hasta dar error\n \'; $$ $$ /**/ ;;
-            
-            /* Al llegar al un salto de línea lanza un error y se recupera. */
-            var string s2 = 'Esta cadena se procesa bien';
+/* Aunque el código esté malformado y no compile,
+se siguen buscando y generando tokens */
+var string a = $ 'Esta cadena se lee correctamente'
+
+/* Esto es útil para depurar los errores
+sin detenerse sólo en el primero. */
+var int a = 2?;
+
+/* En algunos casos, es imposible recuperar tokens
+en un estado válido y seguir procesando. */
+var string s = 'Si se escapa la comilla de cierre sin querer,
+el string continúa hasta dar error\n \'; $$ $$ /**/ ;;
+
+/* Al llegar al un salto de línea lanza un error y se recupera. */
+var string s2 = 'Esta cadena se procesa bien';
         \end{lstlisting}      
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Errores detectados}, colback=white]
-        (2:16) ERROR: Carácter inesperado al buscar el siguiente símbolo («\$», U+0024).\\
-        (5:14) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).\\
-        (8:117) ERROR: Error en la cadena. Carácter no permitido (U+000D).
+        \begin{lstlisting}
+(2:16) ERROR: Carácter inesperado al buscar el siguiente símbolo («$», U+0024).
+(5:14) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).
+(8:117) ERROR: Error en la cadena. Carácter no permitido (U+000D).
+        \end{lstlisting}
     \end{tcolorbox}
 \end{enumerate}
 
