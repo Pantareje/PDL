@@ -46,10 +46,10 @@ La primera entrega de esta práctica consiste en la implementación de un Analiz
     \item Añadir las \textbf{Acciones Semánticas}, asociadas a cada una de las transiciones del diagrama de estados.
     \item Estudiar los posibles \textbf{casos de error}, para poder manejar correctamente la detección y el reporte de errores léxicos. 
 \end{enumerate}
- 
- Por otro lado, hemos comenzado con la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.\\
 
- Finalmente, presentamos una serie de casos de prueba que demuestran el correcto funcionamiento del Procesador, así como su capacidad para manejar errores léxicos.\\
+Por otro lado, hemos comenzado con la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.\\
+
+Finalmente, presentamos una serie de casos de prueba que demuestran el correcto funcionamiento del Procesador, así como su capacidad para manejar errores léxicos.\\
 
 Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguientes especificaciones: 
 \begin{itemize}[left=2cm]
@@ -76,13 +76,11 @@ Por tanto, los siguientes tipos de expresiones no serán identificados como toke
 
 En esta sección, describimos la Gramática Regular (gramática de tipo 3 según la jerarquía de Chomsky) que hemos diseñado para identificar y generar los tokens del lenguaje fuente. 
 
-\vspace{0.1cm}
 \input{Gramatica.tex}
 
 \section{Autómata Finito Determinista}
 Una vez definida la gramática regular, el siguiente paso es construir el Autómata Finito Determinista (AFD) correspondiente. A continuación, presentamos su diseño, incluyendo las transiciones entre estados.
 
-\vspace{0.1cm}
 \input{AFD.tex}
 
 \section{Acciones semánticas}
@@ -120,8 +118,6 @@ En el \textbf{anexo} es posible encontrar distintos casos que demuestran el func
 
 Con esto, demostramos el funcionamiento del programa en diferentes situaciones, desde el reconocimiento de declaraciones válidas hasta la gestión de errores léxicos. Estos resultados serán completados gracias a la segunda entrega del proyecto, que se centrará en el desarrollo del Analizador Sintáctico.
 
-\newpage
-
 \appendix
 \section*{Anexo}
 
@@ -134,8 +130,8 @@ Con esto, demostramos el funcionamiento del programa en diferentes situaciones, 
 }
 
 \begin{enumerate}
+
     \item \textbf{Caso 1:} Funcionamiento correcto
-    
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
 /* Declaraciones válidas */
@@ -187,10 +183,8 @@ Tabla Global \#0:
         \end{lstlisting}
     \end{tcolorbox}
 
-    \newpage
-    
+
     \item \textbf{Caso 2:} Funcionamiento correcto
-    
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
 function void println(string s) {
@@ -242,10 +236,8 @@ Tabla Global #0:
         \end{lstlisting}
     \end{tcolorbox}
 
-    \newpage
-    
-    \item \textbf{Caso 3:} Funcionamiento correcto
 
+    \item \textbf{Caso 3:} Funcionamiento correcto
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
 /* Leemos dos números del usuario.
@@ -278,8 +270,6 @@ output '\n';
         \end{lstlisting}        
     \end{tcolorbox}
 
-    En el siguiente volcado cada token tendría que estar en una línea, pero lo hemos puesto seguido debido a su larga longitud. 
-    
     \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
         \begin{lstlisting}
 <in, >
@@ -352,7 +342,6 @@ Tabla Global \#0:
         \end{lstlisting}
     \end{tcolorbox}
 
-    \newpage
     
     \item \textbf{Caso 4:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
@@ -368,7 +357,6 @@ ya que se recibe un EOF inesperado.
         \end{lstlisting}
     \end{tcolorbox}
 
-    \vspace{3cm}
 
     \item \textbf{Caso 5:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
@@ -392,7 +380,6 @@ var int _error;
         \end{lstlisting}
     \end{tcolorbox}
 
-    \newpage
     
     \item \textbf{Caso 6:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
@@ -422,6 +409,8 @@ var string s2 = 'Esta cadena se procesa bien';
 (8:117) ERROR: Error en la cadena. Carácter no permitido (U+000D).
         \end{lstlisting}
     \end{tcolorbox}
+
 \end{enumerate}
+
 
 \end{document}
