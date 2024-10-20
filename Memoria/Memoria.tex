@@ -241,8 +241,7 @@ Tabla Global #0:
     \item \textbf{Caso 3:} Funcionamiento correcto
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-/* Leemos dos números del usuario.
-Las variables sin declarar se suponen globales y enteras. */
+/* Leemos dos números del usuario. Las variables sin declarar se suponen globales y enteras. */
 input a;
 input b;
 
@@ -250,11 +249,8 @@ input b;
 if (a < b) {
     output '\'a\' es menor que \'b\'.';
 }
-else if (a > b) {
+if (a > b) {
     output '\'a\' es mayor que \'b\'.';
-}
-else {
-    output '\'a\' es igual que \'b\'.';
 }
 
 output '\n';
@@ -290,7 +286,6 @@ output '\n';
 <cstr, "\'a\' es menor que \'b\'.">
 <scol, >
 <cbc, >
-<id, 2>
 <if, >
 <po, >
 <id, 0>
@@ -300,12 +295,6 @@ output '\n';
 <cbo, >
 <out, >
 <cstr, "\'a\' es mayor que \'b\'.">
-<scol, >
-<cbc, >
-<id, 2>
-<cbo, >
-<out, >
-<cstr, "\'a\' es igual que \'b\'.">
 <scol, >
 <cbc, >
 <out, >
@@ -339,7 +328,6 @@ output '\n';
 Tabla Global #0:
 *'a'
 *'b'
-*'else'
         \end{lstlisting}
     \end{tcolorbox}
 
@@ -347,8 +335,7 @@ Tabla Global #0:
     \item \textbf{Caso 4:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-/* Un comentario de bloque sin cerrar es un error léxico,
-ya que se recibe un EOF inesperado.
+/* Un comentario de bloque sin cerrar es un error léxico, ya que se recibe un EOF inesperado.
         \end{lstlisting}      
     \end{tcolorbox}
 
@@ -385,20 +372,17 @@ var int _error;
     \item \textbf{Caso 6:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-/* Aunque el código esté malformado y no compile,
-se siguen buscando y generando tokens */
-var string a = $ 'Esta cadena se lee correctamente'
+/* Aunque el código esté malformado y no compile, se siguen buscando y generando tokens */
+var string a = $ 'Esta cadena se lee correctamente';
 
-/* Esto es útil para depurar los errores
-sin detenerse sólo en el primero. */
+/* Esto es útil para depurar los errores sin detenerse sólo en el primero. */
 var int a = 2?;
 
-/* En algunos casos, es imposible recuperar tokens
-en un estado válido y seguir procesando. */
-var string s = 'Si se escapa la comilla de cierre sin querer,
-el string continúa hasta dar error\n \'; $$ $$ /**/ ;;
+/* En algunos casos, es imposible recuperar tokens en un estado válido y seguir procesando. */
+var string s = 'Si no se temina el string, lee todo \'; $$ /**/;; Esto es parte de la cadena.
+/* Aquí ya ha terminado la cadena, ya que lee un salto de línea no permitido. */
 
-/* Al llegar al un salto de línea lanza un error y se recupera. */
+/* Como la última cadena ya finalizó por error, aquí se recupera y sigue procesando tokens. */
 var string s2 = 'Esta cadena se procesa bien';
         \end{lstlisting}      
     \end{tcolorbox}
@@ -407,7 +391,7 @@ var string s2 = 'Esta cadena se procesa bien';
         \begin{lstlisting}
 (2:16) ERROR: Carácter inesperado al buscar el siguiente símbolo («$», U+0024).
 (5:14) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).
-(8:117) ERROR: Error en la cadena. Carácter no permitido (U+000D).
+(8:94) ERROR: Error en la cadena. Carácter no permitido (U+000D).
         \end{lstlisting}
     \end{tcolorbox}
 
