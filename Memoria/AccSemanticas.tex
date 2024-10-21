@@ -27,7 +27,9 @@
     \> G1 \> if (cont $>$ 64) \> // Transición 5:7 \\
     \> \hspace{1.5cm} then error (COD\_ERROR\_STRLEN, lex) \\
     \> \hspace{1cm}else Gen\_token(cstr, lex) \\
-    \> G2 \> Gen\_token(cint, num) \> // Transición 3:4 \\
+    \> G2 \> if (num $>$ 32767) \> // Transición 3:4 \\
+    \> \hspace{1.5cm} then error (COD\_ERROR\_MAXINT, num) \\
+    \> \hspace{1cm}else Gen\_token(cint, num) \\
     \textit{Delimitadores y operadores de control} \\
     \> G3 \> Gen\_token(cumass, -) \> // Transición 8:9 con el carácter '='\\
     \> G4 \> Gen\_token(ass, -) \> // Transición 0:10 con el carácter '='\\
