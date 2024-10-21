@@ -98,12 +98,12 @@ Dado que en esta parte de la práctica solo se debe implementar el analizador l�
 \section{Funcionamiento del programa}
 El programa que hemos elaborado comienza leyendo el código fuente que le proporcionamos. Lo analiza carácter por carácter, reconociendo los tokens que hemos definido en el punto 2. Para ello, el Analizador Léxico se basa en la gramática regular que genera nuestro Autómata Finito Determinista.
 
-A medida que encuentra identificadores los almacena en la tabla de símbolos. Si encuentra delimitadores o comentarios de bloque, los ignora. Además, el programa está preparado para detectar errores, generando mensajes claros que indican el tipo y la ubicación exacta, con tal de facilitar la corrección por parte del usuario. Al finalizar la ejecución, queda completo un informe con todos los tokens que el programa ha reconocido durante el análisis, o los posibles errores que haya encontrado.
+A medida que encuentra identificadores los almacena en la tabla de símbolos si es necesario. Si encuentra delimitadores o comentarios de bloque, los ignora. Además, el programa está preparado para detectar errores, generando mensajes claros y concisos que indican el tipo de error y la ubicación exacta, con tal de facilitar la corrección por parte del usuario. Al finalizar la ejecución, queda completo un informe con todos los tokens que el programa ha reconocido durante el análisis, y los posibles errores que haya encontrado.
 
-En el \textbf{anexo} es posible encontrar distintos casos que demuestran el funcionamiento correcto del programa. Los tres primeros son favorables y los tres últimos muestran distintos casos de error. A continuación incluimos una breve explicación de cada uno:
+En el \textbf{anexo} es posible encontrar múltiples ejemplos que demuestran el funcionamiento correcto del programa. Los tres primeros son favorables y los tres últimos muestran diversos casos de error. A continuación incluimos una breve explicación de cada uno:
 
 \begin{itemize}
-    \item \textbf{Caso 1:} El programa reconoce declaraciones válidas, como la asignación de tipos a variables y la asignación de identificadores, como lo que ocurre con el tipo «boolean» (tratado como un identificador).
+    \item \textbf{Caso 1:} El programa reconoce declaraciones válidas, como la asignación de tipos a variables y la asignación de identificadores, como lo que ocurre con el tipo «bool» (tratado como un identificador).
     
     \item \textbf{Caso 2:} Muestra el funcionamiento adecuado de una función println (para imprimir mensajes), con lo que se puede apreciar la correcta gestión de cadenas y el uso de saltos de línea.
     
