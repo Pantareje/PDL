@@ -1,0 +1,105 @@
+//// Gramática del fichero de gramática
+//// Conjunto de símbolos terminales
+Terminales = { id cstr cint true false int boolean string void var function return for if input output ( ) { } = += + - < > && || , ; }
+
+//// Conjunto de símbolo no terminales
+NoTerminales = { P F T T1 A K B C D S S1 I I1 Y L Q X E E1 O R R1 M U U1 N V }
+
+//// Axioma
+Axioma = P
+
+//// Lista de producciones
+Producciones = {
+
+P -> F P
+P -> B P
+P -> lambda
+
+F -> function T id ( A ) { C }
+
+T -> T1
+T -> void
+
+T1 -> int
+T1 -> boolean
+T1 -> string
+
+A -> void
+A -> T1 id  K
+
+K -> , T1 id K
+K -> lambda
+
+B -> if ( E ) S
+B -> for ( I ; E ; I ) { B } 
+B -> var T1 id ;
+B -> S
+
+C -> D C
+C -> lambda
+
+D -> if ( E ) S1
+D -> for ( I ; E ; I ) { D } 
+D -> var T1 id ;
+D -> S1
+
+S -> I1 ;
+S -> id ( L ) ;
+S -> output E ;
+S -> input id ;
+
+S1 -> I1 ;
+S1 -> id ( L ) ;
+S1 -> output E ;
+S1 -> input id ;
+S1 -> return X ;
+
+I -> I1
+I -> lambda
+
+I1 -> id Y E
+
+Y -> =
+Y -> +=
+
+L -> E Q
+L -> lambda
+
+Q -> , E Q
+Q -> lambda
+
+X -> E
+X -> lambda
+
+E -> R E1
+
+E1 -> O R E1
+E1 -> lambda
+
+O -> &&
+O -> ||
+
+R -> U R1
+
+R1 -> M U R1
+R1 -> lambda
+
+M -> >
+M -> <
+
+U -> V U1
+
+U1 -> N V U1
+U1 -> lambda
+
+N -> +
+N -> -
+
+V -> id
+V -> ( E )
+V -> id ( L )
+V -> cint
+V -> cstr
+V -> true
+V -> false
+}
