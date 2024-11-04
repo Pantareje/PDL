@@ -95,12 +95,12 @@ namespace {
 
         try {
             parser.Parse(symbolTable, ss);
-            output << "Des" << ss.str() << std::endl;
         } catch (const SyntaxException& e) {
             std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
             status = 1;
         }
 
+        output << "Des" << ss.str() << std::endl;
         return status;
     }
 
