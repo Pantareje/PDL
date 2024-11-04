@@ -49,6 +49,9 @@ struct Token {
     /** El identificador del token. **/
     TokenType type {};
 
+    unsigned line;
+    unsigned column;
+
     /**
      * El contenido del token. Dependiendo del tipo puede estar vacío
      * o ser un identificador, una cadena, o un entero de 16 bits con signo.
@@ -123,4 +126,23 @@ constexpr const char* ToString(const TokenType token) noexcept {
 
     assert(false);
     abort();
+}
+
+/**
+ * Devuelve el valor del contenido de un token como texto.
+ * @param token La variante con el contenido del token.
+ * @return El valor del contenido en forma de texto.
+ */
+constexpr std::string TokenAttributeToString(const auto& token) {
+    return std::visit(
+        []<typename U>(U&& arg) -> std::string {
+            if constexpr (std::is_same_v<std::decay_t<U>, std::string>)
+                return std::format("\"{}\"", EscapeUtf8String(arg));
+            else if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>)
+                return "";
+            else
+                return std::to_string(arg);
+        },
+        token.attribute
+    );
 }

@@ -7,13 +7,21 @@
 
 #include <format>
 
-
 class Lexer {
     std::istream& m_input;
     char32_t m_lastChar = U' ';
 
     unsigned m_line = 1;
     unsigned m_column = 0;
+
+    template <typename T>
+    constexpr Token CreateToken(TokenType tokenType, T&& args) {
+        return { tokenType, m_line, m_column, args };
+    }
+
+    constexpr Token CreateToken(TokenType tokenType) {
+        return CreateToken(tokenType, std::monostate());
+    }
 
     void Read() {
         m_lastChar = ReadUtf8Codepoint(m_input);
@@ -109,7 +117,7 @@ public:
             const TokenType type = KeywordToToken(lex);
 
             if (type != TokenType::IDENTIFIER)
-                return { type };
+                return CreateToken(type);
 
 
             auto pos = symbolTable.SearchSymbol(lex);
@@ -117,7 +125,7 @@ public:
             if (!pos.has_value())
                 pos = { symbolTable.AddSymbol(lex) };
 
-            return { type, pos.value() };
+            return CreateToken(type, pos.value());
         }
 
         // 0 : d : 3
@@ -146,7 +154,7 @@ public:
                     "El valor del entero es demasiado grande (máximo 32767)."
                 );
 
-            return { TokenType::CINT, static_cast<int16_t>(num) };
+            return CreateToken(TokenType::CINT, static_cast<int16_t>(num));
         }
 
         // 0 : ' : 5
@@ -227,7 +235,7 @@ public:
                 );
 
             Read();
-            return { TokenType::CSTR, str };
+            return CreateToken(TokenType::CSTR, str);
         }
 
         // 0 : + : 8
@@ -236,35 +244,35 @@ public:
 
             // 8 : oc : 9
             if (m_lastChar != '=')
-                return { TokenType::SUM };
+                return CreateToken(TokenType::SUM);
 
             // 8 : = : 9
             Read();
-            return { TokenType::CUMULATIVE_ASSIGN };
+            return CreateToken(TokenType::CUMULATIVE_ASSIGN);
         }
 
         // 0 : - : 10
         if (m_lastChar == '-') {
             Read();
-            return { TokenType::SUB };
+            return CreateToken(TokenType::SUB);
         }
 
         // 0 : = : 10
         if (m_lastChar == '=') {
             Read();
-            return { TokenType::ASSIGN };
+            return CreateToken(TokenType::ASSIGN);
         }
 
         // 0 : < : 10
         if (m_lastChar == '<') {
             Read();
-            return { TokenType::LESS };
+            return CreateToken(TokenType::LESS);
         }
 
         // 0 : > : 10
         if (m_lastChar == '>') {
             Read();
-            return { TokenType::GREATER };
+            return CreateToken(TokenType::GREATER);
         }
 
         // 0 : & : 11
@@ -279,7 +287,7 @@ public:
                 );
 
             Read();
-            return { TokenType::AND };
+            return CreateToken(TokenType::AND);
         }
 
         // 0 : | : 13
@@ -292,48 +300,48 @@ public:
                 );
 
             Read();
-            return { TokenType::OR };
+            return CreateToken(TokenType::OR);
         }
 
         // 0 : , : 18
         if (m_lastChar == ',') {
             Read();
-            return { TokenType::COMMA };
+            return CreateToken(TokenType::COMMA);
         }
 
         // 0 : ; : 18
         if (m_lastChar == ';') {
             Read();
-            return { TokenType::SEMICOLON };
+            return CreateToken(TokenType::SEMICOLON);
         }
 
         // 0 : ( : 18
         if (m_lastChar == '(') {
             Read();
-            return { TokenType::PARENTHESIS_OPEN };
+            return CreateToken(TokenType::PARENTHESIS_OPEN);
         }
 
         // 0 : ) : 18
         if (m_lastChar == ')') {
             Read();
-            return { TokenType::PARENTHESIS_CLOSE };
+            return CreateToken(TokenType::PARENTHESIS_CLOSE);
         }
 
         // 0 : { : 18
         if (m_lastChar == '{') {
             Read();
-            return { TokenType::CURLY_BRACKET_OPEN };
+            return CreateToken(TokenType::CURLY_BRACKET_OPEN);
         }
 
         // 0 : } : 18
         if (m_lastChar == '}') {
             Read();
-            return { TokenType::CURLY_BRACKET_CLOSE };
+            return CreateToken(TokenType::CURLY_BRACKET_CLOSE);
         }
 
         // 0 : eof : 19
         if (m_lastChar == EOF || m_lastChar == U'€')
-            return { TokenType::END };
+            return CreateToken(TokenType::END);
 
         // Carácter desconocido.
         throw LexicalException(

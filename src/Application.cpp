@@ -6,26 +6,6 @@
 #include <format>
 
 namespace {
-    /**
-     * Devuelve el valor del contenido de un token como texto.
-     * @param val La variante con el contenido del token.
-     * @return El valor del contenido en forma de texto.
-     */
-    constexpr std::string VariantToString(const auto& val) {
-        return std::visit(
-                []<typename U>(U&& arg) -> std::string {
-                    if constexpr (std::is_same_v<std::decay_t<U>, std::string>)
-                        return std::format("\"{}\"", EscapeUtf8String(arg));
-                    else if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>)
-                        return "";
-                    else
-                        return std::to_string(arg);
-                },
-                val
-        );
-    }
-
-
     int GenerateTokensFile(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
         SymbolTable symbolTable;
@@ -35,13 +15,10 @@ namespace {
         bool isRunning = true;
         while (isRunning) {
             try {
-                const auto [type, val] = lexer.GetToken(symbolTable);
-
-                std::string content = VariantToString(val);
-
-                output << "<" << ToString(type) << ", " << content << ">" << std::endl;
-
-                if (type == TokenType::END) isRunning = false;
+                const auto token = lexer.GetToken(symbolTable);
+                std::string content = TokenAttributeToString(token);
+                output << "<" << ToString(token.type) << ", " << content << ">" << std::endl;
+                if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
                 std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
                 lexer.SkipChar();
@@ -77,8 +54,8 @@ namespace {
         bool isRunning = true;
         while (isRunning) {
             try {
-                const auto [type, val] = lexer.GetToken(symbolTable);
-                if (type == TokenType::END) isRunning = false;
+                const auto token = lexer.GetToken(symbolTable);
+                if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
                 std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
                 lexer.SkipChar();
@@ -117,7 +94,7 @@ namespace {
             const auto parse = parser.Parse(symbolTable);
             output << "Des" << parse << std::endl;
         } catch (const SyntaxException& e) {
-            std::cerr << "ERROR: " << e.what() << std::endl;
+            std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
             status = 1;
         }
 
