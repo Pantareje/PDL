@@ -1,0 +1,1 @@
++ 10-05-2019: Se ha cambiado el orden de compilacion de los archivos: se han puesto las librerias que utiliza gtk+-2.0 al final, ya que ocurrian errores con los compiladores mas modernos de gcc.
