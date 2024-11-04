@@ -1003,17 +1003,9 @@ public:
         SymbolTable todo;
     }
 
-    std::string Parse(SymbolTable& symbolTable) {
-        std::ostringstream ss;
-
-        try {
-            m_lastToken = m_lexer.GetToken(symbolTable);
-            Axiom(ss, symbolTable);
-        } catch (const SyntaxException& e) {
-            std::cerr << "ERROR: " << e.what() << std::endl;
-        }
-
-        return ss.str();
+    void Parse(SymbolTable& symbolTable, std::ostream& output) {
+        m_lastToken = m_lexer.GetToken(symbolTable);
+        Axiom(output, symbolTable);
     }
 };
 

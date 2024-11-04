@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <format>
 
 namespace {
@@ -90,9 +91,11 @@ namespace {
 
         int status = 0;
 
+        std::ostringstream ss;
+
         try {
-            const auto parse = parser.Parse(symbolTable);
-            output << "Des" << parse << std::endl;
+            parser.Parse(symbolTable, ss);
+            output << "Des" << ss.str() << std::endl;
         } catch (const SyntaxException& e) {
             std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
             status = 1;
