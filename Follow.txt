@@ -1,0 +1,16 @@
+FOLLOW de A  =  { && ) , ; || }
+FOLLOW de A1  =  { && ) , ; || }
+FOLLOW de B  =  { && ) , ; < > || }
+FOLLOW de B1  =  { && ) , ; < > || }
+FOLLOW de BODY  =  { } }
+FOLLOW de C  =  { && ) + , - ; < > || }
+FOLLOW de CALLPARAM  =  { ) }
+FOLLOW de EXP  =  { ) , ; }
+FOLLOW de EXP1  =  { ) , ; }
+FOLLOW de EXPATOM  =  { && ) + , - ; < > || }
+FOLLOW de FORACT  =  { ) ; }
+FOLLOW de FUNATTRIBUTES  =  { ) }
+FOLLOW de IDACT  =  { ; }
+FOLLOW de NEXTATTRIBUTE  =  { ) }
+FOLLOW de NEXTPARAM  =  { ) }
+FOLLOW de RETURNEXP  =  { ; }

@@ -332,7 +332,7 @@ public:
         }
 
         // 0 : eof : 19
-        if (m_lastChar == EOF)
+        if (m_lastChar == EOF || m_lastChar == U'€')
             return { TokenType::END };
 
         // Carácter desconocido.

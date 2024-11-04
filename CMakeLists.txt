@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(ICU REQUIRED COMPONENTS uc)
 
 add_executable(PDL
-        src/Main.cpp
         src/Characters.h
         src/Characters.cpp
         src/Token.h
@@ -15,6 +14,10 @@ add_executable(PDL
         src/Lexer.h
         src/SymbolTable.h
         src/Parser.h
-        src/SyntaxException.h)
+        src/SyntaxException.h
+        src/Application.h
+        src/Application.cpp
+        src/Main.cpp
+        src/ApplicationAttributes.h)
 
 target_link_libraries(PDL PRIVATE ICU::uc)

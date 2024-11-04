@@ -1,0 +1,26 @@
+FIRST de A  =  { ( cint cstr false id true }
+FIRST de A1  =  { < > lambda }
+FIRST de ARITHMETICOP  =  { + - }
+FIRST de ASS  =  { += = }
+FIRST de ATOMSTATEMENT  =  { id input output return }
+FIRST de B  =  { ( cint cstr false id true }
+FIRST de B1  =  { + - lambda }
+FIRST de BODY  =  { for id if input output return var lambda }
+FIRST de C  =  { ( lambda }
+FIRST de CALLPARAM  =  { ( cint cstr false id true lambda }
+FIRST de COMPOP  =  { < > }
+FIRST de EXP  =  { ( cint cstr false id true }
+FIRST de EXP1  =  { && || lambda }
+FIRST de EXPATOM  =  { ( cint cstr false id true }
+FIRST de FORACT  =  { id lambda }
+FIRST de FUNATTRIBUTES  =  { boolean int string void }
+FIRST de FUNCTION  =  { function }
+FIRST de FUNTYPE  =  { boolean int string void }
+FIRST de IDACT  =  { ( += = }
+FIRST de LOGOP  =  { && || }
+FIRST de NEXTATTRIBUTE  =  { , lambda }
+FIRST de NEXTPARAM  =  { , lambda }
+FIRST de P  =  { for function id if input output return var lambda }
+FIRST de RETURNEXP  =  { ( cint cstr false id true lambda }
+FIRST de STATEMENT  =  { for id if input output return var }
+FIRST de VARTYPE  =  { boolean int string }

@@ -1,108 +1,99 @@
-#include "Lexer.h"
+#include "Application.h"
 
+#include <stdexcept>
 #include <iostream>
-#include <fstream>
-#include <format>
-
-#include "SymbolTable.h"
 
 namespace {
-    /**
-     * Devuelve el valor del contenido de un token como texto.
-     * @param val La variante con el contenido del token.
-     * @return El valor del contenido en forma de texto.
-     */
-    constexpr std::string VariantToString(const auto& val) {
-        return std::visit(
-            []<typename U>(U&& arg) -> std::string {
-                if constexpr (std::is_same_v<std::decay_t<U>, std::string>)
-                    return std::format("\"{}\"", EscapeUtf8String(arg));
-                else if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>)
-                    return "";
-                else
-                    return std::to_string(arg);
-            },
-            val
-        );
-    }
+    class ArgumentsReader {
+        int m_argc;
+        const char** m_argv;
 
-    int GenerateTokensFile(std::istream& input) {
-        Lexer lexer(input);
-        SymbolTable symbolTable;
+        mutable int m_current;
+        mutable std::string_view m_arg;
 
-        std::ofstream tokenFile("tokens.txt", std::ios::binary);
-        std::ofstream symbolsFile("symbols.txt", std::ios::binary);
-
-        int status = 0;
-
-        bool isRunning = true;
-        while (isRunning) {
-            try {
-                const auto [type, val] = lexer.GetToken(symbolTable);
-
-                std::string content = VariantToString(val);
-
-                tokenFile << "<" << ToString(type) << ", " << content << ">" << std::endl;
-
-                if (type == TokenType::END) isRunning = false;
-            } catch (const LexicalException& e) {
-                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
-                lexer.SkipChar();
-                status = 1;
+        bool GetNextArgument() const {
+            if (m_current < m_argc) {
+                m_arg = { m_argv[m_current] };
+                m_current += 1;
+                return true;
             }
+
+            return false;
         }
 
-        symbolTable.WriteTable(symbolsFile);
+    public:
+        ArgumentsReader(const int argc, const char* argv[]) : m_argc(argc), m_argv(argv), m_current() {}
 
-        return status;
-    }
+        ApplicationAttributes GetAttributes() const {
+            ApplicationAttributes attributes = {};
 
-    int GenerateSymbolsFile(std::istream& input) {
-        Lexer lexer(input);
-        SymbolTable symbolTable;
+            m_current = 1;
 
-        std::ofstream tokenFile("tokens.txt", std::ios::binary);
-        std::ofstream symbolsFile("symbols.txt", std::ios::binary);
+            while (GetNextArgument()) {
+                if (m_arg == "-t") {
+                    if (attributes.taskType != TaskType::None)
+                        throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
 
-        int status = 0;
+                    attributes.taskType = TaskType::Tokens;
+                }
 
-        bool isRunning = true;
-        while (isRunning) {
-            try {
-                const auto [type, val] = lexer.GetToken(symbolTable);
+                else if (m_arg == "-s") {
+                    if (attributes.taskType != TaskType::None)
+                        throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
 
-                std::string content = VariantToString(val);
+                    attributes.taskType = TaskType::Symbols;
+                }
 
-                tokenFile << "<" << ToString(type) << ", " << content << ">" << std::endl;
+                else if (m_arg == "-p") {
+                    if (attributes.taskType != TaskType::None)
+                        throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
 
-                if (type == TokenType::END) isRunning = false;
-            } catch (const LexicalException& e) {
-                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
-                lexer.SkipChar();
-                status = 1;
+                    attributes.taskType = TaskType::Parse;
+                }
+
+
+                else if (m_arg == "-i") {
+                    if (!attributes.inputFileName.empty())
+                        throw std::runtime_error("Ya se ha definido un fichero de entrada.");
+
+                    if (!GetNextArgument())
+                        throw std::runtime_error("Después de «-i» se debe especificar un fichero de entrada.");
+
+                    if (m_arg.empty())
+                        throw std::runtime_error("El nombre del fichero de entrada no puede estar vacío.");
+
+                    attributes.inputFileName = m_arg;
+                }
+
+                else if (m_arg == "-o") {
+                    if (!attributes.outputFileName.empty())
+                        throw std::runtime_error("Ya se ha definido un fichero de salida.");
+
+                    if (!GetNextArgument())
+                        throw std::runtime_error("Después de «-o» se debe especificar un fichero de salida.");
+
+                    if (m_arg.empty())
+                        throw std::runtime_error("El nombre del fichero de salida no puede estar vacío.");
+
+                    attributes.outputFileName = m_arg;
+                }
+
+                else {
+                    throw std::runtime_error(std::format("El argumento «{}» es desconocido.", m_arg));
+                }
             }
+
+            return attributes;
         }
-
-        symbolTable.WriteTable(symbolsFile);
-
-        return status;
-    }
+    };
 }
 
 int main(const int argc, const char* argv[]) {
-    std::ifstream fileStream;
-
-    switch (argc) {
-    case 1:
-        break;
-    case 2:
-        fileStream = std::ifstream(argv[1], std::ios::binary);
-        if (!fileStream) {
-            std::cerr << "No existe el archivo \"" << argv[1] << "\"." << std::endl;
-            return 1;
-        }
-        break;
-    default:
-        return 1;
+    try {
+        ApplicationAttributes attributes = ArgumentsReader(argc, argv).GetAttributes();
+        Application application(attributes);
+        return application.Run();
+    } catch (const std::runtime_error& e) {
+        std::cerr << e.what() << std::endl;
     }
 }
