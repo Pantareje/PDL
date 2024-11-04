@@ -24,7 +24,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (FUNCTION P)
             case FUNCTION:
-                output << "1 ";
+                output << " 1";
                 Function(output, symbolTable);
                 Axiom(output, symbolTable);
                 break;
@@ -37,14 +37,14 @@ class Parser {
             case OUTPUT:
             case INPUT:
             case RETURN:
-                output << "2 ";
+                output << " 2";
                 Statement(output, symbolTable);
                 Axiom(output, symbolTable);
                 break;
 
                 // Como P -> lambda, Follow (P)
             case END:
-                output << "3 ";
+                output << " 3";
                 break;
 
             default:
@@ -56,7 +56,7 @@ class Parser {
     void Function(std::ostream& output, SymbolTable& symbolTable) {
         // FUNCTION -> function FUNTYPE id ( FUNATTRIBUTES ) { BODY }
 
-        output << "4 ";
+        output << " 4";
 
         assert(m_nextToken.type == FUNCTION);
         m_nextToken = m_lexer.GetToken(symbolTable);
@@ -95,7 +95,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (void)
             case VOID:
-                output << "5 ";
+                output << " 5";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -103,7 +103,7 @@ class Parser {
             case INT:
             case BOOL:
             case STRING:
-                output << "6 ";
+                output << " 6";
 
                 VarType(output, symbolTable);
                 break;
@@ -119,19 +119,19 @@ class Parser {
         switch (m_nextToken.type) {
             // First (int)
             case INT:
-                output << "7 ";
+                output << " 7";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (bool)
             case BOOL:
-                output << "8 ";
+                output << " 8";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (string)
             case STRING:
-                output << "9 ";
+                output << " 9";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -146,14 +146,15 @@ class Parser {
         switch (m_nextToken.type) {
             // First (void)
             case VOID:
-                output << "10 ";
+                output << " 10";
+                m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
-                // First (VARTYPE id NEXTATTRIBUTE)
+            // First (VARTYPE id NEXTATTRIBUTE)
             case INT:
             case BOOL:
             case STRING:
-                output << "11 ";
+                output << " 11";
                 VarType(output, symbolTable);
 
                 if (m_nextToken.type != IDENTIFIER)
@@ -174,7 +175,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (, VARTYPE id NEXTATTRIBUTE)
             case COMMA:
-                output << "12 ";
+                output << " 12";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 VarType(output, symbolTable);
@@ -188,7 +189,7 @@ class Parser {
 
                 // Como NEXTATTRIBUTE -> lambda, Follow (NEXTATTRIBUTE)
             case PARENTHESIS_CLOSE:
-                output << "13 ";
+                output << " 13";
                 break;
 
             default:
@@ -208,14 +209,14 @@ class Parser {
             case OUTPUT:
             case INPUT:
             case RETURN:
-                output << "14 ";
+                output << " 14";
                 Statement(output, symbolTable);
                 Body(output, symbolTable);
                 break;
 
                 // Como BODY -> lambda, Follow (BODY)
             case CURLY_BRACKET_CLOSE:
-                output << "15 ";
+                output << " 15";
                 break;
 
             default:
@@ -230,7 +231,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (if ( EXP ) ATOMSTATEMENT)
             case IF:
-                output << "16 ";
+                output << " 16";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 if (m_nextToken.type != TokenType::PARENTHESIS_OPEN)
@@ -248,7 +249,7 @@ class Parser {
 
                 // First (for ( FORACT ; EXP ; FORACT ) { BODY })
             case FOR:
-                output << "17 ";
+                output << " 17";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 if (m_nextToken.type != TokenType::PARENTHESIS_OPEN)
@@ -287,7 +288,7 @@ class Parser {
 
                 // First (var VARTYPE id ;)
             case VAR:
-                output << "18 ";
+                output << " 18";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 VarType(output, symbolTable);
@@ -307,7 +308,7 @@ class Parser {
             case OUTPUT:
             case INPUT:
             case RETURN:
-                output << "19 ";
+                output << " 19";
                 AtomStatement(output, symbolTable);
                 break;
 
@@ -322,7 +323,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (id IDACT ;)
             case IDENTIFIER:
-                output << "20 ";
+                output << " 20";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 IdAct(output, symbolTable);
@@ -335,7 +336,7 @@ class Parser {
 
                 // First (output EXP ;)
             case OUTPUT:
-                output << "21 ";
+                output << " 21";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 Exp(output, symbolTable);
@@ -348,7 +349,7 @@ class Parser {
 
                 // First (input id ;)
             case INPUT:
-                output << "22 ";
+                output << " 22";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 if (m_nextToken.type != TokenType::IDENTIFIER)
@@ -363,7 +364,7 @@ class Parser {
 
                 // First (return RETURNEXP ;)
             case RETURN:
-                output << "23 ";
+                output << " 23";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 ReturnExp(output, symbolTable);
@@ -386,14 +387,14 @@ class Parser {
             // First (ASS EXP)
             case ASSIGN:
             case CUMULATIVE_ASSIGN:
-                output << "24 ";
+                output << " 24";
                 Ass(output, symbolTable);
                 Exp(output, symbolTable);
                 break;
 
                 // First (( CALLPARAM ))
             case PARENTHESIS_OPEN:
-                output << "25 ";
+                output << " 25";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 CallParam(output, symbolTable);
@@ -415,7 +416,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (id ASS EXP)
             case IDENTIFIER:
-                output << "26 ";
+                output << " 26";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 Ass(output, symbolTable);
@@ -426,7 +427,7 @@ class Parser {
                 // Como FORACT -> lambda, Follow (FORACT)
             case PARENTHESIS_CLOSE:
             case SEMICOLON:
-                output << "27 ";
+                output << " 27";
                 break;
 
             default:
@@ -439,12 +440,12 @@ class Parser {
         // ASS -> = | +=
         switch (m_nextToken.type) {
             case ASSIGN:
-                output << "28 ";
+                output << " 28";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
             case CUMULATIVE_ASSIGN:
-                output << "29 ";
+                output << " 29";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -464,14 +465,14 @@ class Parser {
             case FALSE:
             case TRUE:
             case IDENTIFIER:
-                output << "30 ";
+                output << " 30";
                 Exp(output, symbolTable);
                 NextParam(output, symbolTable);
                 break;
 
                 // Como CALLPARAM -> lambda, Follow (CALLPARAM)
             case PARENTHESIS_CLOSE:
-                output << "31 ";
+                output << " 31";
                 break;
 
             default:
@@ -485,7 +486,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (EXP NEXTPARAM)
             case COMMA:
-                output << "32 ";
+                output << " 32";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 Exp(output, symbolTable);
@@ -495,7 +496,7 @@ class Parser {
 
                 // Como NEXTPARAM -> lambda, Follow (NEXTPARAM)
             case PARENTHESIS_CLOSE:
-                output << "33 ";
+                output << " 33";
                 break;
 
             default:
@@ -514,13 +515,13 @@ class Parser {
             case TRUE:
             case FALSE:
             case IDENTIFIER:
-                output << "34 ";
+                output << " 34";
                 Exp(output, symbolTable);
                 break;
 
                 // Como RETURNEXP -> lambda, Follow (RETURNEXP)
             case SEMICOLON:
-                output << "35 ";
+                output << " 35";
                 break;
 
             default:
@@ -539,7 +540,7 @@ class Parser {
             case FALSE:
             case TRUE:
             case IDENTIFIER:
-                output << "36 ";
+                output << " 36";
                 A(output, symbolTable);
                 Exp1(output, symbolTable);
                 break;
@@ -556,7 +557,7 @@ class Parser {
             // First (LOGOP A EXP1)
             case AND:
             case OR:
-                output << "37 ";
+                output << " 37";
                 LogOp(output, symbolTable);
                 A(output, symbolTable);
                 Exp1(output, symbolTable);
@@ -566,7 +567,7 @@ class Parser {
             case PARENTHESIS_CLOSE:
             case COMMA:
             case SEMICOLON:
-                output << "38 ";
+                output << " 38";
                 break;
 
             default:
@@ -579,12 +580,12 @@ class Parser {
         // LOGOP -> && | ||
         switch (m_nextToken.type) {
             case AND:
-                output << "39 ";
+                output << " 39";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
             case OR:
-                output << "40 ";
+                output << " 40";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -604,7 +605,7 @@ class Parser {
             case FALSE:
             case TRUE:
             case IDENTIFIER:
-                output << "41 ";
+                output << " 41";
                 B(output, symbolTable);
                 A1(output, symbolTable);
                 break;
@@ -621,7 +622,7 @@ class Parser {
             // First (COMPOP B A1)
             case GREATER:
             case LESS:
-                output << "42 ";
+                output << " 42";
                 CompOp(output, symbolTable);
                 B(output, symbolTable);
                 A1(output, symbolTable);
@@ -633,7 +634,7 @@ class Parser {
             case PARENTHESIS_CLOSE:
             case COMMA:
             case SEMICOLON:
-                output << "43 ";
+                output << " 43";
                 break;
 
             default:
@@ -647,13 +648,13 @@ class Parser {
         switch (m_nextToken.type) {
             // First (>)
             case GREATER:
-                output << "44 ";
+                output << " 44";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (<)
             case LESS:
-                output << "45 ";
+                output << " 45";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -673,7 +674,7 @@ class Parser {
             case FALSE:
             case TRUE:
             case IDENTIFIER:
-                output << "46 ";
+                output << " 46";
                 ExpAtom(output, symbolTable);
                 B1(output, symbolTable);
                 break;
@@ -690,7 +691,7 @@ class Parser {
             // First (ARITHMETICOP EXPATOM B1)
             case SUM:
             case SUB:
-                output << "47 ";
+                output << " 47";
                 ArithmeticOp(output, symbolTable);
                 ExpAtom(output, symbolTable);
                 B1(output, symbolTable);
@@ -704,7 +705,7 @@ class Parser {
             case SEMICOLON:
             case LESS:
             case GREATER:
-                output << "48 ";
+                output << " 48";
                 break;
 
 
@@ -719,13 +720,13 @@ class Parser {
         switch (m_nextToken.type) {
             // First (+)
             case SUM:
-                output << "49 ";
+                output << " 49";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (-)
             case SUB:
-                output << "50 ";
+                output << " 50";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -740,7 +741,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (id C)
             case IDENTIFIER:
-                output << "51 ";
+                output << " 51";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 C(output, symbolTable);
@@ -748,7 +749,7 @@ class Parser {
 
                 // First (( EXP ))
             case PARENTHESIS_OPEN:
-                output << "52 ";
+                output << " 52";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 Exp(output, symbolTable);
@@ -761,25 +762,25 @@ class Parser {
 
                 // First (cint)
             case CINT:
-                output << "53 ";
+                output << " 53";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (cstr)
             case CSTR:
-                output << "54 ";
+                output << " 54";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (true)
             case TRUE:
-                output << "55 ";
+                output << " 55";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
                 // First (false)
             case FALSE:
-                output << "56 ";
+                output << " 56";
                 m_nextToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -794,7 +795,7 @@ class Parser {
         switch (m_nextToken.type) {
             // First (( CALLPARAM ))
             case PARENTHESIS_OPEN:
-                output << "57 ";
+                output << " 57";
                 m_nextToken = m_lexer.GetToken(symbolTable);
 
                 CallParam(output, symbolTable);
@@ -815,7 +816,7 @@ class Parser {
             case SEMICOLON:
             case GREATER:
             case LESS:
-                output << "58 ";
+                output << " 58";
                 break;
 
             default:

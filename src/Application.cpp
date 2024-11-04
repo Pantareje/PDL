@@ -25,11 +25,10 @@ namespace {
         );
     }
 
-    int GenerateTokensFile(std::istream& input, const std::string& outputFileName) {
+
+    int GenerateTokensFile(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
         SymbolTable symbolTable;
-
-        std::ofstream tokenFile(outputFileName, std::ios::binary);
 
         int status = 0;
 
@@ -40,7 +39,7 @@ namespace {
 
                 std::string content = VariantToString(val);
 
-                tokenFile << "<" << ToString(type) << ", " << content << ">" << std::endl;
+                output << "<" << ToString(type) << ", " << content << ">" << std::endl;
 
                 if (type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
@@ -51,6 +50,11 @@ namespace {
         }
 
         return status;
+    }
+
+    int GenerateTokensFile(std::istream& input, const std::string& outputFileName) {
+        std::ofstream tokenFile(outputFileName.empty() ? "tokens.txt" : outputFileName, std::ios::binary);
+        return GenerateTokensFile(input, tokenFile);
     }
 
     int GenerateTokensFile(const std::string& inputFileName, const std::string& outputFileName) {
@@ -63,11 +67,10 @@ namespace {
         return GenerateTokensFile(fileStream, outputFileName);
     }
 
-    int GenerateSymbolsFile(std::istream& input, const std::string& outputFileName) {
+
+    int GenerateSymbolsFile(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
         SymbolTable symbolTable;
-
-        std::ofstream symbolsFile(outputFileName, std::ios::binary);
 
         int status = 0;
 
@@ -83,9 +86,14 @@ namespace {
             }
         }
 
-        symbolTable.WriteTable(symbolsFile);
+        symbolTable.WriteTable(output);
 
         return status;
+    }
+
+    int GenerateSymbolsFile(std::istream& input, const std::string& outputFileName) {
+        std::ofstream symbolsFile(outputFileName.empty() ? "symbols.txt" : outputFileName, std::ios::binary);
+        return GenerateSymbolsFile(input, symbolsFile);
     }
 
     int GenerateSymbolsFile(const std::string& inputFileName, const std::string& outputFileName) {
@@ -98,17 +106,35 @@ namespace {
         return GenerateSymbolsFile(fileStream, outputFileName);
     }
 
-    int GenerateParse(std::istream& input, const std::string& outputFileName) {
+
+    int GenerateParse(std::istream& input, std::ostream& output) {
         Parser parser(input);
         SymbolTable symbolTable;
 
-        std::ofstream symbolsFile(outputFileName, std::ios::binary);
-
         int status = 0;
 
-        std::cout << parser.Parse(symbolTable) << std::endl;
+        try {
+            const auto parse = parser.Parse(symbolTable);
+            output << "Des" << parse << std::endl;
+        } catch (const SyntaxException& e) {
+            std::cerr << "ERROR: " << e.what() << std::endl;
+            status = 1;
+        }
 
         return status;
+    }
+
+    int GenerateParse(std::istream& input, const std::string& outputFileName) {
+        int result = 0;
+
+        if (outputFileName.empty()) {
+            result = GenerateParse(input, std::cout);
+        } else {
+            std::ofstream symbolsFile(outputFileName, std::ios::binary);
+            result = GenerateParse(input, symbolsFile);
+        }
+
+        return result;
     }
 
     int GenerateParse(const std::string& inputFileName, const std::string& outputFileName) {
@@ -121,6 +147,7 @@ namespace {
         return GenerateParse(fileStream, outputFileName);
     }
 }
+
 
 Application::Application(const ApplicationAttributes& attributes) :
         m_taskType(attributes.taskType),
@@ -135,29 +162,26 @@ int Application::Run() {
 
     switch (m_taskType) {
         case TaskType::Tokens: {
-            const std::string& outputFileName = m_outputFileName.empty() ? "tokens.txt" : m_outputFileName;
             if (m_inputFileName.empty())
-                result = GenerateTokensFile(std::cin, outputFileName);
+                result = GenerateTokensFile(std::cin, m_outputFileName);
             else
-                result = GenerateTokensFile(m_inputFileName, outputFileName);
+                result = GenerateTokensFile(m_inputFileName, m_outputFileName);
             break;
         }
 
         case TaskType::Symbols: {
-            const std::string& outputFileName = m_outputFileName.empty() ? "symbols.txt" : m_outputFileName;
             if (m_inputFileName.empty())
-                result = GenerateSymbolsFile(std::cin, outputFileName);
+                result = GenerateSymbolsFile(std::cin, m_outputFileName);
             else
-                result = GenerateSymbolsFile(m_inputFileName, outputFileName);
+                result = GenerateSymbolsFile(m_inputFileName, m_outputFileName);
             break;
         }
 
         case TaskType::Parse: {
-            const std::string& outputFileName = m_outputFileName.empty() ? "parse.txt" : m_outputFileName;
             if (m_inputFileName.empty())
-                result = GenerateParse(std::cin, outputFileName);
+                result = GenerateParse(std::cin, m_outputFileName);
             else
-                result = GenerateParse(m_inputFileName, outputFileName);
+                result = GenerateParse(m_inputFileName, m_outputFileName);
             break;
         }
 
