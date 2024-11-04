@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-class LexicalException : public std::runtime_error {
+class LexicalException final : public std::runtime_error {
     unsigned m_lineNumber;
     unsigned m_columnNumber;
 

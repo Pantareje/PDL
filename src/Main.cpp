@@ -25,6 +25,68 @@ namespace {
             val
         );
     }
+
+    int GenerateTokensFile(std::istream& input) {
+        Lexer lexer(input);
+        SymbolTable symbolTable;
+
+        std::ofstream tokenFile("tokens.txt", std::ios::binary);
+        std::ofstream symbolsFile("symbols.txt", std::ios::binary);
+
+        int status = 0;
+
+        bool isRunning = true;
+        while (isRunning) {
+            try {
+                const auto [type, val] = lexer.GetToken(symbolTable);
+
+                std::string content = VariantToString(val);
+
+                tokenFile << "<" << ToString(type) << ", " << content << ">" << std::endl;
+
+                if (type == TokenType::END) isRunning = false;
+            } catch (const LexicalException& e) {
+                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
+                lexer.SkipChar();
+                status = 1;
+            }
+        }
+
+        symbolTable.WriteTable(symbolsFile);
+
+        return status;
+    }
+
+    int GenerateSymbolsFile(std::istream& input) {
+        Lexer lexer(input);
+        SymbolTable symbolTable;
+
+        std::ofstream tokenFile("tokens.txt", std::ios::binary);
+        std::ofstream symbolsFile("symbols.txt", std::ios::binary);
+
+        int status = 0;
+
+        bool isRunning = true;
+        while (isRunning) {
+            try {
+                const auto [type, val] = lexer.GetToken(symbolTable);
+
+                std::string content = VariantToString(val);
+
+                tokenFile << "<" << ToString(type) << ", " << content << ">" << std::endl;
+
+                if (type == TokenType::END) isRunning = false;
+            } catch (const LexicalException& e) {
+                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
+                lexer.SkipChar();
+                status = 1;
+            }
+        }
+
+        symbolTable.WriteTable(symbolsFile);
+
+        return status;
+    }
 }
 
 int main(const int argc, const char* argv[]) {
@@ -43,33 +105,4 @@ int main(const int argc, const char* argv[]) {
     default:
         return 1;
     }
-
-    Lexer lexer(argc == 1 ? std::cin : fileStream);
-    SymbolTable symbolTable;
-
-    std::ofstream tokenFile("tokens.txt", std::ios::binary);
-    std::ofstream symbolsFile("symbols.txt", std::ios::binary);
-
-    int status = 0;
-
-    bool isRunning = true;
-    while (isRunning) {
-        try {
-            const auto [type, val] = lexer.GetToken(symbolTable);
-
-            std::string content = VariantToString(val);
-
-            tokenFile << "<" << ToString(type) << ", " << content << ">" << std::endl;
-
-            if (type == TokenType::END) isRunning = false;
-        } catch (const LexicalException& e) {
-            std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
-            lexer.SkipChar();
-            status = 1;
-        }
-    }
-
-    symbolTable.WriteTable(symbolsFile);
-
-    return status;
 }

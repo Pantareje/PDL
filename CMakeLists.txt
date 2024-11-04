@@ -8,11 +8,13 @@ find_package(ICU REQUIRED COMPONENTS uc)
 
 add_executable(PDL
         src/Main.cpp
-        src/Lexer.h
-        src/Token.h
-        src/LexicalException.h
         src/Characters.h
         src/Characters.cpp
-        src/SymbolTable.h)
+        src/Token.h
+        src/LexicalException.h
+        src/Lexer.h
+        src/SymbolTable.h
+        src/Parser.h
+        src/SyntaxException.h)
 
 target_link_libraries(PDL PRIVATE ICU::uc)
