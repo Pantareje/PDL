@@ -3,7 +3,7 @@
 Terminales = { id cstr cint true false int boolean string void var function return for if input output ( ) { } = += + - < > && || , ; }
 
 //// Conjunto de símbolo no terminales
-NoTerminales = { P F T T1 A K B C D S S1 I I1 Y L Q X E E1 O R R1 M U U1 N V }
+NoTerminales = { P FUNCTION FUNTYPE VARTYPE FUNATRIBUTES NEXTATRIBUTE STATEMENT BODY ATOMSTATEMENT IDACT FORACT ASS CALLPARAM NEXTPARAM RETURNEXP EXP EXP1 LOGOP A A1 COMPOP B B1 ARITHMETICOP EXPATOM C }
 
 //// Axioma
 Axioma = P
@@ -11,95 +11,88 @@ Axioma = P
 //// Lista de producciones
 Producciones = {
 
-P -> F P
-P -> B P
+P -> FUNCTION P
+P -> STATEMENT P
 P -> lambda
 
-F -> function T id ( A ) { C }
+FUNCTION -> function FUNTYPE id ( FUNATRIBUTES ) { BODY }
 
-T -> T1
-T -> void
+FUNTYPE -> void
+FUNTYPE -> VARTYPE
 
-T1 -> int
-T1 -> boolean
-T1 -> string
+VARTYPE -> int
+VARTYPE -> boolean
+VARTYPE -> string
 
-A -> void
-A -> T1 id  K
+FUNATRIBUTES -> void
+FUNATRIBUTES -> VARTYPE id NEXTATRIBUTE
 
-K -> , T1 id K
-K -> lambda
+NEXTATRIBUTE -> , VARTYPE id NEXTATRIBUTE
+NEXTATRIBUTE -> lambda
 
-B -> if ( E ) S
-B -> for ( I ; E ; I ) { B } 
-B -> var T1 id ;
-B -> S
+BODY -> STATEMENT BODY
+BODY -> lambda
 
-C -> D C
+STATEMENT -> if ( EXP ) ATOMSTATEMENT
+STATEMENT -> for ( FORACT ; EXP ; FORACT ) { BODY }
+STATEMENT -> var VARTYPE id ;
+STATEMENT -> ATOMSTATEMENT
+
+ATOMSTATEMENT -> id IDACT ;
+ATOMSTATEMENT -> output EXP ;
+ATOMSTATEMENT -> input id ;
+ATOMSTATEMENT -> return RETURNEXP ;
+
+IDACT -> ASS EXP
+IDACT -> ( CALLPARAM )
+
+FORACT -> id ASS EXP
+FORACT -> lambda
+
+ASS -> =
+ASS -> +=
+
+CALLPARAM -> EXP NEXTPARAM
+CALLPARAM -> lambda
+
+NEXTPARAM -> , EXP NEXTPARAM
+NEXTPARAM -> lambda
+
+RETURNEXP -> EXP
+RETURNEXP -> lambda
+
+EXP -> A EXP1
+
+EXP1 -> LOGOP A EXP1
+EXP1 -> lambda
+
+LOGOP -> &&
+LOGOP -> ||
+
+A -> B A1
+
+A1 -> COMPOP B A1
+A1 -> lambda
+
+COMPOP -> >
+COMPOP -> <
+
+B -> EXPATOM B1
+
+B1 -> ARITHMETICOP EXPATOM B1
+B1 -> lambda
+
+ARITHMETICOP -> +
+ARITHMETICOP -> -
+
+EXPATOM -> id C
+EXPATOM -> ( EXP )
+EXPATOM -> cint
+EXPATOM -> cstr
+EXPATOM -> true
+EXPATOM -> false
+
+C -> ( CALLPARAM )
 C -> lambda
 
-D -> if ( E ) S1
-D -> for ( I ; E ; I ) { D } 
-D -> var T1 id ;
-D -> S1
-
-S -> I1 ;
-S -> id ( L ) ;
-S -> output E ;
-S -> input id ;
-
-S1 -> I1 ;
-S1 -> id ( L ) ;
-S1 -> output E ;
-S1 -> input id ;
-S1 -> return X ;
-
-I -> I1
-I -> lambda
-
-I1 -> id Y E
-
-Y -> =
-Y -> +=
-
-L -> E Q
-L -> lambda
-
-Q -> , E Q
-Q -> lambda
-
-X -> E
-X -> lambda
-
-E -> R E1
-
-E1 -> O R E1
-E1 -> lambda
-
-O -> &&
-O -> ||
-
-R -> U R1
-
-R1 -> M U R1
-R1 -> lambda
-
-M -> >
-M -> <
-
-U -> V U1
-
-U1 -> N V U1
-U1 -> lambda
-
-N -> +
-N -> -
-
-V -> id
-V -> ( E )
-V -> id ( L )
-V -> cint
-V -> cstr
-V -> true
-V -> false
 }
