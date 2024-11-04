@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <format>
 
 namespace {
     class ArgumentsReader {
