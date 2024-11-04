@@ -439,7 +439,7 @@ class Parser {
                 output << " 22";
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
-                VerifyType(SEMICOLON, "Se esperaba un identificador como parámetro de entrada.");
+                VerifyType(IDENTIFIER, "Se esperaba un identificador como parámetro de entrada.");
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
                 VerifyType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
