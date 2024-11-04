@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <variant>
+#include <format>
 
 /** El tipo del token del analizador léxico. **/
 enum class TokenType : unsigned char {

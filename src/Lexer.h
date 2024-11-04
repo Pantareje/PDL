@@ -5,8 +5,6 @@
 #include "SymbolTable.h"
 #include "LexicalException.h"
 
-#include <format>
-
 class Lexer {
     std::istream& m_input;
     char32_t m_lastChar = U' ';
