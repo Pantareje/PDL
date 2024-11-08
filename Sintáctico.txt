@@ -1,5 +1,5 @@
 //// Conjunto de símbolos terminales
-Terminales = { id cstr cint true false int boolean string void var function return for if input output ( ) { } = += + - < > && || , ; }
+Terminales = { id cstr cint true false int boolean string void var function return for if input output ( ) { } = += + - < > && || , ; eof }
 
 //// Conjunto de símbolo no terminales
 NoTerminales = { P FUNCTION FUNTYPE VARTYPE FUNATTRIBUTES NEXTATTRIBUTE STATEMENT BODY ATOMSTATEMENT IDACT FORACT ASS CALLPARAM NEXTPARAM RETURNEXP EXP EXP1 LOGOP A A1 COMPOP B B1 ARITHMETICOP EXPATOM C }
@@ -12,7 +12,7 @@ Producciones = {
 
 P -> FUNCTION P
 P -> STATEMENT P
-P -> lambda
+P -> eof
 
 FUNCTION -> function FUNTYPE id ( FUNATTRIBUTES ) { BODY }
 

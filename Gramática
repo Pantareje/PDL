@@ -1,6 +1,6 @@
 P -> FUNCTION P
 P -> STATEMENT P
-P -> lambda
+P -> eof
 FUNCTION -> function FUNTYPE id ( FUNATTRIBUTES ) { BODY }
 FUNTYPE -> void
 FUNTYPE -> VARTYPE

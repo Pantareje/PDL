@@ -55,7 +55,7 @@ class Parser {
                 Axiom(output, symbolTable);
                 break;
 
-            // Como P -> lambda, Follow (P)
+            // First (eof)
             case END:
                 output << " 3";
                 break;
