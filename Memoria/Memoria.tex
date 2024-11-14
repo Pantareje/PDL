@@ -36,20 +36,28 @@
 
 \maketitle
 
-\section{Introducción}
+\section*{Introducción}
 
-La primera entrega de esta práctica consiste en la implementación de un Analizador Léxico y una Tabla de Símbolos. Para ello, hemos seguido los siguientes pasos: 
+La primera entrega de esta práctica consistió en la implementación de un \textbf{Analizador Léxico} y una \textbf{Tabla de Símbolos}. Para ello, seguimos los siguientes pasos: 
 \begin{enumerate}
     \item \textbf{Identificar los Tokens} del lenguaje fuente, teniendo en cuenta las especificaciones de nuestro grupo.
     \item Construir la \textbf{Gramática Regular} que los genera.
     \item Diseñar el \textbf{Autómata Finito Determinista} equivalente a la gramática. Hemos realizado una representación de este a través de un \textbf{diagrama de estados}.
     \item Añadir las \textbf{Acciones Semánticas}, asociadas a cada una de las transiciones del diagrama de estados.
     \item Estudiar los posibles \textbf{casos de error}, para poder manejar correctamente la detección y el reporte de errores léxicos. 
+    \item Comienzo de la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.
+    \item Demostración del \textbf{funcionamiento del programa del Analizador Léxico}, gracias a la presentación de una serie de casos de prueba.
 \end{enumerate}
+ 
+Esta segunda entrega consiste en la implementación de un \textbf{Analizador Sintáctico}, para lo cual hemos seguido los siguientes pasos:
 
-Por otro lado, hemos comenzado con la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.\\
-
-Finalmente, presentamos una serie de casos de prueba que demuestran el correcto funcionamiento del Procesador, así como su capacidad para manejar errores léxicos.\\
+\begin{enumerate}
+    \setcounter{enumi}{7}
+    \item \textbf Construir la \textbf{Gramática de Contexto Libre} basándonos en las reglas del lenguaje fuente.
+    \item Demostración de que se trata de una \textbf{Gramática LL(1)}
+    \item Autómata, tablas LR, tabla LL o el pseudo-código con funciones del Analizador ¿?
+    \item Demostración del \textbf{funcionamiento del programa del Analizador Sintáctico}, gracias a la presentación de una serie de casos de prueba.
+\end{enumerate}
 
 Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguientes especificaciones: 
 \begin{itemize}[left=2cm]
