@@ -24,11 +24,11 @@
 \pagestyle{fancy}
 \fancyhead[L]{Grupo 7}
 \fancyhead[C]{}
-\fancyfoot[L]{Práctica 1 - Procesadores de Lenguajes}
+\fancyfoot[L]{Práctica 2 - Procesadores de Lenguajes}
 \fancyfoot[C]{}
 \fancyfoot[R]{\thepage}
 
-\title{\textbf{Práctica 1 - Procesadores de Lenguajes}}
+\title{\textbf{Práctica 2 - Procesadores de Lenguajes}}
 \author{\textbf{Grupo 7}\\Carmen Toribio Pérez, 22M009\\Sergio Gil Atienza, 22M046\\María Moronta Carrión, 22M111}
 \date{}
 
@@ -125,6 +125,97 @@ En el \textbf{anexo} es posible encontrar múltiples ejemplos que demuestran el 
 \end{itemize}
 
 Con esto, demostramos el funcionamiento del programa en diferentes situaciones, desde el reconocimiento de declaraciones válidas hasta la gestión de errores léxicos. Estos resultados serán completados gracias a la segunda entrega del proyecto, que se centrará en el desarrollo del Analizador Sintáctico.
+
+\newpage
+
+\section{Gramática de Contexto Libre del Analizador Sintáctico}
+
+En esta sección, describimos la Gramática de Contexto Libre (gramática de tipo 2 según la jerarquía de Chomsky) que hemos diseñado para que hemos diseñado para representar la estructura sintáctica del lenguaje fuente.
+
+\begin{center}
+    \begin{tcolorbox}[title=Símbolos no terminales, width=0.6\textwidth]
+        $id$ := identificador (secuencia de letras o guiones bajos que empieza por una letra)
+
+        $cint$ := constante entera (dígitos del 0 al 9)
+
+        $cstr$ := constante string (cadena encerrada entre comillas dobles)
+
+        $true$, $false$ := constantes booleanas
+
+        $LOGOP$ := operadores lógicos ("\&\&", "||")
+
+        $COMPOP$ := operadores de comparación (">", "<")
+
+        $ARITHMETICOP$ := operadores aritméticos ("+", "-")
+
+        $ASS$ := operadores de asignación ("=", "+=")
+
+        $eof$ := fin del archivo
+    \end{tcolorbox}
+\end{center}
+
+\begin{tcolorbox}[title=Gramática de Contexto Libre]
+    \hspace{0.5cm} P → FUNCTION P \texttt{|} STATEMENT P \texttt{|} eof
+    
+    \hspace{0.5cm} FUNCTION → function FUNTYPE $id$ ( FUNATTRIBUTES ) \{ BODY \}
+    
+    \hspace{0.5cm} FUNTYPE → void \texttt{|} VARTYPE
+    
+    \hspace{0.5cm} VARTYPE → int \texttt{|} boolean \texttt{|} string
+    
+    \hspace{0.5cm} FUNATTRIBUTES → void \texttt{|} VARTYPE $id$ NEXTATTRIBUTE
+    
+    \hspace{0.5cm} NEXTATTRIBUTE → , VARTYPE $id$ NEXTATTRIBUTE \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} BODY → STATEMENT BODY \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} STATEMENT → if ( EXP ) ATOMSTATEMENT 
+    
+    \hspace{0.5cm} \texttt{|} for ( FORACT ; EXP ; FORACT ) \{ BODY \} 
+    
+    \hspace{0.5cm} \texttt{|} var VARTYPE $id$ ;
+    
+    \hspace{0.5cm} \texttt{|} ATOMSTATEMENT
+    
+    \hspace{0.5cm} ATOMSTATEMENT → $id$ IDACT ; 
+    
+    \hspace{0.5cm} \texttt{|} output EXP ;
+    
+    \hspace{0.5cm} \texttt{|} input $id$ ;
+    
+    \hspace{0.5cm} \texttt{|} return RETURNEXP ;
+    
+    \hspace{0.5cm} IDACT → ASS EXP \texttt{|} ( CALLPARAM )
+    
+    \hspace{0.5cm} FORACT → $id$ ASS EXP \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} ASS → = \texttt{|} +=
+    
+    \hspace{0.5cm} CALLPARAM → EXP NEXTPARAM \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} NEXTPARAM → , EXP NEXTPARAM \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} RETURNEXP → EXP \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} EXP → A EXP1
+    
+    \hspace{0.5cm} EXP1 → LOGOP A EXP1 \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} A → B A1
+    
+    \hspace{0.5cm} A1 → COMPOP B A1 \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} B → EXPATOM B1
+    
+    \hspace{0.5cm} B1 → ARITHMETICOP EXPATOM B1 \texttt{|} \( \lambda \)
+    
+    \hspace{0.5cm} EXPATOM → $id$ C \texttt{|} ( EXP ) \texttt{|} $cint$ \texttt{|} $cstr$ \texttt{|} true \texttt{|} false
+    
+    \hspace{0.5cm} C → ( CALLPARAM ) \texttt{|} \( \lambda \)
+\end{tcolorbox}
+
+
+\newpage
 
 \appendix
 \section*{Anexo}
