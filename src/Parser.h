@@ -164,13 +164,11 @@ class Parser {
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
+            case VOID:
+                ThrowError("Una variable no puede ser de tipo «void».");
+
             default:
-                ThrowError(
-                    std::format(
-                        "Tipo de variable «{}» desconocido.",
-                        TokenAttributeToString(m_lastToken)
-                    )
-                );
+                ThrowError("Tipo de variable desconocido.");
         }
     }
 
@@ -199,6 +197,12 @@ class Parser {
 
                 NextAttribute(output, symbolTable);
                 break;
+
+            case PARENTHESIS_CLOSE:
+                ThrowError(
+                    "Declaración de función incorrecta: "
+                    "Es necesario definir algún atributo para la función, o «void» si no toma argumentos."
+                );
 
             default:
                 ThrowError(
@@ -990,7 +994,7 @@ class Parser {
                 ThrowError(
                     std::format(
                         "Expresión incorrecta: "
-                        "Elemento de tipo «{}» inesperado.",
+                        "Se esperaba alguna acción sobre el identificador.",
                         ToString(m_lastToken.type)
                     )
                 );
