@@ -103,7 +103,7 @@ Para ilustrar mejor el comportamiento del programa, en la sección 8 presentamos
 \section{Tabla de Símbolos}
 Dado que en esta parte de la práctica aún no hemos implementado el \textbf{analizador semántico}, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.
 
-\section{Funcionamiento del programa}
+\section{Funcionamiento del programa del Analizador Léxico}
 El programa que hemos elaborado comienza leyendo el código fuente que le proporcionamos. Lo analiza carácter por carácter, reconociendo los tokens que hemos definido en el punto 2. Para ello, el Analizador Léxico se basa en la gramática regular que genera nuestro Autómata Finito Determinista.
 
 A medida que encuentra identificadores los almacena en la tabla de símbolos si es necesario. Si encuentra delimitadores o comentarios de bloque, los ignora. Además, el programa está preparado para detectar errores, generando mensajes claros y concisos que indican el tipo de error y la ubicación exacta, con tal de facilitar la corrección por parte del usuario. Al finalizar la ejecución, queda completo un informe con todos los tokens que el programa ha reconocido durante el análisis, y los posibles errores que haya encontrado.
