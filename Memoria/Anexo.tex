@@ -1,3 +1,6 @@
+\appendix
+\section{Anexo - Analizador Léxico}
+
 \lstset{
   language=C,
   basicstyle=\ttfamily\scriptsize,
@@ -269,6 +272,175 @@ var string s2 = 'Esta cadena se procesa bien';
 (2:16) ERROR: Carácter inesperado al buscar el siguiente símbolo («$», U+0024).
 (5:14) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).
 (8:94) ERROR: Error en la cadena. Carácter no permitido (U+000D).
+        \end{lstlisting}
+    \end{tcolorbox}
+
+\end{enumerate}
+
+\newpage
+
+\section{Anexo - Analizador Sintáctico}
+
+\begin{enumerate}
+
+    \item \textbf{Caso 1:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* Programa con con sólo declaraciones de nivel superior. */
+var boolean a;
+var int b;
+var string c;
+
+/* Declarar de nuevo una variable es error semántico, no sintáctico. */
+var int a;
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
+        \begin{lstlisting}
+Des 2 18 8 2 18 7 2 18 9 2 18 7 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white]
+        \begin{lstlisting}
+TODO
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+    \item \textbf{Caso 2:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* En este programa, definimos y llamamos a funciones. */
+
+function void println(string s) {
+    output s;
+    output '\n';
+}
+
+println('¡Hola mundo!');
+println('Eso son llamadas a \'output\' usando una función.');
+        \end{lstlisting}
+    \end{tcolorbox}
+
+        \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
+        \begin{lstlisting}
+Des 1 4 5 11 9 13 14 19 21 36 41 46 51 58 48 43 38 14 19 21 36 41 46 54 48 43 38 15 2 19 20 25 
+30 36 41 46 54 48 43 38 33 2 19 20 25 30 36 41 46 54 48 43 38 33 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white]
+        \begin{lstlisting}
+TODO
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+    \item \textbf{Caso 3:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* Leemos dos números del usuario. Las variables sin declarar se suponen globales y enteras. */
+input a;
+input b;
+
+/* Comparamos los números entre sí. */
+if (a < b)
+    output '\'a\' es menor que \'b\'.';
+if (a > b)
+    output '\'a\' es mayor que \'b\'.';
+
+output '\n';
+
+/* Operamos con los números. */
+
+output 'a + b: ';
+output a + b;
+
+output 'a - b: ';
+output a - b;
+
+output '\n';
+        \end{lstlisting}        
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
+        \begin{lstlisting}
+Des 2 19 22 2 19 22 2 16 36 41 46 51 58 48 42 45 46 51 58 48 43 38 21 36 41 46 54 48 43 38 2 16 
+36 41 46 51 58 48 42 44 46 51 58 48 43 38 21 36 41 46 54 48 43 38 2 19 21 36 41 46 54 48 43 38 2 
+19 21 36 41 46 54 48 43 38 2 19 21 36 41 46 51 58 47 49 51 58 48 43 38 2 19 21 36 41 46 54 48 43 
+38 2 19 21 36 41 46 51 58 47 50 51 58 48 43 38 2 19 21 36 41 46 54 48 43 38 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white]
+        \begin{lstlisting}
+TODO
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    
+    \item \textbf{Caso 4:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* No podemos declarar una variable con un tipo inexistente. */
+var no_type err;
+        \end{lstlisting}      
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(2:12) ERROR: Tipo de variable desconocido.
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+    \item \textbf{Caso 5:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* Una función puede usa «void» si no devuelve nada o si no toma argumentos. */
+function void empty(void) {}
+
+/* Una variable no puede ser de tipo «void». */
+var void err;
+        \end{lstlisting}      
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(5:9) ERROR: Una variable no puede ser de tipo «void».
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    
+    \item \textbf{Caso 6:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* Usar un identificador dos veces es error semántico, no sintáctico. */
+var int a;
+
+function int a(string arg) {
+    output arg
+    /* El sintáctico no verifica que se devuelva un valor valido. */
+};
+
+/* Podemos realizar varias acciones sobre identificadores. */
+
+/* Asignar un valor, si es una variable. */
+a = a + 3;
+
+/* Realizar una llamada, si es función. */
+result = a();
+
+/* No realizar ninguna acción es inválido. */
+a;
+        \end{lstlisting}      
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(7:2) ERROR: Expresión incorrecta: Se esperaba alguna acción sobre el identificador.
         \end{lstlisting}
     \end{tcolorbox}
 
