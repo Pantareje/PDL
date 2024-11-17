@@ -138,7 +138,7 @@ class Parser {
             default:
                 ThrowError(
                     "Declaración de función incorrecta: "
-                    "se esperaba el tipo de retorno de la función (int, boolean, string) o void."
+                    "Se esperaba el tipo de retorno de la función (int, boolean, string) o «void»."
                 );
         }
     }
@@ -295,7 +295,7 @@ class Parser {
                 VerifyType(
                     PARENTHESIS_OPEN,
                     "Sentencia if incorrecta: "
-                    "Se esperaba un paréntesis de apertura tras «if»."
+                    "Se esperaba «(» tras «if»."
                 );
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
