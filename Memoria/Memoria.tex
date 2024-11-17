@@ -140,6 +140,27 @@ En esta sección, describimos la Gramática de Contexto Libre (gramática de tip
 
 \input{CondLL1.tex}
 
+\section{Funcionamiento del programa del Analizador Sintáctico}
+El programa realizado toma como entrada los tokens generados por el Analizador Léxico y los organiza siguiendo las reglas gramaticales que hemos definido previamente. Este proceso verifica que el código fuente cumple con la estructura sintáctica esperada, generando un fichero de parse o detectando errores. Gracias a la herramienta VASt y la gramática es posible visualizar los árboles sintácticos.
+
+En el \textbf{anexo} es posible encontrar múltiples ejemplos que demuestran el funcionamiento correcto del programa. Los tres primeros son favorables y los tres últimos muestran casos de error. A continuación incluimos una breve explicación de cada uno:
+
+\begin{itemize}
+    \item \textbf{Caso 1:} Demuestra que el Analizador Sintáctico reconoce declaraciones de nivel superior como válidas, incluyendo declaraciones repetidas de variables, que no son errores sintácticos, sino semánticos.
+
+    \item \textbf{Caso 2:} Ilustra el reconocimiento de funciones, con su declaración y sus llamadas posteriores. El programa maneja de forma correcta las cadenas y los saltos de línea.
+    
+    \item \textbf{Caso 3:} Demuestra la capacidad del programa para realizar operaciones matemáticas básicas y comparaciones entre variables. Además, las variables sin declarar se consideran globales y enteras por defecto.
+    
+    \item \textbf{Caso 4:} Muestra cómo el analizador detecta un error al intentar declarar una variable con un tipo inexistente.
+    
+    \item \textbf{Caso 5:} Ilustra un caso en el que el tipo void se utiliza incorrectamente para una variable. Aunque es válido para funciones sin retorno, no se permite en variables.
+    
+    \item \textbf{Caso 6:} Incluye una expresión que no realiza ninguna acción sobre un identificador. El analizador detecta este error mientras permite procesar otras partes del código.
+\end{itemize}
+
+Con esto demostramos el funcionamiento del Analizador Sintáctico poniendo en manifiesto su capacidad de procesar correctamente código y de identificar errores con mensajes claros y precisos. Este trabajo se verá ampliado con el desarrollo del Analizador Semántico, que se encargará de verificar reglas contextuales y la validez de los tipos de datos en el código fuente.
+
 \newpage
 
 \input{Anexo.tex}
