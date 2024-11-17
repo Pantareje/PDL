@@ -52,10 +52,10 @@ La primera entrega de esta práctica consistió en la implementación de un \tex
 Esta segunda entrega consiste en la implementación de un \textbf{Analizador Sintáctico}, para lo cual hemos seguido los siguientes pasos:
 
 \begin{enumerate}
-    \setcounter{enumi}{7}
+    %\setcounter{enumi}{7}
     \item \textbf Construir la \textbf{Gramática de Contexto Libre} basándonos en las reglas del lenguaje fuente.
     \item Demostración de que se trata de una \textbf{Gramática LL(1)}
-    \item Autómata, tablas LR, tabla LL o el pseudo-código con funciones del Analizador ¿?
+    \item Diseño en pseudo-código de las \textbf{funciones del Analizador} (una por cada símbolo no terminal de la gramática).
     \item Demostración del \textbf{funcionamiento del programa del Analizador Sintáctico}, gracias a la presentación de una serie de casos de prueba.
 \end{enumerate}
 
@@ -68,7 +68,7 @@ Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguient
     \item Cadenas: Con comillas simples (' ')
 \end{itemize}
 
-Hemos decidido usar C++ como lenguaje de programación ya que la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo MSVC (desarrollado por Microsoft) y el proyecto LLVM (utilizado por Google en Android). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, a la vez que se mantiene versátil y permite escribir código legible.
+%Hemos decidido usar C++ como lenguaje de programación ya que la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo MSVC (desarrollado por Microsoft) y el proyecto LLVM (utilizado por Google en Android). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, a la vez que se mantiene versátil y permite escribir código legible.
 
 \newpage
 
@@ -101,7 +101,7 @@ A lo largo de esta sección, describimos las acciones semánticas que hemos aña
 Para ilustrar mejor el comportamiento del programa, en la sección 8 presentamos varios casos en los que demostramos cómo el analizador maneja la detección de errores.
 
 \section{Tabla de Símbolos}
-Dado que en esta parte de la práctica solo se debe implementar el analizador léxico, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.
+Dado que en esta parte de la práctica aún no hemos implementado el \textbf{analizador semántico}, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.
 
 \section{Funcionamiento del programa}
 El programa que hemos elaborado comienza leyendo el código fuente que le proporcionamos. Lo analiza carácter por carácter, reconociendo los tokens que hemos definido en el punto 2. Para ello, el Analizador Léxico se basa en la gramática regular que genera nuestro Autómata Finito Determinista.
@@ -136,7 +136,7 @@ En esta sección, describimos la Gramática de Contexto Libre (gramática de tip
 
 \newpage
 
-\section{Comprobación de que la Gramática es LL(1)}
+\section{Comprobación de la condición LL(1)}
 
 \input{CondLL1.tex}
 

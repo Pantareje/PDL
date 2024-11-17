@@ -1,4 +1,47 @@
+Por una parte, la gramática diseñada \textbf{no es ambigua}, ya que no existen dos producciones distintas para un mismo no terminal que generen la misma cadena de terminales y no terminales.\\
+
+Además, \textbf{no es recursiva por la izquierda}, pues ninguna de las producciones de la misma es del tipo A → A$\alpha$ (donde A es un no terminal y $\alpha$ es una cadena de terminales y no terminales).\\
+
+No obstante, dado que múltiples reglas de la gramática diseñada tienen dos o más producciones distintas, es necesario realizar la \textbf{comprobación de la condición LL(1)}:
+\begin{center}
+    $\forall$ A $\in$ N, para cada par de reglas A → $\alpha$ | $\beta$\\
+    - Se cumple que FIRST($\alpha$) $\cap$ FIRST($\beta$) = $\emptyset$.\\
+    - Si $\beta$ puede derivar $\lambda$, entonces FIRST($\alpha$) $\cap$ FOLLOW(A) = $\emptyset$.\\
+\end{center}
+
+De esta forma, podemos observar claramente que la gramática diseñada es LL(1):
 \begin{tabbing}
-    \hspace{1cm}\=\hspace{5cm}\=\kill
-    \textbf{Ibai mason:} \\
+    \hspace{1cm}\=\hspace{2cm}\=\kill
+    P → FUNCTION P | STATEMENT P | $eof$\\
+    \> FIRST(FUNCTION P) = \{function\}\\
+    \> FIRST(STATEMENT P) = \{if, for, var, id, output, input, return\}\\
+    \> FIRST($eof$) = \{eof\}\\
+    \> \> FIRST(FUNCTION P) $\cap$ FIRST(STATEMENT P) = $\emptyset$\\
+    \> \> FIRST(FUNCTION P) $\cap$ FIRST($eof$) = $\emptyset$\\
+    \> \> FIRST(STATEMENT P) $\cap$ FIRST($eof$) = $\emptyset$\\
+    \\
+    FUNTYPE → $void$ | VARTYPE\\
+    \> FIRST($void$) = \{void\}\\
+    \> FIRST(VARTYPE) = \{int, boolean, string\}\\
+    \> \> FIRST($void$) $\cap$ FIRST(VARTYPE) = $\emptyset$\\
+    \\
+    VARTYPE → $int$ | $boolean$ | $string$\\
+    \> FIRST($int$) = \{int\} ; FIRST($boolean$) = \{boolean\} ; FIRST($string$) = \{string\}\\
+    \> \> FIRST($int$) $\cap$ FIRST($boolean$) = $\emptyset$\\
+    \> \> FIRST($int$) $\cap$ FIRST($string$) = $\emptyset$\\
+    \> \> FIRST($boolean$) $\cap$ FIRST($string$) = $\emptyset$\\
+    \\
+    FUNATTRIBUTES → $void$ | VARTYPE $id$ NEXTATTRIBUTE\\
+    \> FIRST($void$) = \{void\}\\
+    \> FIRST(VARTYPE $id$ NEXTATTRIBUTE) = \{int, boolean, string\}\\
+    \> \> FIRST($void$) $\cap$ FIRST(VARTYPE $id$ NEXTATTRIBUTE) = $\emptyset$\\
+    \\
+    NEXTATTRIBUTE → , VARTYPE $id$ NEXTATTRIBUTE | $\lambda$\\
+    \> FIRST(, VARTYPE $id$ NEXTATTRIBUTE) = \{,\}\\
+    \> FIRST($\lambda$) = $\{\lambda\}$\\
+    \> FOLLOW(NEXTATTRIBUTE) = \{)\}\\
+    \> \> FIRST(, VARTYPE $id$ NEXTATTRIBUTE) $\cap$ FIRST($\lambda$) = $\emptyset$\\
+    \> \> FIRST(, VARTYPE $id$ NEXTATTRIBUTE) $\cap$ FOLLOW(NEXTATTRIBUTE) = $\emptyset$\\
 \end{tabbing}
+
+Procederíamos de esta forma con el resto de reglas de la gramática con dos o más producciones asociadas, pero dado que el proceso es tedioso y repetitivo, hemos decidido no incluirlo en la memoria. Cabe destacar, además, que la comprobación de la condición LL(1) ha sido contrastada exitosamente con los resultados obtenidos por la herramienta de apoyo ofrecida en la \href{https://dlsiis.fi.upm.es/procesadores/Herramientas.html}{página web del departamento}.\\

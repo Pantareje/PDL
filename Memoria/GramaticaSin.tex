@@ -12,9 +12,9 @@
     \>10. FUNATTRIBUTES → $void$\\
     \>11. FUNATTRIBUTES → VARTYPE $id$ NEXTATTRIBUTE\\
     \>12. NEXTATTRIBUTE → , VARTYPE $id$ NEXTATTRIBUTE\\
-    \>13. NEXTATTRIBUTE → \( \lambda \)\\
+    \>13. NEXTATTRIBUTE → $\lambda$\\
     \>14. BODY → STATEMENT BODY\\
-    \>15. BODY → \( \lambda \)\\
+    \>15. BODY → $\lambda$\\
     \>16. STATEMENT → $if$ ( EXP ) ATOMSTATEMENT\\
     \>17. STATEMENT → $for$ ( FORACT ; EXP ; FORACT ) \{ BODY \}\\
     \>18. STATEMENT → $var$ VARTYPE $id$ ;\\
@@ -26,26 +26,26 @@
     \>24. IDACT → ASS EXP\\
     \>25. IDACT → ( CALLPARAM )\\
     \>26. FORACT → $id$ ASS EXP\\
-    \>27. FORACT → \( \lambda \)\\
+    \>27. FORACT → $\lambda$\\
     \>28. ASS → =\\
     \>29. ASS → +=\\
     \>30. CALLPARAM → EXP NEXTPARAM\\
-    \>31. CALLPARAM → \( \lambda \)\\
+    \>31. CALLPARAM → $\lambda$\\
     \>32. NEXTPARAM → , EXP NEXTPARAM\\
-    \>33. NEXTPARAM → \( \lambda \)\\
+    \>33. NEXTPARAM → $\lambda$\\
     \>34. RETURNEXP → EXP\\
-    \>35. RETURNEXP → \( \lambda \)\\
+    \>35. RETURNEXP → $\lambda$\\
     \>36. EXP → A EXP1\\
     \>37. EXP1 → LOGOP A EXP1\\
-    \>38. EXP1 → \( \lambda \)\>49. ARITHMETICOP → +\\
+    \>38. EXP1 → $\lambda$\>49. ARITHMETICOP → +\\
     \>39. LOGOP → \verb!&&!\>50. ARITHMETICOP → -\\
     \>40. LOGOP → \verb!||!\>51. EXPATOM → $id$ C\\
     \>41. A → B A1\>52. EXPATOM → ( EXP )\\
     \>42. A1 → COMPOP B A1\>53. EXPATOM → $cint$\\
-    \>43. A1 → \( \lambda \)\>54. EXPATOM → $cstr$\\
+    \>43. A1 → $\lambda$\>54. EXPATOM → $cstr$\\
     \>44. COMPOP → >\>55. EXPATOM → $true$\\
     \>45. COMPOP → <\>56. EXPATOM → $false$\\
     \>46. B → EXPATOM B1\>57. C → ( CALLPARAM )\\
-    \>47. B1 → ARITHMETICOP EXPATOM B1\>58. C → \( \lambda \)\\
-    \>48. B1 → \( \lambda \)\\
+    \>47. B1 → ARITHMETICOP EXPATOM B1\>58. C → $\lambda$\\
+    \>48. B1 → $\lambda$\\
 \end{tabbing}
