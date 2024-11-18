@@ -1,0 +1,406 @@
+\begin{lstlisting}[language=C, caption={Main del Analizador Sintáctico}]
+Function A_Sint() {
+    sig_tok := ALex();
+    P;
+    if sig_tok ≠ '$' then error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={Equipara}]
+Function equipara (t){
+    if sig_tok == t
+    then sig_tok := ALex()
+    else error ()
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={P}]
+Function P() {
+    if sig_tok == 'function' then {
+        print(1);
+        FUNCTION();
+        P();
+    }
+    else if sig_tok ∈ {'for', 'id', 'if', 'input', 'output', 'return', 'var'} then {
+        print(2);
+        STATEMENT();
+        P();
+    }
+    else if sig_tok == 'eof' then {
+        print(3);
+        equipara( eof );
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={FUNCTION}]
+Function FUNCTION() {
+    if sig_tok == 'function' then {
+        print(4);
+        equipara(function);
+        FUNTYPE();
+        equipara(id);
+        equipara(();
+        FUNATTRIBUTES();
+        equipara());
+        equipara({);
+        BODY();
+        equipara(});
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={FUNTYPE}]
+Function FUNTYPE() {
+    if sig_tok == 'void' then {
+        print(5);
+        equipara(void);
+    }
+    else if sig_tok ∈ {'boolean', 'int', 'string'} then {
+        print(6);
+        VARTYPE();
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={VARTYPE}]
+Function VARTYPE() {
+    if sig_tok == 'int' then {
+        print(7);
+        equipara(int);
+    }
+    else if sig_tok == 'boolean' then {
+        print(8);
+        equipara(boolean);
+    }
+    else if sig_tok == 'string' then {
+        print(9);
+        equipara(string);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={FUNATTRIBUTES}]
+Function FUNATTRIBUTES() {
+    if sig_tok == 'void' then {
+        print(10);
+        equipara(void);
+    }
+    else if sig_tok ∈ {'boolean', 'int', 'string'} then {
+        print(11);
+        VARTYPE();
+        equipara(id);
+        NEXTATTRIBUTE();
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={NEXTATTRIBUTE}]
+Function NEXTATTRIBUTE() {
+    if sig_tok == ',' then {
+        print(12);
+        equipara(,);
+        VARTYPE();
+        equipara(id);
+        NEXTATTRIBUTE();
+    }
+    else if sig_tok = ')' then 
+        print(13);
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={BODY}]
+Function BODY() {
+    if sig_tok ∈ {'for', 'id', 'if', 'input', 'output', 'return', 'var'} then {
+        print(14);
+        STATEMENT();
+        BODY();
+    }
+    else if sig_tok = '}' then 
+        print(15);
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={ATOMSTATEMENT}]
+Function ATOMSTATEMENT() {
+    if sig_tok == 'id' then {
+        print(16);
+        equipara(id);
+        IDACT();
+        equipara( ; );
+    }
+    else if sig_tok == 'output' then {
+        print(17);
+        equipara(output);
+        EXP();
+        equipara( ; );
+    }
+    else if sig_tok == 'input' then {
+        print(18);
+        equipara(input);
+        equipara(id);
+        equipara( ; );
+    }
+    else if sig_tok == 'return' then {
+        print(19);
+        equipara(return);
+        RETURNEXP();
+        equipara( ; );
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={IDACT}]
+Function IDACT() {
+    if sig_tok ∈ {'=', '+='} then {
+        print(20);
+        ASS();
+        EXP();
+    }
+    else if sig_tok == '(' then {
+        print(21);
+        equipara(();
+        CALLPARAM();
+        equipara());
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={FORACT}]
+Function FORACT() {
+    if sig_tok == 'id' then {
+        print(22);
+        equipara(id);
+        ASS();
+        EXP();
+    }
+    else if sig_tok ∈ {')', ';'} then {
+        print(23);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={ASS}]
+Function IDACT() {
+    if sig_tok == '=' then {
+        print(24);
+        equipara(=);
+    }
+    else if sig_tok == '+=' then {
+        print(25);
+        equipara(+=);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={CALLPARAM}]
+Function CALLPARAM() {
+    if sig_tok ∈ {'(', 'cint', 'cstr', 'false', 'id', 'true', 'lambda'} then {
+        print(26);
+        EXP();
+        NEXTPARAM();
+    }
+    else if sig_tok == ')' then {
+        print(27);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={NEXTPARAM}]
+Function NEXTPARAM() {
+    if sig_tok == ',' then {
+        print(28);
+        equipara(,);
+        EXP();
+        NEXTPARAM();
+    }
+    else if sig_tok == ')' then {
+        print(29);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={RETURNEXP}]
+Function RETURNEXP() {
+    if sig_tok ∈ {'(', 'cint', 'cstr', 'false', 'id', 'true'} then {
+        print(30);
+        EXP();
+    }
+    else if sig_tok == ';' then {
+        print(31);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={EXP}]
+Function EXP() {
+    print(32);
+    A();
+    EXP1();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={EXP1}]
+Function EXP1() {
+    if sig_tok ∈ {'&&', '||'} then {
+        print(33);
+        LOGOP();
+        A();
+        EXP1();
+    }
+    else if sig_tok ∈ {')', ';', ','} then {
+        print(34);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={LOGOP}]
+Function LOGOP() {
+    if sig_tok == '&&' then {
+        print(35);
+        equipara(&&);
+    }
+    else if sig_tok == '||' then {
+        print(36);
+        equipara(||);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={A}]
+Function A() {
+    print(37);
+    B();
+    A1();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={A1}]
+Function A1() {
+    if sig_tok ∈ {'>', '<'} then {
+        print(38);
+        COMPOP();
+        B();
+        A1();
+    }
+    else if sig_tok ∈ {'&&', '||', ')', ';', ','} then {
+        print(39);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={COMPOP}]
+Function COMPOP() {
+    if sig_tok == '>' then {
+        print(40);
+        equipara(>);
+    }
+    else if sig_tok == '<' then {
+        print(41);
+        equipara(<);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={B}]
+Function B() {
+    print(42);
+    EXPATOM();
+    B1();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={B1}]
+Function B1() {
+    if sig_tok ∈ {'+', '-'} then {
+        print(43);
+        ARITHMETICOP();
+        EXPATOM();
+        B1();
+    }
+    else if sig_tok ∈ {'&&', '||', ')', ';', ',', '<', '>'} then {
+        print(44);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={ARITHMETICOP}]
+Function ARITHMETICOP() {
+    if sig_tok == '+' then {
+        print(45);
+        equipara(+);
+    }
+    else if sig_tok == '-' then {
+        print(46);
+        equipara(-);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={EXPATOM}]
+Function EXPATOM() {
+    if sig_tok == 'id' then {
+        print(47);
+        equipara(id);
+        C();
+    }
+    else if sig_tok == '(' then {
+        print(48);
+        equipara(();
+        EXP();
+        equipara());
+    }
+    else if sig_tok == 'cint' then {
+        print(49);
+        equipara(cint);
+    }
+    else if sig_tok == 'cstr' then {
+        print(50);
+        equipara(cstr);
+    }
+    else if sig_tok == 'true' then {
+        print(51);
+        equipara(true);
+    }
+    else if sig_tok == 'false' then {
+        print(52);
+        equipara(false);
+    }
+    else error();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={C}]
+Function C() {
+    if sig_tok == '(' then {
+        print(53);
+        equipara(();
+        CALLPARAM();
+        equipara());
+    }
+    else if sig_tok ∈ {'&&', '||', ')', ';', ',', '<', '>', '+','-'} then {
+        print(54);
+    }
+    else error();
+}
+\end{lstlisting}
