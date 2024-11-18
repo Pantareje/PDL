@@ -67,7 +67,7 @@ Function FUNTYPE() {
     else error();
 }
 \end{lstlisting}
-
+\newpage
 \begin{lstlisting}[language=C, caption={VARTYPE}]
 Function VARTYPE() {
     if sig_tok == 'int' then {
@@ -129,7 +129,7 @@ Function BODY() {
     else error();
 }
 \end{lstlisting}
-
+\newpage
 \begin{lstlisting}[language=C, caption={ATOMSTATEMENT}]
 Function ATOMSTATEMENT() {
     if sig_tok == 'id' then {
@@ -191,9 +191,9 @@ Function FORACT() {
     else error();
 }
 \end{lstlisting}
-
+\newpage
 \begin{lstlisting}[language=C, caption={ASS}]
-Function IDACT() {
+Function ASS() {
     if sig_tok == '=' then {
         print(24);
         equipara(=);
@@ -255,7 +255,7 @@ Function EXP() {
     EXP1();
 }
 \end{lstlisting}
-
+\newpage
 \begin{lstlisting}[language=C, caption={EXP1}]
 Function EXP1() {
     if sig_tok ∈ {'&&', '||'} then {
@@ -391,7 +391,7 @@ Function EXPATOM() {
     else error();
 }
 \end{lstlisting}
-
+\newpage
 \begin{lstlisting}[language=C, caption={C}]
 Function C() {
     if sig_tok == '(' then {
