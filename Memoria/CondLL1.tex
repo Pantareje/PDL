@@ -42,6 +42,66 @@ De esta forma, podemos observar claramente que la gramática diseñada es LL(1):
     \> FOLLOW(NEXTATTRIBUTE) = \{)\}\\
     \> \> FIRST(, VARTYPE $id$ NEXTATTRIBUTE) $\cap$ FIRST($\lambda$) = $\emptyset$\\
     \> \> FIRST(, VARTYPE $id$ NEXTATTRIBUTE) $\cap$ FOLLOW(NEXTATTRIBUTE) = $\emptyset$\\
+    \\
+    BODY → STATEMENT BODY | $\lambda$\\
+    \> FIRST(STATEMENT BODY) = \{for, id, if, input, output, return, var\}\\
+    \> FIRST($\lambda$) = $\{\lambda\}$\\
+    \> FOLLOW(BODY) = \{\}\}\\
+    \> \> FIRST(STATEMENT BODY) $\cap$ FIRST($\lambda$) = $\emptyset$\\
+    \> \> FIRST(STATEMENT BODY) $\cap$ FOLLOW(BODY) = $\emptyset$\\
 \end{tabbing}
-
-Procederíamos de esta forma con el resto de reglas de la gramática con dos o más producciones asociadas, pero dado que el proceso es tedioso y repetitivo, hemos decidido no incluirlo en la memoria. Cabe destacar, además, que la comprobación de la condición LL(1) ha sido contrastada exitosamente con los resultados obtenidos por la herramienta de apoyo ofrecida en la sección de herramientas de la página web del departamento.\\
+\newpage
+Procederíamos de igual manera con el resto de reglas de la gramática con dos o más producciones asociadas, pero dado que el proceso es tedioso y repetitivo, no detallaremos con tanta profundidad en las siguientes comprobaciones:
+\begin{tabbing}
+    \hspace{0.5cm}\=\kill
+    STATEMENT → $if$ ( EXP ) ATOMSTATEMENT | $for$ ( FORACT ; EXP ; FORACT ) \{ BODY \} |\\
+    $var$ VARTYPE $id$ ; | ATOMSTATEMENT\\
+    \>FIRST($if$ ( EXP ) ATOMSTATEMENT) $\cap$ FIRST($for$ ( FORACT ; EXP ; FORACT ) \{ BODY \}) = $\emptyset$\\
+    \>FIRST($if$ ( EXP ) ATOMSTATEMENT) $\cap$ FIRST($var$ VARTYPE $id$ ;) = $\emptyset$\\
+    \>FIRST($if$ ( EXP ) ATOMSTATEMENT) $\cap$ FIRST(ATOMSTATEMENT) = $\emptyset$\\
+    \>FIRST($for$ ( FORACT ; EXP ; FORACT ) \{ BODY \}) $\cap$ FIRST($var$ VARTYPE $id$ ;) = $\emptyset$\\
+    \>FIRST($for$ ( FORACT ; EXP ; FORACT ) \{ BODY \}) $\cap$ FIRST(ATOMSTATEMENT) = $\emptyset$\\
+    \>FIRST($var$ VARTYPE $id$ ;) $\cap$ FIRST(ATOMSTATEMENT) = $\emptyset$\\
+    \\
+    ATOMSTATEMENT → $id$ IDACT ; | $output$ EXP ; | $input$ $id$ ; | $return$ RETURNEXP ;\\
+    \>FIRST($id$ IDACT ;) $\cap$ FIRST($output$ EXP ;) = $\emptyset$\\
+    \>FIRST($id$ IDACT ;) $\cap$ FIRST($input$ $id$ ;) = $\emptyset$\\
+    \>FIRST($id$ IDACT ;) $\cap$ FIRST($return$ RETURNEXP ;) = $\emptyset$\\
+    \>FIRST($output$ EXP ;) $\cap$ FIRST($input$ $id$ ;) = $\emptyset$\\
+    \>FIRST($output$ EXP ;) $\cap$ FIRST($return$ RETURNEXP ;) = $\emptyset$\\
+    \>FIRST($input$ $id$ ;) $\cap$ FIRST($return$ RETURNEXP ;) = $\emptyset$\\
+    \\
+    IDACT → ASS EXP | ( CALLPARAM )\\
+    \>FIRST(ASS EXP) $\cap$ FIRST( ( CALLPARAM ) ) = $\emptyset$\\
+    \\
+    FORACT → $id$ ASS EXP | $\lambda$\\
+    \>FIRST($id$ ASS EXP) $\cap$ FIRST($\lambda$) = $\emptyset$\\
+    \>FIRST($id$ ASS EXP) $\cap$ FOLLOW(FORACT) = $\emptyset$\\
+    \\
+    ASS → = | +=\\
+    \>FIRST(=) $\cap$ FIRST(+=) = $\emptyset$\\
+    \\
+    CALLPARAM → EXP NEXTPARAM | $\lambda$\\
+    \>FIRST(EXP NEXTPARAM) $\cap$ FIRST($\lambda$) = $\emptyset$\\
+    \>FIRST(EXP NEXTPARAM) $\cap$ FOLLOW(CALLPARAM) = $\emptyset$\\
+    \\
+    NEXTPARAM → , EXP NEXTPARAM | $\lambda$\\
+    \>FIRST(, EXP NEXTPARAM) $\cap$ FIRST($\lambda$) = $\emptyset$\\
+    \>FIRST(, EXP NEXTPARAM) $\cap$ FOLLOW(NEXTPARAM) = $\emptyset$\\
+    \\
+    RETURNEXP → EXP | $\lambda$\\
+    \>FIRST(EXP) $\cap$ FIRST($\lambda$) = $\emptyset$\\
+    \>FIRST(EXP) $\cap$ FOLLOW(RETURNEXP) = $\emptyset$\\
+\end{tabbing}
+\begin{tabbing}
+    \hspace{0.5cm}\=\hspace{10cm}\=\kill
+    Repetiríamos el mismo proceso para las reglas restantes:\\
+    \\
+    \>EXP1 → LOGOP A EXP1 | $\lambda$\>LOGOP → \verb!&&! | \verb!||!\\
+    \>A1 → COMPOP B A1 | $\lambda$\>COMPOP → > | <\\
+    \>B1 → ARITHMETICOP EXPATOM B1 | $\lambda$\>ARITHMETICOP → + | -\\
+    \>EXPATOM → $id$ C | ( EXP ) | $cint$ | $cstr$ | $true$ | $false$\\
+    \>C → ( CALLPARAM ) | $\lambda$
+\end{tabbing}
+Cabe destacar, además, que la comprobación de la condición LL(1) ha sido contrastada exitosamente con los resultados obtenidos por la herramienta de apoyo ofrecida en la sección de herramientas de la página web del departamento.\\
+\newpage
