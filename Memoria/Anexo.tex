@@ -289,7 +289,7 @@ var string s2 = 'Esta cadena se procesa bien';
 \begin{enumerate}
 
     \item \textbf{Caso 1:} Funcionamiento correcto
-    \begin{tcolorbox}[title={Código fuente}, colback=white]
+    \begin{tcolorbox}[title={Código fuente}, colback=white, breakable]
         \begin{lstlisting}
 /* Programa con con sólo declaraciones de nivel superior. */
 var boolean a;
@@ -342,7 +342,7 @@ Des 2 18 8 2 18 7 2 18 9 2 18 7 3
 
 
     \item \textbf{Caso 2:} Funcionamiento correcto
-    \begin{tcolorbox}[title={Código fuente}, colback=white]
+    \begin{tcolorbox}[title={Código fuente}, colback=white, breakable]
         \begin{lstlisting}
 /* En este programa, definimos y llamamos a funciones. */
 
@@ -356,7 +356,7 @@ println('Eso son llamadas a \'output\' usando una función.');
         \end{lstlisting}
     \end{tcolorbox}
 
-        \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white, enhanced jigsaw]
+    \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
 Des 1 4 5 11 9 13 14 19 21 36 41 46 51 58 48 43 38 14 19 21 36 41 46 54 48 43 38 15 2 19 20 25 30 36 41 46 54 48 43 38 33 2 19 20 25 30 36 41 46 54 48 43 38 33 3
     \end{tcolorbox}
 
@@ -465,7 +465,7 @@ Des 1 4 5 11 9 13 14 19 21 36 41 46 51 58 48 43 38 14 19 21 36 41 46 54 48 43 38
 
 
     \item \textbf{Caso 3:} Funcionamiento correcto
-    \begin{tcolorbox}[title={Código fuente}, colback=white]
+    \begin{tcolorbox}[title={Código fuente}, colback=white, breakable]
         \begin{lstlisting}
 /* Leemos dos números del usuario. Las variables sin declarar se suponen globales y enteras. */
 input a;
@@ -714,7 +714,7 @@ Des 2 19 22 2 19 22 2 16 36 41 46 51 58 48 42 45 46 51 58 48 43 38 21 36 41 46 5
 
     
     \item \textbf{Caso 4:} Funcionamiento erróneo
-    \begin{tcolorbox}[title={Código fuente}, colback=white]
+    \begin{tcolorbox}[title={Código fuente}, colback=white, breakable]
         \begin{lstlisting}
 /* No podemos declarar una variable con un tipo inexistente. */
 var no_type err;
@@ -729,7 +729,7 @@ var no_type err;
 
 
     \item \textbf{Caso 5:} Funcionamiento erróneo
-    \begin{tcolorbox}[title={Código fuente}, colback=white]
+    \begin{tcolorbox}[title={Código fuente}, colback=white, breakable]
         \begin{lstlisting}
 /* Una función puede usa «void» si no devuelve nada o si no toma argumentos. */
 function void empty(void) {}
@@ -747,7 +747,7 @@ var void err;
 
     
     \item \textbf{Caso 6:} Funcionamiento erróneo
-    \begin{tcolorbox}[title={Código fuente}, colback=white]
+    \begin{tcolorbox}[title={Código fuente}, colback=white, breakable]
         \begin{lstlisting}
 /* Usar un identificador dos veces es error semántico, no sintáctico. */
 var int a;
