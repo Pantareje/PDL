@@ -302,14 +302,41 @@ var int a;
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
-        \begin{lstlisting}
 Des 2 18 8 2 18 7 2 18 9 2 18 7 3
-        \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white]
         \begin{lstlisting}
-TODO
+· P (2)
+  · STATEMENT (18)
+    · var
+    · VARTYPE (8)
+      · boolean
+    · id
+    · ;
+  · P (2)
+    · STATEMENT (18)
+      · var
+      · VARTYPE (7)
+        · int
+      · id
+      · ;
+    · P (2)
+      · STATEMENT (18)
+        · var
+        · VARTYPE (9)
+          · string
+        · id
+        · ;
+      · P (2)
+        · STATEMENT (18)
+          · var
+          · VARTYPE (7)
+            · int
+          · id
+          · ;
+        · P (3)
+          · eof
         \end{lstlisting}
     \end{tcolorbox}
 
@@ -329,16 +356,110 @@ println('Eso son llamadas a \'output\' usando una función.');
         \end{lstlisting}
     \end{tcolorbox}
 
-        \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
-        \begin{lstlisting}
-Des 1 4 5 11 9 13 14 19 21 36 41 46 51 58 48 43 38 14 19 21 36 41 46 54 48 43 38 15 2 19 20 25 
-30 36 41 46 54 48 43 38 33 2 19 20 25 30 36 41 46 54 48 43 38 33 3
-        \end{lstlisting}
+        \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white, enhanced jigsaw]
+Des 1 4 5 11 9 13 14 19 21 36 41 46 51 58 48 43 38 14 19 21 36 41 46 54 48 43 38 15 2 19 20 25 30 36 41 46 54 48 43 38 33 2 19 20 25 30 36 41 46 54 48 43 38 33 3
     \end{tcolorbox}
 
-    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white]
+    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white, breakable]
         \begin{lstlisting}
-TODO
+· P (1)
+  · FUNCTION (4)
+    · function
+    · FUNTYPE (5)
+      · void
+    · id
+    · (
+    · FUNATTRIBUTES (11)
+      · VARTYPE (9)
+        · string
+      · id
+      · NEXTATTRIBUTE (13)
+        · lambda
+    · )
+    · {
+    · BODY (14)
+      · STATEMENT (19)
+        · ATOMSTATEMENT (21)
+          · output
+          · EXP (36)
+            · A (41)
+              · B (46)
+                · EXPATOM (51)
+                  · id
+                  · C (58)
+                    · lambda
+                · B1 (48)
+                  · lambda
+              · A1 (43)
+                · lambda
+            · EXP1 (38)
+              · lambda
+          · ;
+      · BODY (14)
+        · STATEMENT (19)
+          · ATOMSTATEMENT (21)
+            · output
+            · EXP (36)
+              · A (41)
+                · B (46)
+                  · EXPATOM (54)
+                    · cstr
+                  · B1 (48)
+                    · lambda
+                · A1 (43)
+                  · lambda
+              · EXP1 (38)
+                · lambda
+            · ;
+        · BODY (15)
+          · lambda
+    · }
+  · P (2)
+    · STATEMENT (19)
+      · ATOMSTATEMENT (20)
+        · id
+        · IDACT (25)
+          · (
+          · CALLPARAM (30)
+            · EXP (36)
+              · A (41)
+                · B (46)
+                  · EXPATOM (54)
+                    · cstr
+                  · B1 (48)
+                    · lambda
+                · A1 (43)
+                  · lambda
+              · EXP1 (38)
+                · lambda
+            · NEXTPARAM (33)
+              · lambda
+          · )
+        · ;
+    · P (2)
+      · STATEMENT (19)
+        · ATOMSTATEMENT (20)
+          · id
+          · IDACT (25)
+            · (
+            · CALLPARAM (30)
+              · EXP (36)
+                · A (41)
+                  · B (46)
+                    · EXPATOM (54)
+                      · cstr
+                    · B1 (48)
+                      · lambda
+                  · A1 (43)
+                    · lambda
+                · EXP1 (38)
+                  · lambda
+              · NEXTPARAM (33)
+                · lambda
+            · )
+          · ;
+      · P (3)
+        · eof
         \end{lstlisting}
     \end{tcolorbox}
 
@@ -370,18 +491,224 @@ output '\n';
         \end{lstlisting}        
     \end{tcolorbox}
 
-    \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white]
-        \begin{lstlisting}
-Des 2 19 22 2 19 22 2 16 36 41 46 51 58 48 42 45 46 51 58 48 43 38 21 36 41 46 54 48 43 38 2 16 
-36 41 46 51 58 48 42 44 46 51 58 48 43 38 21 36 41 46 54 48 43 38 2 19 21 36 41 46 54 48 43 38 2 
-19 21 36 41 46 54 48 43 38 2 19 21 36 41 46 51 58 47 49 51 58 48 43 38 2 19 21 36 41 46 54 48 43 
-38 2 19 21 36 41 46 51 58 47 50 51 58 48 43 38 2 19 21 36 41 46 54 48 43 38 3
-        \end{lstlisting}
+    \begin{tcolorbox}[title={Volcado del fichero de parse}, colback=white, breakable]
+Des 2 19 22 2 19 22 2 16 36 41 46 51 58 48 42 45 46 51 58 48 43 38 21 36 41 46 54 48 43 38 2 16 36 41 46 51 58 48 42 44 46 51 58 48 43 38 21 36 41 46 54 48 43 38 2 19 21 36 41 46 54 48 43 38 2 19 21 36 41 46 54 48 43 38 2 19 21 36 41 46 51 58 47 49 51 58 48 43 38 2 19 21 36 41 46 54 48 43 38 2 19 21 36 41 46 51 58 47 50 51 58 48 43 38 2 19 21 36 41 46 54 48 43 38 3
     \end{tcolorbox}
 
-    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white]
+    \begin{tcolorbox}[title={Árbol sintáctico generado con la herramienta VASt}, colback=white, breakable]
         \begin{lstlisting}
-TODO
+· P (2)
+  · STATEMENT (19)
+    · ATOMSTATEMENT (22)
+      · input
+      · id
+      · ;
+  · P (2)
+    · STATEMENT (19)
+      · ATOMSTATEMENT (22)
+        · input
+        · id
+        · ;
+    · P (2)
+      · STATEMENT (16)
+        · if
+        · (
+        · EXP (36)
+          · A (41)
+            · B (46)
+              · EXPATOM (51)
+                · id
+                · C (58)
+                  · lambda
+              · B1 (48)
+                · lambda
+            · A1 (42)
+              · COMPOP (45)
+                ·
+              · B (46)
+                · EXPATOM (51)
+                  · id
+                  · C (58)
+                    · lambda
+                · B1 (48)
+                  · lambda
+              · A1 (43)
+                · lambda
+          · EXP1 (38)
+            · lambda
+        · )
+        · ATOMSTATEMENT (21)
+          · output
+          · EXP (36)
+            · A (41)
+              · B (46)
+                · EXPATOM (54)
+                  · cstr
+                · B1 (48)
+                  · lambda
+              · A1 (43)
+                · lambda
+            · EXP1 (38)
+              · lambda
+          · ;
+      · P (2)
+        · STATEMENT (16)
+          · if
+          · (
+          · EXP (36)
+            · A (41)
+              · B (46)
+                · EXPATOM (51)
+                  · id
+                  · C (58)
+                    · lambda
+                · B1 (48)
+                  · lambda
+              · A1 (42)
+                · COMPOP (44)
+                  ·
+                · B (46)
+                  · EXPATOM (51)
+                    · id
+                    · C (58)
+                      · lambda
+                  · B1 (48)
+                    · lambda
+                · A1 (43)
+                  · lambda
+            · EXP1 (38)
+              · lambda
+          · )
+          · ATOMSTATEMENT (21)
+            · output
+            · EXP (36)
+              · A (41)
+                · B (46)
+                  · EXPATOM (54)
+                    · cstr
+                  · B1 (48)
+                    · lambda
+                · A1 (43)
+                  · lambda
+              · EXP1 (38)
+                · lambda
+            · ;
+        · P (2)
+          · STATEMENT (19)
+            · ATOMSTATEMENT (21)
+              · output
+              · EXP (36)
+                · A (41)
+                  · B (46)
+                    · EXPATOM (54)
+                      · cstr
+                    · B1 (48)
+                      · lambda
+                  · A1 (43)
+                    · lambda
+                · EXP1 (38)
+                  · lambda
+              · ;
+          · P (2)
+            · STATEMENT (19)
+              · ATOMSTATEMENT (21)
+                · output
+                · EXP (36)
+                  · A (41)
+                    · B (46)
+                      · EXPATOM (54)
+                        · cstr
+                      · B1 (48)
+                        · lambda
+                    · A1 (43)
+                      · lambda
+                  · EXP1 (38)
+                    · lambda
+                · ;
+            · P (2)
+              · STATEMENT (19)
+                · ATOMSTATEMENT (21)
+                  · output
+                  · EXP (36)
+                    · A (41)
+                      · B (46)
+                        · EXPATOM (51)
+                          · id
+                          · C (58)
+                            · lambda
+                        · B1 (47)
+                          · ARITHMETICOP (49)
+                            · +
+                          · EXPATOM (51)
+                            · id
+                            · C (58)
+                              · lambda
+                          · B1 (48)
+                            · lambda
+                      · A1 (43)
+                        · lambda
+                    · EXP1 (38)
+                      · lambda
+                  · ;
+              · P (2)
+                · STATEMENT (19)
+                  · ATOMSTATEMENT (21)
+                    · output
+                    · EXP (36)
+                      · A (41)
+                        · B (46)
+                          · EXPATOM (54)
+                            · cstr
+                          · B1 (48)
+                            · lambda
+                        · A1 (43)
+                          · lambda
+                      · EXP1 (38)
+                        · lambda
+                    · ;
+                · P (2)
+                  · STATEMENT (19)
+                    · ATOMSTATEMENT (21)
+                      · output
+                      · EXP (36)
+                        · A (41)
+                          · B (46)
+                            · EXPATOM (51)
+                              · id
+                              · C (58)
+                                · lambda
+                            · B1 (47)
+                              · ARITHMETICOP (50)
+                                · -
+                              · EXPATOM (51)
+                                · id
+                                · C (58)
+                                  · lambda
+                              · B1 (48)
+                                · lambda
+                          · A1 (43)
+                            · lambda
+                        · EXP1 (38)
+                          · lambda
+                      · ;
+                  · P (2)
+                    · STATEMENT (19)
+                      · ATOMSTATEMENT (21)
+                        · output
+                        · EXP (36)
+                          · A (41)
+                            · B (46)
+                              · EXPATOM (54)
+                                · cstr
+                              · B1 (48)
+                                · lambda
+                            · A1 (43)
+                              · lambda
+                          · EXP1 (38)
+                            · lambda
+                        · ;
+                    · P (3)
+                      · eof
         \end{lstlisting}
     \end{tcolorbox}
 
