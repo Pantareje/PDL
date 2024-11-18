@@ -140,6 +140,17 @@ En esta sección, describimos la Gramática de Contexto Libre (gramática de tip
 
 \input{CondLL1.tex}
 
+\section{Pseudo-código con funciones del Analizador Sintáctico}
+
+En esta sección, presentamos el diseño en pseudo-código de las funciones que conforman el Analizador Sintáctico. Para cada símbolo no terminal de la gramática, se implementa una función que sigue un esquema de if-then-else anidado, donde cada rama corresponde a una posible regla. El token recibido desde el Analizador Léxico determina la rama que se ejecuta, iniciando el recorrido del consecuente de la regla seleccionada. Para cada símbolo del consecuente:
+
+\begin{itemize}
+    \item Si resulta ser un terminal, se equipara con el token actual. En el caso de que coincidan, se le solicita un nuevo token al Analizador Léxico y, si no, se genera un error sintáctico. 
+    \item Si es un no terminal, se realiza una llamada recursiva a la función correspondiente. El main del Analizador Sintáctico inicia con la solicitud del primer token y llamando a la función del axioma. 
+\end{itemize}
+
+Si al terminar esta función la cadena se ha procesado por completo, el análisis concluye con éxito. En caso contrario, se reporta un error sintáctico. En el anexo B presentamos la estructura de dichas funciones.
+
 \section{Funcionamiento del programa del Analizador Sintáctico}
 El programa realizado toma como entrada los tokens generados por el Analizador Léxico y los organiza siguiendo las reglas gramaticales que hemos definido previamente. Este proceso verifica que el código fuente cumple con la estructura sintáctica esperada, generando un fichero de parse o detectando errores. Gracias a la herramienta VASt y la gramática es posible visualizar los árboles sintácticos.
 
