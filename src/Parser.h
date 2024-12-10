@@ -33,7 +33,7 @@ class Parser {
 
 
     void Axiom(std::ostream& output, SymbolTable& symbolTable) {
-        // P -> FUNCTION P | STATEMENT P | lambda
+        // P -> FUNCTION P | STATEMENT P | eof
         switch (m_lastToken.type) {
             // First (FUNCTION P)
             case FUNCTION:
@@ -284,10 +284,10 @@ class Parser {
     }
 
     void Statement(std::ostream& output, SymbolTable& symbolTable) {
-        // STATEMENT -> if ( EXP ) ATOMSTATEMENT | for ( FORACT ; EXP ; FORACT ) { BODY } |
+        // STATEMENT -> if ( EXP1 ) ATOMSTATEMENT | for ( FORACT ; EXP1 ; FORACT ) { BODY } |
         //              var VARTYPE id ; | ATOMSTATEMENT
         switch (m_lastToken.type) {
-            // First (if ( EXP ) ATOMSTATEMENT)
+            // First (if ( EXP1 ) ATOMSTATEMENT)
             case IF:
                 output << " 16";
                 m_lastToken = m_lexer.GetToken(symbolTable);
@@ -299,7 +299,7 @@ class Parser {
                 );
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
 
                 VerifyType(
                     PARENTHESIS_CLOSE,
@@ -311,7 +311,7 @@ class Parser {
                 AtomStatement(output, symbolTable);
                 break;
 
-            // First (for ( FORACT ; EXP ; FORACT ) { BODY })
+            // First (for ( FORACT ; EXP1 ; FORACT ) { BODY })
             case FOR:
                 output << " 17";
                 m_lastToken = m_lexer.GetToken(symbolTable);
@@ -332,7 +332,7 @@ class Parser {
                 );
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
 
                 VerifyType(
                     SEMICOLON,
@@ -412,7 +412,7 @@ class Parser {
     }
 
     void AtomStatement(std::ostream& output, SymbolTable& symbolTable) {
-        // ATOMSTATEMENT -> id IDACT ; | output EXP ; | input id ; | return RETURNEXP ;
+        // ATOMSTATEMENT -> id IDACT ; | output EXP1 ; | input id ; | return RETURNEXP ;
         switch (m_lastToken.type) {
             // First (id IDACT ;)
             case IDENTIFIER:
@@ -426,12 +426,12 @@ class Parser {
 
                 break;
 
-            // First (output EXP ;)
+            // First (output EXP1 ;)
             case OUTPUT:
                 output << " 21";
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
 
                 VerifyType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
                 m_lastToken = m_lexer.GetToken(symbolTable);
@@ -475,14 +475,14 @@ class Parser {
     }
 
     void IdAct(std::ostream& output, SymbolTable& symbolTable) {
-        // IDACT -> ASS EXP | ( CALLPARAM )
+        // IDACT -> ASS EXP1 | ( CALLPARAM )
         switch (m_lastToken.type) {
-            // First (ASS EXP)
+            // First (ASS EXP1)
             case ASSIGN:
             case CUMULATIVE_ASSIGN:
                 output << " 24";
                 Ass(output, symbolTable);
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
                 break;
 
             // First (( CALLPARAM ))
@@ -506,15 +506,15 @@ class Parser {
     }
 
     void ForAct(std::ostream& output, SymbolTable& symbolTable) {
-        // FORACT -> id ASS EXP | lambda
+        // FORACT -> id ASS EXP1 | lambda
         switch (m_lastToken.type) {
-            // First (id ASS EXP)
+            // First (id ASS EXP1)
             case IDENTIFIER:
                 output << " 26";
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
                 Ass(output, symbolTable);
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
 
                 break;
 
@@ -557,9 +557,9 @@ class Parser {
     }
 
     void CallParam(std::ostream& output, SymbolTable& symbolTable) {
-        // CALLPARAM -> EXP NEXTPARAM | lambda
+        // CALLPARAM -> EXP1 NEXTPARAM | lambda
         switch (m_lastToken.type) {
-            // First (EXP NEXTPARAM)
+            // First (EXP1 NEXTPARAM)
             case PARENTHESIS_OPEN:
             case CINT:
             case CSTR:
@@ -567,7 +567,7 @@ class Parser {
             case TRUE:
             case IDENTIFIER:
                 output << " 30";
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
                 NextParam(output, symbolTable);
                 break;
 
@@ -588,14 +588,14 @@ class Parser {
     }
 
     void NextParam(std::ostream& output, SymbolTable& symbolTable) {
-        // NEXTPARAM -> , EXP NEXTPARAM | lambda
+        // NEXTPARAM -> , EXP1 NEXTPARAM | lambda
         switch (m_lastToken.type) {
-            // First (EXP NEXTPARAM)
+            // First (EXP1 NEXTPARAM)
             case COMMA:
                 output << " 32";
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
                 NextParam(output, symbolTable);
 
                 break;
@@ -617,9 +617,9 @@ class Parser {
     }
 
     void ReturnExp(std::ostream& output, SymbolTable& symbolTable) {
-        // RETURNEXP -> EXP | lambda
+        // RETURNEXP -> EXP1 | lambda
         switch (m_lastToken.type) {
-            // First (EXP)
+            // First (EXP1)
             case PARENTHESIS_OPEN:
             case CINT:
             case CSTR:
@@ -627,7 +627,7 @@ class Parser {
             case FALSE:
             case IDENTIFIER:
                 output << " 34";
-                Exp(output, symbolTable);
+                Exp1(output, symbolTable);
                 break;
 
             // Como RETURNEXP -> lambda, Follow (RETURNEXP)
@@ -646,45 +646,45 @@ class Parser {
         }
     }
 
-    void Exp(std::ostream& output, SymbolTable& symbolTable) {
-        // EXP -> A EXP1
-        switch (m_lastToken.type) {
-            // First (A EXP1)
-            case PARENTHESIS_OPEN:
-            case CINT:
+    void Exp1(std::ostream& output, SymbolTable& symbolTable)
+    {
+        // EXP1 -> EXP2 EXPOR
+        switch (m_lastToken.type)
+        {
+            // First ( EXP2 EXPOR )
             case CSTR:
+            case CINT:
             case FALSE:
             case TRUE:
             case IDENTIFIER:
                 output << " 36";
-                A(output, symbolTable);
-                Exp1(output, symbolTable);
+                Exp2(output, symbolTable);
+                ExpOr(output, symbolTable);
                 break;
 
             default:
                 ThrowError(
                     std::format(
                         "Expresión incorrecta: "
-                        "Elemento de tipo «{}» inesperado.",
-                        ToString(m_lastToken.type)
+                        "Sergio cambia esto."
                     )
                 );
         }
     }
 
-    void Exp1(std::ostream& output, SymbolTable& symbolTable) {
-        // EXP1 -> LOGOP A EXP1 | lambda
-        switch (m_lastToken.type) {
-            // First (LOGOP A EXP1)
-            case AND:
+    void ExpOr(std::ostream& output, SymbolTable& symbolTable)
+    {
+        // EXPOR -> || EXP2 EXPOR | lambda
+        switch (m_lastToken.type)
+        {
+            // First ( || EXP2 EXPOR )
             case OR:
                 output << " 37";
-                LogOp(output, symbolTable);
-                A(output, symbolTable);
-                Exp1(output, symbolTable);
+                Exp2(output, symbolTable);
+                ExpOr(output, symbolTable);
                 break;
 
-            // Como EXP1 -> lambda, Follow (EXP1)
+            // Como EXPOR -> lambda, Follow (EXPOR)
             case PARENTHESIS_CLOSE:
             case COMMA:
             case SEMICOLON:
@@ -695,50 +695,25 @@ class Parser {
                 ThrowError(
                     std::format(
                         "Expresión incorrecta: "
-                        "Elemento de tipo «{}» inesperado.",
-                        ToString(m_lastToken.type)
+                        "Sergio cambia esto."
                     )
                 );
         }
     }
 
-    void LogOp(std::ostream& output, SymbolTable& symbolTable) {
-        // LOGOP -> && | ||
+    void Exp2(std::ostream& output, SymbolTable& symbolTable) {
+        // EXP2 -> EXP3 EXPAND
         switch (m_lastToken.type) {
-            case AND:
-                output << " 39";
-                m_lastToken = m_lexer.GetToken(symbolTable);
-                break;
-
-            case OR:
-                output << " 40";
-                m_lastToken = m_lexer.GetToken(symbolTable);
-                break;
-
-            default:
-                ThrowError(
-                    std::format(
-                        "Operación lógica incorrecta: "
-                        "Elemento de tipo «{}» inesperado.",
-                        ToString(m_lastToken.type)
-                    )
-                );
-        }
-    }
-
-    void A(std::ostream& output, SymbolTable& symbolTable) {
-        // A -> B A1
-        switch (m_lastToken.type) {
-            // First (B A1)
+            // First (EXP3 EXPAND)
             case PARENTHESIS_OPEN:
             case CINT:
             case CSTR:
             case FALSE:
             case TRUE:
             case IDENTIFIER:
-                output << " 41";
-                B(output, symbolTable);
-                A1(output, symbolTable);
+                output << " 39";
+                Exp3(output, symbolTable);
+                ExpAnd(output, symbolTable);
                 break;
 
             default:
@@ -752,25 +727,81 @@ class Parser {
         }
     }
 
-    void A1(std::ostream& output, SymbolTable& symbolTable) {
-        // A1 -> COMPOP B A1 | lambda
-        switch (m_lastToken.type) {
-            // First (COMPOP B A1)
-            case GREATER:
-            case LESS:
-                output << " 42";
-                CompOp(output, symbolTable);
-                B(output, symbolTable);
-                A1(output, symbolTable);
+    void ExpAnd(std::ostream& output, SymbolTable& symbolTable)
+    {
+        // EXPAND -> && EXP3 EXPAND | lambda
+        switch (m_lastToken.type)
+        {
+            // First ( && EXP3 EXPAND )
+            case AND:
+                output << " 40";
+                Exp3(output, symbolTable);
+                ExpAnd(output, symbolTable);
                 break;
 
-            // Como A1 -> lambda, Follow (A1)
+            // Como EXPAND -> lambda, Follow (EXPAND)
+            case PARENTHESIS_CLOSE:
+            case COMMA:
+            case SEMICOLON:
+            case OR:
+                output << " 41";
+                break;
+
+            default:
+                ThrowError(
+                    std::format(
+                        "Expresión incorrecta: "
+                        "Sergio cambia esto."
+                    )
+                );
+        }
+    }
+
+    void Exp3(std::ostream& output, SymbolTable& symbolTable) {
+        // EXP3 -> EXP4 COMP
+        switch (m_lastToken.type) {
+            // First (EXP4 COMP)
+            case PARENTHESIS_OPEN:
+            case CINT:
+            case CSTR:
+            case FALSE:
+            case TRUE:
+            case IDENTIFIER:
+                output << " 42";
+                Exp4(output, symbolTable);
+                Comp(output, symbolTable);
+                break;
+
+            default:
+                ThrowError(
+                    std::format(
+                        "Expresión incorrecta: "
+                        "Elemento de tipo «{}» inesperado.",
+                        ToString(m_lastToken.type)
+                    )
+                );
+        }
+    }
+
+    void Comp(std::ostream& output, SymbolTable& symbolTable) {
+        // COMP -> COMPOP EXP4 COMP | lambda
+        switch (m_lastToken.type) {
+            // First (COMPOP EXP4 COMP)
+            case GREATER:
+            case LESS:
+                output << " 43";
+                CompOp(output, symbolTable);
+                Exp4(output, symbolTable);
+                Comp(output, symbolTable);
+                break;
+
+            // Como COMP -> lambda, Follow (COMP)
             case AND:
             case OR:
             case PARENTHESIS_CLOSE:
             case COMMA:
             case SEMICOLON:
-                output << " 43";
+                output << " 44";
                 break;
 
             default:
@@ -789,13 +820,13 @@ class Parser {
         switch (m_lastToken.type) {
             // First (>)
             case GREATER:
-                output << " 44";
+                output << " 45";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
             // First (<)
             case LESS:
-                output << " 45";
+                output << " 46";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -810,19 +841,19 @@ class Parser {
         }
     }
 
-    void B(std::ostream& output, SymbolTable& symbolTable) {
-        // B -> EXPATOM B1
+    void Exp4(std::ostream& output, SymbolTable& symbolTable) {
+        // EXP4 -> EXPATOM ARITH
         switch (m_lastToken.type) {
-            // First (EXPATOM B1)
+            // First (EXPATOM ARITH)
             case PARENTHESIS_OPEN:
             case CINT:
             case CSTR:
             case FALSE:
             case TRUE:
             case IDENTIFIER:
-                output << " 46";
+                output << " 47";
                 ExpAtom(output, symbolTable);
-                B1(output, symbolTable);
+                Arith(output, symbolTable);
                 break;
 
             default:
@@ -836,19 +867,19 @@ class Parser {
         }
     }
 
-    void B1(std::ostream& output, SymbolTable& symbolTable) {
-        // B1 -> ARITHMETICOP EXPATOM B1 | lambda
+    void Arith(std::ostream& output, SymbolTable& symbolTable) {
+        // ARITH -> ARITHOP EXPATOM ARITH | lambda
         switch (m_lastToken.type) {
-            // First (ARITHMETICOP EXPATOM B1)
+            // First (ARITHOP EXPATOM ARITH)
             case SUM:
             case SUB:
-                output << " 47";
-                ArithmeticOp(output, symbolTable);
+                output << " 48";
+                ArithOp(output, symbolTable);
                 ExpAtom(output, symbolTable);
-                B1(output, symbolTable);
+                Arith(output, symbolTable);
                 break;
 
-            // Como B1 -> lambda, Follow (B1)
+            // Como ARITH -> lambda, Follow (ARITH)
             case AND:
             case OR:
             case PARENTHESIS_CLOSE:
@@ -856,7 +887,7 @@ class Parser {
             case SEMICOLON:
             case LESS:
             case GREATER:
-                output << " 48";
+                output << " 49";
                 break;
 
             default:
@@ -870,18 +901,18 @@ class Parser {
         }
     }
 
-    void ArithmeticOp(std::ostream& output, SymbolTable& symbolTable) {
-        // ARITHMETICOP -> + | -
+    void ArithOp(std::ostream& output, SymbolTable& symbolTable) {
+        // ARITHOP -> + | -
         switch (m_lastToken.type) {
             // First (+)
             case SUM:
-                output << " 49";
+                output << " 50";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
             // First (-)
             case SUB:
-                output << " 50";
+                output << " 51";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -897,22 +928,22 @@ class Parser {
     }
 
     void ExpAtom(std::ostream& output, SymbolTable& symbolTable) {
-        // EXPATOM -> id C | ( EXP ) | cint | cstr | true | false
+        // EXPATOM -> id IDVAL | ( EXP1 ) | cint | cstr | true | false
         switch (m_lastToken.type) {
-            // First (id C)
+            // First (id IDVAL)
             case IDENTIFIER:
-                output << " 51";
-                m_lastToken = m_lexer.GetToken(symbolTable);
-
-                C(output, symbolTable);
-                break;
-
-            // First (( EXP ))
-            case PARENTHESIS_OPEN:
                 output << " 52";
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
-                Exp(output, symbolTable);
+                IdVal(output, symbolTable);
+                break;
+
+            // First (( EXP1 ))
+            case PARENTHESIS_OPEN:
+                output << " 53";
+                m_lastToken = m_lexer.GetToken(symbolTable);
+
+                Exp1(output, symbolTable);
 
                 VerifyType(
                     PARENTHESIS_CLOSE,
@@ -925,25 +956,25 @@ class Parser {
 
             // First (cint)
             case CINT:
-                output << " 53";
+                output << " 54";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
             // First (cstr)
             case CSTR:
-                output << " 54";
+                output << " 55";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
             // First (true)
             case TRUE:
-                output << " 55";
+                output << " 56";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
             // First (false)
             case FALSE:
-                output << " 56";
+                output << " 57";
                 m_lastToken = m_lexer.GetToken(symbolTable);
                 break;
 
@@ -958,12 +989,12 @@ class Parser {
         }
     }
 
-    void C(std::ostream& output, SymbolTable& symbolTable) {
-        // C -> ( CALLPARAM ) | lambda
+    void IdVal(std::ostream& output, SymbolTable& symbolTable) {
+        // IDVAL -> ( CALLPARAM ) | lambda
         switch (m_lastToken.type) {
             // First (( CALLPARAM ))
             case PARENTHESIS_OPEN:
-                output << " 57";
+                output << " 58";
                 m_lastToken = m_lexer.GetToken(symbolTable);
 
                 CallParam(output, symbolTable);
@@ -977,7 +1008,7 @@ class Parser {
 
                 break;
 
-            // Como C -> lambda, Follow (C)
+            // Como IDVAL -> lambda, Follow (IDVAL)
             case AND:
             case OR:
             case PARENTHESIS_CLOSE:
@@ -987,7 +1018,7 @@ class Parser {
             case SEMICOLON:
             case GREATER:
             case LESS:
-                output << " 58";
+                output << " 59";
                 break;
 
             default:
