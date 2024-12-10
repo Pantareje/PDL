@@ -680,8 +680,11 @@ class Parser {
             // First ( || EXP2 EXPOR )
             case OR:
                 output << " 37";
+                m_lastToken = m_lexer.GetToken(symbolTable);
+
                 Exp2(output, symbolTable);
                 ExpOr(output, symbolTable);
+
                 break;
 
             // Como EXPOR -> lambda, Follow (EXPOR)
@@ -735,6 +738,8 @@ class Parser {
             // First ( && EXP3 EXPAND )
             case AND:
                 output << " 40";
+                m_lastToken = m_lexer.GetToken(symbolTable);
+
                 Exp3(output, symbolTable);
                 ExpAnd(output, symbolTable);
                 break;
