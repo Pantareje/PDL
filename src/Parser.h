@@ -652,6 +652,7 @@ class Parser {
         switch (m_lastToken.type)
         {
             // First ( EXP2 EXPOR )
+            case PARENTHESIS_OPEN:
             case CSTR:
             case CINT:
             case FALSE:
