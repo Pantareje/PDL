@@ -15,37 +15,38 @@
     \>13. NEXTATTRIBUTE → $\lambda$\\
     \>14. BODY → STATEMENT BODY\\
     \>15. BODY → $\lambda$\\
-    \>16. STATEMENT → $if$ ( EXP ) ATOMSTATEMENT\\
-    \>17. STATEMENT → $for$ ( FORACT ; EXP ; FORACT ) \{ BODY \}\\
+    \>16. STATEMENT → $if$ ( EXP1 ) ATOMSTATEMENT\\
+    \>17. STATEMENT → $for$ ( FORACT ; EXP1 ; FORACT ) \{ BODY \}\\
     \>18. STATEMENT → $var$ VARTYPE $id$ ;\\
     \>19. STATEMENT → ATOMSTATEMENT\\
     \>20. ATOMSTATEMENT → $id$ IDACT ;\\
-    \>21. ATOMSTATEMENT → $output$ EXP ;\\
+    \>21. ATOMSTATEMENT → $output$ EXP1 ;\\
     \>22. ATOMSTATEMENT → $input$ $id$ ;\\
     \>23. ATOMSTATEMENT → $return$ RETURNEXP ;\\
-    \>24. IDACT → ASS EXP\\
+    \>24. IDACT → ASS EXP1\\
     \>25. IDACT → ( CALLPARAM )\\
-    \>26. FORACT → $id$ ASS EXP\\
+    \>26. FORACT → $id$ ASS EXP1\\
     \>27. FORACT → $\lambda$\\
     \>28. ASS → =\\
     \>29. ASS → +=\\
-    \>30. CALLPARAM → EXP NEXTPARAM\\
+    \>30. CALLPARAM → EXP1 NEXTPARAM\\
     \>31. CALLPARAM → $\lambda$\\
-    \>32. NEXTPARAM → , EXP NEXTPARAM\\
+    \>32. NEXTPARAM → , EXP1 NEXTPARAM\\
     \>33. NEXTPARAM → $\lambda$\\
-    \>34. RETURNEXP → EXP\\
+    \>34. RETURNEXP → EXP1\\
     \>35. RETURNEXP → $\lambda$\\
-    \>36. EXP → A EXP1\\
-    \>37. EXP1 → LOGOP A EXP1\\
-    \>38. EXP1 → $\lambda$\>49. ARITHMETICOP → +\\
-    \>39. LOGOP → \verb!&&!\>50. ARITHMETICOP → -\\
-    \>40. LOGOP → \verb!||!\>51. EXPATOM → $id$ C\\
-    \>41. A → B A1\>52. EXPATOM → ( EXP )\\
-    \>42. A1 → COMPOP B A1\>53. EXPATOM → $cint$\\
-    \>43. A1 → $\lambda$\>54. EXPATOM → $cstr$\\
-    \>44. COMPOP → >\>55. EXPATOM → $true$\\
-    \>45. COMPOP → <\>56. EXPATOM → $false$\\
-    \>46. B → EXPATOM B1\>57. C → ( CALLPARAM )\\
-    \>47. B1 → ARITHMETICOP EXPATOM B1\>58. C → $\lambda$\\
-    \>48. B1 → $\lambda$\\
+    \>36. EXP1 → EXP2 EXPOR\\
+    \>37. EXPOR → \verb!||! EXP2 EXPOR\\
+    \>38. EXPOR → $\lambda$\\
+    \>39. EXP2 → EXP3 EXPAND\\
+    \>40. EXPAND → \verb!&&! EXP3 EXPAND\>    50. ARITHOP → +\\
+    \>41. EXPAND → $\lambda$\>    51. ARITHOP → -\\
+    \>42. EXP3 → EXP4 COMP\>    52. EXPATOM → $id$ IDVAL\\
+    \>43. COMP → COMPOP EXP4 COMP\>    53. EXPATOM → ( EXP1 )\\
+    \>44. COMP → $\lambda$\>    54. EXPATOM → cint\\
+    \>45. COMPOP → >\>    55. EXPATOM → cstr\\
+    \>46. COMPOP → <\>    56. EXPATOM → true\\
+    \>47. EXP4 → EXPATOM ARITH\>    57. EXPATOM → false\\
+    \>48. ARITH → ARITHOP EXPATOM ARITH\>    58. IDVAL → ( CALLPARAM )\\
+    \>49. ARITH → $\lambda$\>    59. IDVAL → $\lambda$\\
 \end{tabbing}
