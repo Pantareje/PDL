@@ -36,24 +36,17 @@ namespace {
                         throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
 
                     attributes.taskType = TaskType::Tokens;
-                }
-
-                else if (m_arg == "-s") {
+                } else if (m_arg == "-s") {
                     if (attributes.taskType != TaskType::None)
                         throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
 
                     attributes.taskType = TaskType::Symbols;
-                }
-
-                else if (m_arg == "-p") {
+                } else if (m_arg == "-p") {
                     if (attributes.taskType != TaskType::None)
                         throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
 
                     attributes.taskType = TaskType::Parse;
-                }
-
-
-                else if (m_arg == "-i") {
+                } else if (m_arg == "-i") {
                     if (!attributes.inputFileName.empty())
                         throw std::runtime_error("Ya se ha definido un fichero de entrada.");
 
@@ -64,9 +57,7 @@ namespace {
                         throw std::runtime_error("El nombre del fichero de entrada no puede estar vacío.");
 
                     attributes.inputFileName = m_arg;
-                }
-
-                else if (m_arg == "-o") {
+                } else if (m_arg == "-o") {
                     if (!attributes.outputFileName.empty())
                         throw std::runtime_error("Ya se ha definido un fichero de salida.");
 
@@ -77,9 +68,7 @@ namespace {
                         throw std::runtime_error("El nombre del fichero de salida no puede estar vacío.");
 
                     attributes.outputFileName = m_arg;
-                }
-
-                else {
+                } else {
                     throw std::runtime_error(std::format("El argumento «{}» es desconocido.", m_arg));
                 }
             }
@@ -91,8 +80,8 @@ namespace {
 
 int main(const int argc, const char* argv[]) {
     try {
-        ApplicationAttributes attributes = ArgumentsReader(argc, argv).GetAttributes();
-        Application application(attributes);
+        const ApplicationAttributes attributes = ArgumentsReader(argc, argv).GetAttributes();
+        const Application application(attributes);
         return application.Run();
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << std::endl;

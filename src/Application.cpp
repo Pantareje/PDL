@@ -9,7 +9,7 @@
 namespace {
     int GenerateTokensFile(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
-        SymbolTable symbolTable;
+        SymbolTables symbolTable;
 
         int status = 0;
 
@@ -21,8 +21,13 @@ namespace {
                 output << "<" << ToString(token.type) << ", " << content << ">" << std::endl;
                 if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
-                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
-                lexer.SkipChar();
+                std::cerr << std::format(
+                    "({}:{}) LE-{:04X}: ",
+                    e.GetLine(), e.GetColumn(),
+                    static_cast<uint32_t>(e.GetError())
+                );
+                std::cerr<< e.what() << std::endl;
+                lexer.SkipLine();
                 status = 1;
             }
         }
@@ -48,7 +53,7 @@ namespace {
 
     int GenerateSymbolsFile(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
-        SymbolTable symbolTable;
+        SymbolTables symbolTable;
 
         int status = 0;
 
@@ -58,8 +63,9 @@ namespace {
                 const auto token = lexer.GetToken(symbolTable);
                 if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
-                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
-                lexer.SkipChar();
+                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
+                std::cerr << " ERROR: " << e.what() << std::endl;
+                lexer.SkipLine();
                 status = 1;
             }
         }
@@ -87,16 +93,17 @@ namespace {
 
     int GenerateParse(std::istream& input, std::ostream& output) {
         Parser parser(input);
-        SymbolTable symbolTable;
 
         int status = 0;
 
         std::ostringstream ss;
 
         try {
+            SymbolTables symbolTable;
             parser.Parse(symbolTable, ss);
         } catch (const SyntaxException& e) {
-            std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ") ERROR: " << e.what() << std::endl;
+            std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
+            std::cerr << " ERROR: " << e.what() << std::endl;
             status = 1;
         }
 
@@ -137,36 +144,36 @@ Application::Application(const ApplicationAttributes& attributes) :
         throw std::runtime_error("Se debe especificar una tarea a ejecutar.");
 }
 
-int Application::Run() {
+int Application::Run() const {
     int result = 0;
 
     switch (m_taskType) {
-        case TaskType::Tokens: {
-            if (m_inputFileName.empty())
-                result = GenerateTokensFile(std::cin, m_outputFileName);
-            else
-                result = GenerateTokensFile(m_inputFileName, m_outputFileName);
-            break;
-        }
+    case TaskType::Tokens: {
+        if (m_inputFileName.empty())
+            result = GenerateTokensFile(std::cin, m_outputFileName);
+        else
+            result = GenerateTokensFile(m_inputFileName, m_outputFileName);
+        break;
+    }
 
-        case TaskType::Symbols: {
-            if (m_inputFileName.empty())
-                result = GenerateSymbolsFile(std::cin, m_outputFileName);
-            else
-                result = GenerateSymbolsFile(m_inputFileName, m_outputFileName);
-            break;
-        }
+    case TaskType::Symbols: {
+        if (m_inputFileName.empty())
+            result = GenerateSymbolsFile(std::cin, m_outputFileName);
+        else
+            result = GenerateSymbolsFile(m_inputFileName, m_outputFileName);
+        break;
+    }
 
-        case TaskType::Parse: {
-            if (m_inputFileName.empty())
-                result = GenerateParse(std::cin, m_outputFileName);
-            else
-                result = GenerateParse(m_inputFileName, m_outputFileName);
-            break;
-        }
+    case TaskType::Parse: {
+        if (m_inputFileName.empty())
+            result = GenerateParse(std::cin, m_outputFileName);
+        else
+            result = GenerateParse(m_inputFileName, m_outputFileName);
+        break;
+    }
 
-        case TaskType::None:
-            assert(false);
+    case TaskType::None:
+        assert(false);
     }
 
     return result;

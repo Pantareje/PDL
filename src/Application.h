@@ -10,5 +10,5 @@ class Application {
 public:
     explicit Application(const ApplicationAttributes& attributes);
 
-    int Run();
+    [[nodiscard]] int Run() const;
 };

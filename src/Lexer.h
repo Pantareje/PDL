@@ -2,8 +2,8 @@
 
 #include "Characters.h"
 #include "Token.h"
-#include "SymbolTable.h"
-#include "LexicalException.h"
+#include "SymbolTables.h"
+#include "LexicalError.h"
 
 class Lexer {
     std::istream& m_input;
@@ -12,9 +12,17 @@ class Lexer {
     unsigned m_line = 1;
     unsigned m_column = 0;
 
-    template <typename T>
+    unsigned m_tokenLine = m_line;
+    unsigned m_tokenColumn = m_column;
+
+    [[noreturn]]
+    void ThrowError(LexicalError error) const {
+        throw LexicalException(m_line, m_column, error, m_lastChar);
+    }
+
+    template<typename T>
     constexpr Token CreateToken(TokenType tokenType, T&& args) {
-        return { tokenType, m_line, m_column, args };
+        return { tokenType, m_tokenLine, m_tokenColumn, args };
     }
 
     constexpr Token CreateToken(TokenType tokenType) {
@@ -30,6 +38,10 @@ class Lexer {
         } else {
             m_column += 1;
         }
+
+        if (m_lastChar == U'€') {
+            m_lastChar = static_cast<char32_t>(EOF);
+        }
     }
 
     void ReadDelAndComments() {
@@ -44,10 +56,7 @@ class Lexer {
 
                 // 15 : * : 16
                 if (m_lastChar != '*')
-                    throw LexicalException(
-                        m_line, m_column,
-                        "Carácter inesperado tras «/». Se esperaba «*» para iniciar un comentario de bloque."
-                    );
+                    ThrowError(LexicalError::MISSING_COMMENT_START);
 
                 Read();
 
@@ -56,9 +65,7 @@ class Lexer {
                 bool m_awaitExit = false;
                 while (m_loop) {
                     if (m_lastChar == EOF)
-                        throw LexicalException(
-                            m_line, m_column,
-                            "Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.");
+                        ThrowError(LexicalError::MISSING_COMMENT_END);
 
                     if (m_awaitExit) {
                         // 17 : / : 0
@@ -92,11 +99,11 @@ class Lexer {
         }
     }
 
-public:
-    explicit Lexer(std::istream& input) : m_input(input) {}
-
-    Token GetToken(SymbolTable& symbolTable) {
+    Token ReadToken(SymbolTables& symbolTable) {
         ReadDelAndComments();
+
+        m_tokenLine = m_line;
+        m_tokenColumn = m_column;
 
         // 0 : l : 1
         if (IsAlphaUnicode(m_lastChar)) {
@@ -147,10 +154,7 @@ public:
 
             // 3 : oc : 4
             if (numberTooBig)
-                throw LexicalException(
-                    m_line, m_column,
-                    "El valor del entero es demasiado grande (máximo 32767)."
-                );
+                ThrowError(LexicalError::INT_TOO_BIG);
 
             return CreateToken(TokenType::CINT, static_cast<int16_t>(num));
         }
@@ -163,10 +167,7 @@ public:
 
             while (m_lastChar != '\'') {
                 if (m_lastChar == static_cast<char32_t>(EOF))
-                    throw LexicalException(
-                        m_line, m_column,
-                        "Fin de fichero inesperado. Se esperaba «'» para cerrar la cadena."
-                    );
+                    ThrowError(LexicalError::MISSING_STRING_END);
 
                 // 5 : \ : 6
                 if (m_lastChar == '\\') {
@@ -177,20 +178,7 @@ public:
 
                     // Carácter ilegal.
                     if (escapedChar == -1)
-                        throw LexicalException(
-                            m_line, m_column,
-                            m_lastChar == ' ' || IsPrintUnicode(m_lastChar)
-                                ? std::format(
-                                    "Error en la cadena. La secuencia de escape '\\{}' (U+{:04X}) no es válida.",
-                                    CodepointToUtf8(m_lastChar),
-                                    static_cast<int32_t>(m_lastChar)
-                                )
-                                : std::format(
-                                    "Error en la cadena. Carácter ilegal en la secuencia de escape (U+{:04X}).",
-                                    static_cast<int32_t>(m_lastChar)
-                                )
-
-                        );
+                        ThrowError(LexicalError::STRING_ESCAPE_SEQUENCE);
 
                     str += CodepointToUtf8(escapedChar);
                     counter += 1;
@@ -204,19 +192,7 @@ public:
                 }
                 // Carácter ilegal.
                 else {
-                    throw LexicalException(
-                        m_line, m_column,
-                        IsPrintUnicode(m_lastChar)
-                            ? std::format(
-                                "Error en la cadena. Carácter no permitido («{}», U+{:04X}).",
-                                CodepointToUtf8(m_lastChar),
-                                static_cast<int32_t>(m_lastChar)
-                            )
-                            : std::format(
-                                "Error en la cadena. Carácter no permitido (U+{:04X}).",
-                                static_cast<int32_t>(m_lastChar)
-                            )
-                    );
+                    ThrowError(LexicalError::STRING_FORBIDDEN_CHARACTER);
                 }
             }
 
@@ -224,13 +200,7 @@ public:
 
             // Comprobamos el contador y, si es mayor que 64, lanzamos un error.
             if (counter > 64)
-                throw LexicalException(
-                    m_line, m_column,
-                    std::format(
-                        "La longitud de cadena excede el límite de 64 caracteres ({} caracteres).",
-                        counter
-                    )
-                );
+                ThrowError(LexicalError::STRING_TOO_LONG);
 
             Read();
             return CreateToken(TokenType::CSTR, str);
@@ -279,10 +249,7 @@ public:
 
             // 11 : & : 12
             if (m_lastChar != '&')
-                throw LexicalException(
-                    m_line, m_column,
-                    "Se esperaba «&» después de «&» para formar un operador."
-                );
+                ThrowError(LexicalError::MISSING_OP_AND);
 
             Read();
             return CreateToken(TokenType::AND);
@@ -292,10 +259,7 @@ public:
         if (m_lastChar == '|') {
             Read();
             if (m_lastChar != '|')
-                throw LexicalException(
-                    m_line, m_column,
-                    "Se esperaba «|» después «|» para formar un operador."
-                );
+                ThrowError(LexicalError::MISSING_OP_OR);
 
             Read();
             return CreateToken(TokenType::OR);
@@ -338,24 +302,23 @@ public:
         }
 
         // 0 : eof : 19
-        if (m_lastChar == EOF || m_lastChar == U'€')
+        if (m_lastChar == EOF)
             return CreateToken(TokenType::END);
 
         // Carácter desconocido.
-        throw LexicalException(
-            m_line, m_column,
-            IsPrintUnicode(m_lastChar)
-                ? std::format(
-                    "Carácter inesperado al buscar el siguiente símbolo («{}», U+{:04X}).",
-                    CodepointToUtf8(m_lastChar),
-                    static_cast<int32_t>(m_lastChar)
-                )
-                : std::format(
-                    "Carácter inesperado al buscar el siguiente símbolo (U+{:04X}).",
-                    static_cast<int32_t>(m_lastChar)
-                )
-        );
+        ThrowError(LexicalError::UNEXPECTED_START_CHARACTER);
     }
 
-    void SkipChar() { Read(); }
+public:
+    explicit Lexer(std::istream& input) : m_input(input) {}
+
+    Token GetToken(SymbolTables& symbolTable) {
+        return ReadToken(symbolTable);
+    }
+
+    void SkipLine() {
+        while (m_lastChar != U'\n' && m_lastChar != EOF) {
+            Read();
+        }
+    }
 };

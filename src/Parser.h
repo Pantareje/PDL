@@ -16,23 +16,35 @@ class Parser {
     Lexer m_lexer;
     Token m_lastToken;
 
+    void ThrowError(SyntaxError error) const {
+        throw SyntaxException(m_lastToken.line, m_lastToken.column, error);
+    }
+
     [[noreturn]]
-    inline void ThrowError(const char* errorMessage) const {
+    [[deprecated]]
+    void ThrowError(const char* errorMessage) const {
         throw SyntaxException(m_lastToken.line, m_lastToken.column, errorMessage);
     }
 
     [[noreturn]]
-    inline void ThrowError(const std::string& errorMessage) const {
+    [[deprecated]]
+    void ThrowError(const std::string& errorMessage) const {
         throw SyntaxException(m_lastToken.line, m_lastToken.column, errorMessage);
     }
 
-    inline void VerifyType(TokenType expectedType, const char* errorMessage) const {
+    [[deprecated]]
+    void VerifyType(TokenType expectedType, const char* errorMessage) const {
         if (m_lastToken.type != expectedType)
             ThrowError(errorMessage);
     }
 
+    void VerifyType(TokenType expectedType, SyntaxError error) const {
+        if (m_lastToken.type != expectedType)
+            ThrowError(error);
+    }
 
-    void Axiom(std::ostream& output, SymbolTable& symbolTable) {
+
+    void Axiom(std::ostream& output, SymbolTables& symbolTable) {
         // P -> FUNCTION P | STATEMENT P | eof
         switch (m_lastToken.type) {
             // First (FUNCTION P)
@@ -68,7 +80,7 @@ class Parser {
         }
     }
 
-    void Function(std::ostream& output, SymbolTable& symbolTable) {
+    void Function(std::ostream& output, SymbolTables& symbolTable) {
         // FUNCTION -> function FUNTYPE id ( FUNATTRIBUTES ) { BODY }
 
         output << " 4";
@@ -118,7 +130,7 @@ class Parser {
         m_lastToken = m_lexer.GetToken(symbolTable);
     }
 
-    void FunType(std::ostream& output, SymbolTable& symbolTable) {
+    void FunType(std::ostream& output, SymbolTables& symbolTable) {
         // FUNTYPE -> void | VARTYPE
         switch (m_lastToken.type) {
             // First (void)
@@ -143,7 +155,7 @@ class Parser {
         }
     }
 
-    void VarType(std::ostream& output, SymbolTable& symbolTable) {
+    void VarType(std::ostream& output, SymbolTables& symbolTable) {
         // VARTYPE -> int | boolean | string
         switch (m_lastToken.type) {
             // First (int)
@@ -172,7 +184,7 @@ class Parser {
         }
     }
 
-    void FunAttributes(std::ostream& output, SymbolTable& symbolTable) {
+    void FunAttributes(std::ostream& output, SymbolTables& symbolTable) {
         // FUNATTRIBUTES -> void | VARTYPE id NEXTATTRIBUTE
         switch (m_lastToken.type) {
             // First (void)
@@ -215,7 +227,7 @@ class Parser {
         }
     }
 
-    void NextAttribute(std::ostream& output, SymbolTable& symbolTable) {
+    void NextAttribute(std::ostream& output, SymbolTables& symbolTable) {
         // NEXTATTRIBUTE -> , VARTYPE id NEXTATTRIBUTE | lambda
         switch (m_lastToken.type) {
             // First (, VARTYPE id NEXTATTRIBUTE)
@@ -251,7 +263,7 @@ class Parser {
         }
     }
 
-    void Body(std::ostream& output, SymbolTable& symbolTable) {
+    void Body(std::ostream& output, SymbolTables& symbolTable) {
         // BODY -> STATEMENT BODY | lambda
         switch (m_lastToken.type) {
             // First (STATEMENT BODY)
@@ -283,7 +295,7 @@ class Parser {
         }
     }
 
-    void Statement(std::ostream& output, SymbolTable& symbolTable) {
+    void Statement(std::ostream& output, SymbolTables& symbolTable) {
         // STATEMENT -> if ( EXP1 ) ATOMSTATEMENT | for ( FORACT ; EXP1 ; FORACT ) { BODY } |
         //              var VARTYPE id ; | ATOMSTATEMENT
         switch (m_lastToken.type) {
@@ -411,7 +423,7 @@ class Parser {
         }
     }
 
-    void AtomStatement(std::ostream& output, SymbolTable& symbolTable) {
+    void AtomStatement(std::ostream& output, SymbolTables& symbolTable) {
         // ATOMSTATEMENT -> id IDACT ; | output EXP1 ; | input id ; | return RETURNEXP ;
         switch (m_lastToken.type) {
             // First (id IDACT ;)
@@ -474,7 +486,7 @@ class Parser {
         }
     }
 
-    void IdAct(std::ostream& output, SymbolTable& symbolTable) {
+    void IdAct(std::ostream& output, SymbolTables& symbolTable) {
         // IDACT -> ASS EXP1 | ( CALLPARAM )
         switch (m_lastToken.type) {
             // First (ASS EXP1)
@@ -505,7 +517,7 @@ class Parser {
         }
     }
 
-    void ForAct(std::ostream& output, SymbolTable& symbolTable) {
+    void ForAct(std::ostream& output, SymbolTables& symbolTable) {
         // FORACT -> id ASS EXP1 | lambda
         switch (m_lastToken.type) {
             // First (id ASS EXP1)
@@ -535,7 +547,7 @@ class Parser {
         }
     }
 
-    void Ass(std::ostream& output, SymbolTable& symbolTable) {
+    void Ass(std::ostream& output, SymbolTables& symbolTable) {
         // ASS -> = | +=
         switch (m_lastToken.type) {
             case ASSIGN:
@@ -556,7 +568,7 @@ class Parser {
         }
     }
 
-    void CallParam(std::ostream& output, SymbolTable& symbolTable) {
+    void CallParam(std::ostream& output, SymbolTables& symbolTable) {
         // CALLPARAM -> EXP1 NEXTPARAM | lambda
         switch (m_lastToken.type) {
             // First (EXP1 NEXTPARAM)
@@ -587,7 +599,7 @@ class Parser {
         }
     }
 
-    void NextParam(std::ostream& output, SymbolTable& symbolTable) {
+    void NextParam(std::ostream& output, SymbolTables& symbolTable) {
         // NEXTPARAM -> , EXP1 NEXTPARAM | lambda
         switch (m_lastToken.type) {
             // First (EXP1 NEXTPARAM)
@@ -616,7 +628,7 @@ class Parser {
         }
     }
 
-    void ReturnExp(std::ostream& output, SymbolTable& symbolTable) {
+    void ReturnExp(std::ostream& output, SymbolTables& symbolTable) {
         // RETURNEXP -> EXP1 | lambda
         switch (m_lastToken.type) {
             // First (EXP1)
@@ -646,7 +658,7 @@ class Parser {
         }
     }
 
-    void Exp1(std::ostream& output, SymbolTable& symbolTable)
+    void Exp1(std::ostream& output, SymbolTables& symbolTable)
     {
         // EXP1 -> EXP2 EXPOR
         switch (m_lastToken.type)
@@ -673,7 +685,7 @@ class Parser {
         }
     }
 
-    void ExpOr(std::ostream& output, SymbolTable& symbolTable)
+    void ExpOr(std::ostream& output, SymbolTables& symbolTable)
     {
         // EXPOR -> || EXP2 EXPOR | lambda
         switch (m_lastToken.type)
@@ -705,7 +717,7 @@ class Parser {
         }
     }
 
-    void Exp2(std::ostream& output, SymbolTable& symbolTable) {
+    void Exp2(std::ostream& output, SymbolTables& symbolTable) {
         // EXP2 -> EXP3 EXPAND
         switch (m_lastToken.type) {
             // First (EXP3 EXPAND)
@@ -731,7 +743,7 @@ class Parser {
         }
     }
 
-    void ExpAnd(std::ostream& output, SymbolTable& symbolTable)
+    void ExpAnd(std::ostream& output, SymbolTables& symbolTable)
     {
         // EXPAND -> && EXP3 EXPAND | lambda
         switch (m_lastToken.type)
@@ -763,7 +775,7 @@ class Parser {
         }
     }
 
-    void Exp3(std::ostream& output, SymbolTable& symbolTable) {
+    void Exp3(std::ostream& output, SymbolTables& symbolTable) {
         // EXP3 -> EXP4 COMP
         switch (m_lastToken.type) {
             // First (EXP4 COMP)
@@ -789,7 +801,7 @@ class Parser {
         }
     }
 
-    void Comp(std::ostream& output, SymbolTable& symbolTable) {
+    void Comp(std::ostream& output, SymbolTables& symbolTable) {
         // COMP -> COMPOP EXP4 COMP | lambda
         switch (m_lastToken.type) {
             // First (COMPOP EXP4 COMP)
@@ -821,7 +833,7 @@ class Parser {
         }
     }
 
-    void CompOp(std::ostream& output, SymbolTable& symbolTable) {
+    void CompOp(std::ostream& output, SymbolTables& symbolTable) {
         // COMPOP -> > | <
         switch (m_lastToken.type) {
             // First (>)
@@ -847,7 +859,7 @@ class Parser {
         }
     }
 
-    void Exp4(std::ostream& output, SymbolTable& symbolTable) {
+    void Exp4(std::ostream& output, SymbolTables& symbolTable) {
         // EXP4 -> EXPATOM ARITH
         switch (m_lastToken.type) {
             // First (EXPATOM ARITH)
@@ -873,7 +885,7 @@ class Parser {
         }
     }
 
-    void Arith(std::ostream& output, SymbolTable& symbolTable) {
+    void Arith(std::ostream& output, SymbolTables& symbolTable) {
         // ARITH -> ARITHOP EXPATOM ARITH | lambda
         switch (m_lastToken.type) {
             // First (ARITHOP EXPATOM ARITH)
@@ -907,7 +919,7 @@ class Parser {
         }
     }
 
-    void ArithOp(std::ostream& output, SymbolTable& symbolTable) {
+    void ArithOp(std::ostream& output, SymbolTables& symbolTable) {
         // ARITHOP -> + | -
         switch (m_lastToken.type) {
             // First (+)
@@ -933,7 +945,7 @@ class Parser {
         }
     }
 
-    void ExpAtom(std::ostream& output, SymbolTable& symbolTable) {
+    void ExpAtom(std::ostream& output, SymbolTables& symbolTable) {
         // EXPATOM -> id IDVAL | ( EXP1 ) | cint | cstr | true | false
         switch (m_lastToken.type) {
             // First (id IDVAL)
@@ -995,7 +1007,7 @@ class Parser {
         }
     }
 
-    void IdVal(std::ostream& output, SymbolTable& symbolTable) {
+    void IdVal(std::ostream& output, SymbolTables& symbolTable) {
         // IDVAL -> ( CALLPARAM ) | lambda
         switch (m_lastToken.type) {
             // First (( CALLPARAM ))
@@ -1041,10 +1053,10 @@ class Parser {
 
 public:
     explicit Parser(std::istream& input) : m_lexer(input) {
-        SymbolTable todo;
+        SymbolTables todo;
     }
 
-    void Parse(SymbolTable& symbolTable, std::ostream& output) {
+    void Parse(SymbolTables& symbolTable, std::ostream& output) {
         m_lastToken = m_lexer.GetToken(symbolTable);
         Axiom(output, symbolTable);
     }

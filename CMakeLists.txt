@@ -10,9 +10,9 @@ add_executable(PDL
         src/Characters.h
         src/Characters.cpp
         src/Token.h
-        src/LexicalException.h
+        src/LexicalError.h
         src/Lexer.h
-        src/SymbolTable.h
+        src/SymbolTables.h
         src/Parser.h
         src/SyntaxException.h
         src/Application.h
