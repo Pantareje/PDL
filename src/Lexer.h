@@ -4,6 +4,7 @@
 #include "Token.h"
 #include "SymbolTables.h"
 #include "LexicalError.h"
+#include "SemanticState.h"
 
 class Lexer {
     std::istream& m_input;
@@ -99,7 +100,7 @@ class Lexer {
         }
     }
 
-    Token ReadToken(SymbolTables& symbolTable) {
+    Token ReadToken(SymbolTables& symbolTable, const SemanticState& flags) {
         ReadDelAndComments();
 
         m_tokenLine = m_line;
@@ -127,8 +128,13 @@ class Lexer {
 
             auto pos = symbolTable.SearchSymbol(lex);
 
-            if (!pos.has_value())
-                pos = { symbolTable.AddSymbol(lex) };
+            if (!pos.has_value()) {
+                if (flags.implicitDeclaration) {
+                    pos = { symbolTable.AddSymbol(lex) };
+                } else {
+                    pos = { symbolTable.AddGlobalSymbol(lex) };
+                }
+            }
 
             return CreateToken(type, pos.value());
         }
@@ -312,8 +318,8 @@ class Lexer {
 public:
     explicit Lexer(std::istream& input) : m_input(input) {}
 
-    Token GetToken(SymbolTables& symbolTable) {
-        return ReadToken(symbolTable);
+    Token GetToken(SymbolTables& symbolTable, const SemanticState& flags) {
+        return ReadToken(symbolTable, flags);
     }
 
     void SkipLine() {

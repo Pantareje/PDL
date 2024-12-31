@@ -1,12 +1,9 @@
 #pragma once
 
 #include <stdexcept>
+#include <utility>
 
-enum class SyntaxError {
-
-
-
-};
+enum class SyntaxError {};
 
 constexpr const char* GetErrorMessage(SyntaxError error) {
     using enum SyntaxError;
@@ -19,8 +16,7 @@ constexpr const char* GetErrorMessage(SyntaxError error) {
 
 class SyntaxException final : public std::runtime_error {
     SyntaxError m_error;
-    unsigned m_lineNumber;
-    unsigned m_columnNumber;
+    Token m_token;
 
 public:
     [[deprecated]]
@@ -31,31 +27,17 @@ public:
     ) noexcept
         : runtime_error(message),
           m_error(),
-          m_lineNumber(lineNumber),
-          m_columnNumber(columnNumber) {}
-
-    [[deprecated]]
-    SyntaxException(
-        const unsigned lineNumber,
-        const unsigned columnNumber,
-        const char* message
-    ) noexcept
-        : runtime_error(message),
-          m_error(),
-          m_lineNumber(lineNumber),
-          m_columnNumber(columnNumber) {}
+          m_token(TokenType::END, lineNumber, columnNumber) {}
 
     SyntaxException(
-        const unsigned lineNumber,
-        const unsigned columnNumber,
-        const SyntaxError error
+        const SyntaxError error,
+        Token token
     ) noexcept
         : runtime_error(GetErrorMessage(error)),
           m_error(error),
-          m_lineNumber(lineNumber),
-          m_columnNumber(columnNumber) {}
+          m_token(std::move(token)) {}
 
     [[nodiscard]] SyntaxError GetError() const { return m_error; }
-    [[nodiscard]] unsigned GetLine() const { return m_lineNumber; }
-    [[nodiscard]] unsigned GetColumn() const { return m_columnNumber; }
+    [[nodiscard]] unsigned GetLine() const { return m_token.line; }
+    [[nodiscard]] unsigned GetColumn() const { return m_token.column; }
 };

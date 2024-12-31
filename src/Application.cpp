@@ -16,7 +16,7 @@ namespace {
         bool isRunning = true;
         while (isRunning) {
             try {
-                const auto token = lexer.GetToken(symbolTable);
+                const auto token = lexer.GetToken(symbolTable, {});
                 std::string content = TokenAttributeToString(token);
                 output << "<" << ToString(token.type) << ", " << content << ">" << std::endl;
                 if (token.type == TokenType::END) isRunning = false;
@@ -51,7 +51,7 @@ namespace {
     }
 
 
-    int GenerateSymbolsFile(std::istream& input, std::ostream& output) {
+    int GenerateLexicalSymbolsFile(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
         SymbolTables symbolTable;
 
@@ -60,7 +60,7 @@ namespace {
         bool isRunning = true;
         while (isRunning) {
             try {
-                const auto token = lexer.GetToken(symbolTable);
+                const auto token = lexer.GetToken(symbolTable, {});
                 if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
                 std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
@@ -70,24 +70,24 @@ namespace {
             }
         }
 
-        symbolTable.WriteTable(output);
+        symbolTable.WriteLocalTable(output);
 
         return status;
     }
 
-    int GenerateSymbolsFile(std::istream& input, const std::string& outputFileName) {
+    int GenerateLexicalSymbolsFile(std::istream& input, const std::string& outputFileName) {
         std::ofstream symbolsFile(outputFileName.empty() ? "symbols.txt" : outputFileName, std::ios::binary);
-        return GenerateSymbolsFile(input, symbolsFile);
+        return GenerateLexicalSymbolsFile(input, symbolsFile);
     }
 
-    int GenerateSymbolsFile(const std::string& inputFileName, const std::string& outputFileName) {
+    int GenerateLexicalSymbolsFile(const std::string& inputFileName, const std::string& outputFileName) {
         std::ifstream fileStream(inputFileName, std::ios::binary);
         if (!fileStream) {
             std::cerr << "No existe el archivo \"" << inputFileName << "\"." << std::endl;
             return 1;
         }
 
-        return GenerateSymbolsFile(fileStream, outputFileName);
+        return GenerateLexicalSymbolsFile(fileStream, outputFileName);
     }
 
 
@@ -100,7 +100,8 @@ namespace {
 
         try {
             SymbolTables symbolTable;
-            parser.Parse(symbolTable, ss);
+            SemanticState semanticState;
+            parser.Parse(ss, symbolTable, semanticState);
         } catch (const SyntaxException& e) {
             std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
             std::cerr << " ERROR: " << e.what() << std::endl;
@@ -144,6 +145,7 @@ Application::Application(const ApplicationAttributes& attributes) :
         throw std::runtime_error("Se debe especificar una tarea a ejecutar.");
 }
 
+
 int Application::Run() const {
     int result = 0;
 
@@ -158,9 +160,9 @@ int Application::Run() const {
 
     case TaskType::Symbols: {
         if (m_inputFileName.empty())
-            result = GenerateSymbolsFile(std::cin, m_outputFileName);
+            result = GenerateLexicalSymbolsFile(std::cin, m_outputFileName);
         else
-            result = GenerateSymbolsFile(m_inputFileName, m_outputFileName);
+            result = GenerateLexicalSymbolsFile(m_inputFileName, m_outputFileName);
         break;
     }
 

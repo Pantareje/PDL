@@ -18,6 +18,10 @@ add_executable(PDL
         src/Application.h
         src/Application.cpp
         src/Main.cpp
-        src/ApplicationAttributes.h)
+        src/ApplicationAttributes.h
+        src/SemanticState.h
+        src/Parser.cpp
+        src/StringProduct.h
+)
 
 target_link_libraries(PDL PRIVATE ICU::uc)
