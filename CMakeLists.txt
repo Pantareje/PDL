@@ -12,16 +12,19 @@ add_executable(PDL
         src/Token.h
         src/LexicalError.h
         src/Lexer.h
-        src/SymbolTables.h
+        src/SymbolTable.h
         src/Parser.h
         src/SyntaxException.h
         src/Application.h
         src/Application.cpp
         src/Main.cpp
         src/ApplicationAttributes.h
-        src/SemanticState.h
+        src/GlobalState.h
         src/Parser.cpp
-        src/StringProduct.h
+        src/ValueProduct.h
+        src/Symbol.h
+        src/SymbolPos.h
+        src/Lexer.cpp
 )
 
 target_link_libraries(PDL PRIVATE ICU::uc)

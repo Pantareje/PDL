@@ -2,15 +2,13 @@
 
 #include "Lexer.h"
 #include "SyntaxException.h"
-#include "StringProduct.h"
+#include "ValueProduct.h"
 
 #include <sstream>
 
-typedef std::map<std::string, StringProduct> RuleAttributes;
+typedef std::map<std::string, ValueProduct> RuleAttributes;
 
 class Parser {
-    using enum TokenType;
-
     Lexer m_lexer;
     Token m_lastToken;
 
@@ -40,62 +38,62 @@ class Parser {
     }
 
 
-    [[nodiscard]] RuleAttributes Axiom(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Axiom(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Function(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Function(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes FunType(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes FunType(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes VarType(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes VarType(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes FunAttributes(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes FunAttributes(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes NextAttribute(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes NextAttributes(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Body(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Body(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Statement(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Statement(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes AtomStatement(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes AtomStatement(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes IdAct(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes IdAct(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes ForAct(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes ForAct(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Ass(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Ass(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes CallParam(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes CallParams(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes NextParam(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes NextParams(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes ReturnExp(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes ReturnExp(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Exp1(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Exp1(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes ExpOr(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes ExpOr(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Exp2(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Exp2(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes ExpAnd(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes ExpAnd(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Exp3(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Exp3(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Comp(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Comp(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes CompOp(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes CompOp(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Exp4(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Exp4(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes Arith(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes Arith(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes ArithOp(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes ArithOp(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes ExpAtom(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes ExpAtom(std::ostream& output, GlobalState& globals);
 
-    [[nodiscard]] RuleAttributes IdVal(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    [[nodiscard]] RuleAttributes IdVal(std::ostream& output, GlobalState& globals);
 
 public:
     explicit Parser(std::istream& input) : m_lexer(input), m_lastToken() {}
 
-    void Parse(std::ostream& output, SymbolTables& symbolTable, SemanticState& globals);
+    void Parse(std::ostream& output, GlobalState& globals);
 };

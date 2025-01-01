@@ -26,7 +26,10 @@ namespace {
         ArgumentsReader(const int argc, const char* argv[]) : m_argc(argc), m_argv(argv), m_current() {}
 
         ApplicationAttributes GetAttributes() const {
-            ApplicationAttributes attributes = {};
+            ApplicationAttributes attributes = {
+                .taskType = TaskType::None,
+                .useSemantic = false
+            };
 
             m_current = 1;
 
@@ -34,39 +37,32 @@ namespace {
                 if (m_arg == "-t") {
                     if (attributes.taskType != TaskType::None)
                         throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
-
                     attributes.taskType = TaskType::Tokens;
                 } else if (m_arg == "-s") {
                     if (attributes.taskType != TaskType::None)
                         throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
-
                     attributes.taskType = TaskType::Symbols;
                 } else if (m_arg == "-p") {
                     if (attributes.taskType != TaskType::None)
                         throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
-
                     attributes.taskType = TaskType::Parse;
+                } else if (m_arg == "-u") {
+                    attributes.useSemantic = true;
                 } else if (m_arg == "-i") {
                     if (!attributes.inputFileName.empty())
                         throw std::runtime_error("Ya se ha definido un fichero de entrada.");
-
                     if (!GetNextArgument())
                         throw std::runtime_error("Después de «-i» se debe especificar un fichero de entrada.");
-
                     if (m_arg.empty())
                         throw std::runtime_error("El nombre del fichero de entrada no puede estar vacío.");
-
                     attributes.inputFileName = m_arg;
                 } else if (m_arg == "-o") {
                     if (!attributes.outputFileName.empty())
                         throw std::runtime_error("Ya se ha definido un fichero de salida.");
-
                     if (!GetNextArgument())
                         throw std::runtime_error("Después de «-o» se debe especificar un fichero de salida.");
-
                     if (m_arg.empty())
                         throw std::runtime_error("El nombre del fichero de salida no puede estar vacío.");
-
                     attributes.outputFileName = m_arg;
                 } else {
                     throw std::runtime_error(std::format("El argumento «{}» es desconocido.", m_arg));

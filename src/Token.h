@@ -1,5 +1,8 @@
 #pragma once
 
+#include "SymbolPos.h"
+#include "Characters.h"
+
 #include <cassert>
 #include <cstdint>
 #include <string>
@@ -57,7 +60,7 @@ struct Token {
      * El contenido del token. Dependiendo del tipo puede estar vacío
      * o ser un identificador, una cadena, o un entero de 16 bits con signo.
      */
-    std::variant<std::monostate, size_t, std::string, int16_t> attribute {};
+    std::variant<std::monostate, SymbolPos, std::string, int16_t> attribute {};
 };
 
 /**
@@ -139,6 +142,8 @@ constexpr std::string TokenAttributeToString(const auto& token) {
         []<typename U>(U&& arg) -> std::string {
             if constexpr (std::is_same_v<std::decay_t<U>, std::string>)
                 return std::format("\"{}\"", EscapeUtf8String(arg));
+            else if constexpr (std::is_same_v<std::decay_t<U>, SymbolPos>)
+                return (arg.isLocal ? "l" : "g") + std::to_string(arg.pos);
             else if constexpr (std::is_same_v<std::decay_t<U>, std::monostate>)
                 return "";
             else
