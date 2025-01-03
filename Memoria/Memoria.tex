@@ -140,6 +140,10 @@ En esta sección, describimos la Gramática de Contexto Libre (gramática de tip
 
 \input{CondLL1.tex}
 
+\section{TDS - EdT}
+TODO: ponerle un mejor titulo a esta seccion
+\input{TDS.tex}
+
 \section{Pseudo-código con funciones del Analizador Sintáctico}
 
 En esta sección, presentamos el diseño en pseudo-código de las funciones que conforman el Analizador Sintáctico. Para cada símbolo no terminal de la gramática, se implementa una función que sigue un esquema de if-then-else anidado, donde cada rama corresponde a una posible regla. El token recibido desde el Analizador Léxico determina la rama que se ejecuta, iniciando el recorrido del consecuente de la regla seleccionada. Para cada símbolo del consecuente:
