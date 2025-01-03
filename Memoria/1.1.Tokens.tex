@@ -1,0 +1,67 @@
+Tokens obligatorios
+
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabular}{|l|l|l|}
+        \hline
+		\rowcolor{gray!20} % color grisáceo en la cabecera de la tabla
+        \textbf{Elemento} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
+        boolean & bool & - \\ \hline
+        for & for & - \\ \hline
+        function & fn & - \\ \hline
+        if & if & - \\ \hline
+        input & in & - \\ \hline
+        int & int & - \\ \hline
+        output & out & - \\ \hline
+        return & ret & - \\ \hline
+        string & str & - \\ \hline
+        var & var & - \\ \hline
+        void & void & - \\ \hline
+        constante entera & cint & Número \\ \hline
+        Cadena (') & cstr & Cadena ("c*") \\ \hline
+		Identificador & id & Número (posición en la TS) \\ \hline
+        += & cumass & - \\ \hline
+        = & ass & - \\ \hline
+        , & com & - \\ \hline
+        ; & scol & - \\ \hline
+        ( & po & - \\ \hline
+        ) & pc & - \\ \hline
+        \{ & cbo & - \\ \hline
+        \} & cbc & - \\ \hline
+    \end{tabular}
+\end{table}
+
+Tokens de operadores aritméticos, lógicos y relacionales:
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabular}{|l|l|l|}
+        \hline
+		\rowcolor{gray!20} % color grisaceo en la cabecera de la tabla
+        \textbf{Grupo de Opciones} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
+        Grupo Operadores Aritméticos: Suma (+) & sum & - \\ \hline
+        Grupo Operadores Aritméticos: Resta (-) & sub & - \\ \hline
+        Grupo Operadores Lógicos: Y lógico (\&\&) & and & - \\ \hline
+        Grupo Operadores Lógicos: O lógico (\texttt{||}) & or & - \\ \hline
+        Grupo Operadores Relacionales: Menor (\textless) & ls & - \\ \hline
+        Grupo Operadores Relacionales: Mayor (\textgreater) & gr & - \\ \hline
+    \end{tabular}
+\end{table}
+
+Tokens opcionales:
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabular}{|l|l|l|}
+        \hline
+		\rowcolor{gray!20} % color grisáceo en la cabecera de la tabla
+        \textbf{Grupo de Opciones} & \textbf{Código de Token} & \textbf{Atributo} \\ \hline
+        %Estas dos las quitamos al final
+        %Menos Unario (-) & sub & - \\ \hline
+        %Más Unario (+) & sum & - \\ \hline
+        false & cap & - \\ \hline
+        true & nocap & - \\ \hline
+        EOF & eof & - \\ \hline
+    \end{tabular}
+\end{table}

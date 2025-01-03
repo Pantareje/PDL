@@ -1,0 +1,49 @@
+La Tabla de Símbolos Global es esencialmente una colección de entradas, donde cada entrada corresponde a un símbolo (un identificador). Cada símbolo tiene varios atributos dependiendo de su tipo (por ejemplo, una variable, una función, un array, etc.). Sin embargo, este proyecto requiere de la existencia de Tablas Locales. Estas almacenan información sobre los identificadores dentro de un alcance específico. \\
+
+Es por esta razón que nuestra Tabla de Símbolos tiene una estructura de pila de tablas de símbolos. Cuando se ingresa a un nuevo bloque de código (por ejemplo, al ingresar a una función), se puede crear una nueva tabla local que se apila encima de la tabla global o de las tablas locales anteriores. Cuando se sale del bloque, se elimina la tabla local, y el procesador de lenguajes vuelve a la tabla local anterior o a la global.
+
+Nuestra estructura principal de la Tabla de Símbolos incluye:
+
+\begin{itemize}
+  \item \textbf{Struct Symbol}: Cada símbolo contiene la siguiente información:
+  \begin{itemize}
+    \item \textbf{Lexema}: nombre del identificador
+    \item \textbf{Atributos específicos}: que pueden ser cualquier par clave-valor, como tipo, desplazamiento, número de parámetros, etc.
+    \item \textbf{Tipo de identificador} (opcional): puede agregarse para especificar el tipo del identificador
+  \end{itemize}
+
+  \item \textbf{Clase SymbolTables}: La clase principal que gestiona las tablas de símbolos:
+  \begin{itemize}
+    \item \textbf{Clase Table}: Una tabla de símbolos que contiene:
+        \begin{itemize}
+            \item \textbf{Identificador de tabla}: único para cada tabla
+            \item \textbf{Lista de símbolos}: vector con los símbolos de la tabla.
+            \item \textbf{Mapa de nombres a posiciones}: un mapa que asocia los nombres de los símbolos con sus posiciones en el vector.
+            \item \textbf{Métodos}: 
+            \begin{itemize}
+                \item \textbf{AddSymbol}: Agrega un nuevo símbolo a la tabla y retorna su posición.
+                \item \textbf{AddAttribute}: Agrega un atributo al símbolo en la posición indicada.
+                \item \textbf{SearchSymbol}: Busca un símbolo por su nombre en la tabla y devuelve su posición si lo encuentra.
+                \item \textbf{WriteTable}: Escribe el contenido de la tabla por consola.
+            \end{itemize}
+        \end{itemize}
+    \item \textbf{Contador de tablas}: para asignar un identificador único a cada tabla creada.
+    \item \textbf{Lista de tablas}: un vector que contiene las tablas de símbolos en orden jerárquico.
+    \item \textbf{Métodos para gestionar tablas y símbolos}: 
+        \begin{itemize}          
+            \item \textbf{CreateTable()}: Crea una nueva tabla de símbolos y la agrega a la lista de tablas. 
+          
+            \item \textbf{DestroyTable()}: Elimina la tabla de símbolos más reciente de la lista de tablas.
+          
+            \item \textbf{AddSymbol()}: Agrega un nuevo símbolo a la tabla más reciente, dado su nombre.
+          
+            \item \textbf{AddGlobalSymbol()}: Agrega un símbolo a la tabla global.
+          
+            \item \textbf{AddAttribute()}: Agrega un atributo a un símbolo específico en la tabla más reciente, dado su índice, el nombre del atributo y su valor.
+          
+            \item \textbf{SearchSymbol()}: Busca un símbolo en todas las tablas (empezando desde la tabla más reciente) y devuelve su posición si es encontrado.
+          
+            \item \textbf{WriteTable()}: Escribe la tabla de símbolos más reciente por consola.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}

@@ -1,0 +1,184 @@
+\documentclass{article}
+
+% Soporte para Unicode.
+% En vez de usar pdflatex, usa el comando xelatex.
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setmonofont{JetBrains Mono}
+
+\usepackage[margin=1in]{geometry} % márgenes de la página
+\usepackage{enumitem} % para listas personalizadas
+\usepackage{fancyhdr} % para encabezados y pies de página
+\usepackage[table]{xcolor} % para colores en tablas
+\usepackage{xcolor} % para colores personalizados
+\usepackage{hyperref} % para enlaces
+\usepackage{tikz} % para dibujar diagramas (AFD)
+\usepackage[most]{tcolorbox} % para cajas de texto
+\usepackage{indentfirst} % para la sangría al iniciar una sección
+\usepackage{listings} % para los códigos del anexo
+
+\setlength{\headheight}{13.07225pt}
+\addtolength{\topmargin}{-1.07225pt}
+
+\pagestyle{fancy}
+\fancyhead[L]{Grupo 7}
+\fancyhead[C]{}
+\fancyfoot[L]{Práctica 2 - Procesadores de Lenguajes}
+\fancyfoot[C]{}
+\fancyfoot[R]{\thepage}
+
+\title{\textbf{Práctica 2 - Procesadores de Lenguajes}}
+\author{\textbf{Grupo 7}\\Carmen Toribio Pérez, 22M009\\Sergio Gil Atienza, 22M046\\María Moronta Carrión, 22M111}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introducción}
+
+La primera entrega de esta práctica consistió en la implementación de un \textbf{Analizador Léxico} y una \textbf{Tabla de Símbolos}. Para ello, seguimos los siguientes pasos: 
+\begin{enumerate}
+    \item \textbf{Identificar los Tokens} del lenguaje fuente, teniendo en cuenta las especificaciones de nuestro grupo.
+    \item Construir la \textbf{Gramática Regular} que los genera.
+    \item Diseñar el \textbf{Autómata Finito Determinista} equivalente a la gramática. Hemos realizado una representación de este a través de un \textbf{diagrama de estados}.
+    \item Añadir las \textbf{Acciones Semánticas}, asociadas a cada una de las transiciones del diagrama de estados.
+    \item Estudiar los posibles \textbf{casos de error}, para poder manejar correctamente la detección y el reporte de errores léxicos. 
+    \item Comienzo de la implementación de la \textbf{Tabla de Símbolos}, concretamente con el diseño de su estructura y su organización.
+    \item Demostración del \textbf{funcionamiento del programa del Analizador Léxico}, gracias a la presentación de una serie de casos de prueba.
+\end{enumerate}
+ 
+Esta segunda entrega consiste en la implementación de un \textbf{Analizador Sintáctico}, para lo cual hemos seguido los siguientes pasos:
+
+\begin{enumerate}
+    \setcounter{enumi}{7}
+    \item \textbf Construir la \textbf{Gramática de Contexto Libre} basándonos en las reglas del lenguaje fuente.
+    \item Demostración de que se trata de una \textbf{Gramática LL(1)}
+    \item Diseño en pseudo-código de las \textbf{funciones del Analizador} (una por cada símbolo no terminal de la gramática).
+    \item Demostración del \textbf{funcionamiento del programa del Analizador Sintáctico}, gracias a la presentación de una serie de casos de prueba.
+\end{enumerate}
+
+Como integrantes del \textbf{grupo 7}, hemos tenido que cumplir con las siguientes especificaciones: 
+\begin{itemize}[left=2cm]
+    \item Sentencias: Sentencia repetitiva (for)
+    \item Operadores especiales: Asignación con suma (+=)
+    \item Técnicas de Análisis Sintáctico: Descendente Recursivo
+    \item Comentarios: Comentario de bloque (/* */)
+    \item Cadenas: Con comillas simples (' ')
+\end{itemize}
+
+%Hemos decidido usar C++ como lenguaje de programación ya que la mayor parte de la infraestructura de compiladores está escrita en C o en C++, incluyendo MSVC (desarrollado por Microsoft) y el proyecto LLVM (utilizado por Google en Android). También hemos tenido en cuenta su flexibilidad y potencia, junto a la amplia variedad de utilidades que tiene su librería estándar. En comparación con lenguajes como Java o JavaScript, C++ ofrece mayor eficiencia y control sobre los recursos del sistema, a la vez que se mantiene versátil y permite escribir código legible.
+
+\newpage
+
+\section{Tokens}
+El primer paso a la hora de construir un Analizador Léxico es la identificación de los tokens. Para hacer la lista nos hemos basado en la actividad práctica de la plataforma Draco. Hemos decidido utilizar el mismo formato en tablas con tal de facilitar su legibilidad.\\
+Tokens obligatorios:
+
+\input{Tokens.tex}
+
+Por tanto, los siguientes tipos de expresiones no serán identificados como tokens: los delimitadores (como los espacios en blanco o las tabulaciones), los comentarios de bloque (/* */) o los saltos de línea (\textbackslash n).
+
+\section{Gramática Regular del Analizador Léxico}
+
+En esta sección, describimos la Gramática Regular (gramática de tipo 3 según la jerarquía de Chomsky) que hemos diseñado para identificar y generar los tokens del lenguaje fuente. 
+
+\input{GramaticaLex.tex}
+
+\section{Autómata Finito Determinista}
+Una vez definida la gramática regular, el siguiente paso es construir el Autómata Finito Determinista (AFD) correspondiente. A continuación, presentamos su diseño, incluyendo las transiciones entre estados.
+
+\input{AFD.tex}
+
+\section{Acciones semánticas}
+A lo largo de esta sección, describimos las acciones semánticas que hemos añadido a las transiciones del Autómata Finito Determinista. Estas acciones permiten que se lleven a cabo acciones como la lectura, la identificación de los tokens o, en su lugar, una correcta gestión de los errores léxicos. A continuación, detallamos las operaciones utilizadas y, por legibilidad en el AFD, las transiciones en las que se realiza cada una:\\
+\input{AccSemanticas.tex}
+
+\section{Gestión de errores}
+\input{Errores.tex}
+
+Para ilustrar mejor el comportamiento del programa, en la sección 8 presentamos varios casos en los que demostramos cómo el analizador maneja la detección de errores.
+
+\section{Tabla de Símbolos}
+Dado que en esta parte de la práctica aún no hemos implementado el \textbf{analizador semántico}, nuestra tabla de símbolos es única y global. Por el momento, simplemente almacena los identificadores que el analizador léxico encuentre, y carecerá de atributos más allá del nombre del propio identificador.
+
+\section{Funcionamiento del programa del Analizador Léxico}
+El programa que hemos elaborado comienza leyendo el código fuente que le proporcionamos. Lo analiza carácter por carácter, reconociendo los tokens que hemos definido en el punto 2. Para ello, el Analizador Léxico se basa en la gramática regular que genera nuestro Autómata Finito Determinista.
+
+A medida que encuentra identificadores los almacena en la tabla de símbolos si es necesario. Si encuentra delimitadores o comentarios de bloque, los ignora. Además, el programa está preparado para detectar errores, generando mensajes claros y concisos que indican el tipo de error y la ubicación exacta, con tal de facilitar la corrección por parte del usuario. Al finalizar la ejecución, queda completo un informe con todos los tokens que el programa ha reconocido durante el análisis, y los posibles errores que haya encontrado.
+
+En el \textbf{anexo} es posible encontrar múltiples ejemplos que demuestran el funcionamiento correcto del programa. Los tres primeros son favorables y los tres últimos muestran diversos casos de error. A continuación incluimos una breve explicación de cada uno:
+
+\begin{itemize}
+    \item \textbf{Caso 1:} El programa reconoce declaraciones válidas, como la asignación de tipos a variables y la asignación de identificadores, como lo que ocurre con el tipo «bool» (tratado como un identificador).
+    
+    \item \textbf{Caso 2:} Muestra el funcionamiento adecuado de una función println (para imprimir mensajes), con lo que se puede apreciar la correcta gestión de cadenas y el uso de saltos de línea.
+    
+    \item \textbf{Caso 3:} Demuestra la capacidad del programa para comparar variables de entrada y ejecutar operaciones matemáticas.
+    
+    \item \textbf{Caso 4:} Ilustra un error léxico causado por un comentario de bloque no cerrado, que resulta en un fin de fichero inesperado.
+    
+    \item \textbf{Caso 5:} Muestra que hay caracteres no permitidos al inicio de un token y que se produce un error si declaramos variables que no cumplen con las convenciones, como empezar por «\_».
+    
+    \item \textbf{Caso 6:} Resalta cómo el programa continúa buscando tokens válidos a pesar de haber errores en el código, lo que permite depurar varios errores en una sola ejecución.
+\end{itemize}
+
+Con esto, demostramos el funcionamiento del programa en diferentes situaciones, desde el reconocimiento de declaraciones válidas hasta la gestión de errores léxicos. Estos resultados serán completados gracias a la segunda entrega del proyecto, que se centrará en el desarrollo del Analizador Sintáctico.
+
+\newpage
+
+\section{Gramática de Contexto Libre del Analizador Sintáctico}
+
+En esta sección, describimos la Gramática de Contexto Libre (gramática de tipo 2 según la jerarquía de Chomsky) que hemos diseñado para representar la estructura sintáctica del lenguaje fuente.
+
+\input{GramaticaSin.tex}
+
+\newpage
+
+\section{Comprobación de la condición LL(1)}
+
+\input{CondLL1.tex}
+
+\section{TDS - EdT}
+TODO: ponerle un mejor titulo a esta seccion
+\input{TDS.tex}
+
+\section{Pseudo-código con funciones del Analizador Sintáctico}
+
+En esta sección, presentamos el diseño en pseudo-código de las funciones que conforman el Analizador Sintáctico. Para cada símbolo no terminal de la gramática, se implementa una función que sigue un esquema de if-then-else anidado, donde cada rama corresponde a una posible regla. El token recibido desde el Analizador Léxico determina la rama que se ejecuta, iniciando el recorrido del consecuente de la regla seleccionada. Para cada símbolo del consecuente:
+
+\begin{itemize}
+    \item Si resulta ser un terminal, se equipara con el token actual. En el caso de que coincidan, se le solicita un nuevo token al Analizador Léxico y, si no, se genera un error sintáctico. 
+    \item Si es un no terminal, se realiza una llamada recursiva a la función correspondiente. El main del Analizador Sintáctico inicia con la solicitud del primer token y llamando a la función del axioma. 
+\end{itemize}
+
+Si al terminar esta función la cadena se ha procesado por completo, el análisis concluye con éxito. En caso contrario, se reporta un error sintáctico. En el anexo B presentamos la estructura de dichas funciones.
+
+\section{Funcionamiento del programa del Analizador Sintáctico}
+El programa realizado toma como entrada los tokens generados por el Analizador Léxico y los organiza siguiendo las reglas gramaticales que hemos definido previamente. Este proceso verifica que el código fuente cumple con la estructura sintáctica esperada, generando un fichero de parse o detectando errores. Gracias a la herramienta VASt y la gramática es posible visualizar los árboles sintácticos.
+
+En el \textbf{anexo} es posible encontrar múltiples ejemplos que demuestran el funcionamiento correcto del programa. Los tres primeros son favorables y los tres últimos muestran casos de error. A continuación incluimos una breve explicación de cada uno:
+
+\begin{itemize}
+    \item \textbf{Caso 1:} Demuestra que el Analizador Sintáctico reconoce declaraciones de nivel superior como válidas, incluyendo declaraciones repetidas de variables, que no son errores sintácticos, sino semánticos.
+
+    \item \textbf{Caso 2:} Ilustra el reconocimiento de funciones, con su declaración y sus llamadas posteriores. El programa maneja de forma correcta las cadenas y los saltos de línea.
+    
+    \item \textbf{Caso 3:} Demuestra la capacidad del programa para realizar operaciones matemáticas básicas y comparaciones entre variables. Además, las variables sin declarar se consideran globales y enteras por defecto.
+    
+    \item \textbf{Caso 4:} Muestra cómo el analizador detecta un error al intentar declarar una variable con un tipo inexistente.
+    
+    \item \textbf{Caso 5:} Ilustra un caso en el que el tipo void se utiliza incorrectamente para una variable. Aunque es válido para funciones sin retorno, no se permite en variables.
+    
+    \item \textbf{Caso 6:} Incluye una expresión que no realiza ninguna acción sobre un identificador. El analizador detecta este error mientras permite procesar otras partes del código.
+\end{itemize}
+
+Con esto demostramos el funcionamiento del Analizador Sintáctico poniendo en manifiesto su capacidad de procesar correctamente código y de identificar errores con mensajes claros y precisos. Este trabajo se verá ampliado con el desarrollo del Analizador Semántico, que se encargará de verificar reglas contextuales y la validez de los tipos de datos en el código fuente.
+
+\newpage
+
+\input{Anexo.tex}
+\newpage
+
+\end{document}

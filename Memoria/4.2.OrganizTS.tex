@@ -1,0 +1,28 @@
+En cuanto a la organización de la tabla de símbolos, se trata de un mecanismo que permite estructurar y gestionar los identificadores en un programa de manera eficiente, para que se pueda acceder a ellos correctamente.
+
+\begin{enumerate}
+    \item \textbf{Tablas Globales y Locales:}
+    \begin{itemize}
+        \item La \textbf{tabla global} contiene símbolos con alcance global, es decir, aquellos que pueden ser utilizados en cualquier parte del programa.
+        \item Las \textbf{tablas locales} contienen símbolos con alcance local, que solo son accesibles dentro de la función o bloque donde se han declarado.
+    \end{itemize}
+
+    \item \textbf{Estructura de las Tablas:}
+    \begin{itemize}
+        \item Cada tabla de símbolos (global o local) puede organizarse como una lista de entradas por el nombre del símbolo.
+        \item Cada entrada en la tabla contiene información relevante sobre el símbolo, como su nombre, tipo, atributos adicionales, desplazamiento en memoria, o tipo de retorno en caso de funciones.
+    \end{itemize}
+
+    \item \textbf{Organización Jerárquica:}
+    \begin{itemize}
+        \item Las tablas de símbolos se organizan en una \textbf{jerarquía}. Las tablas locales pueden referirse a símbolos definidos en tablas globales.
+    \end{itemize}
+
+    \item \textbf{Relación entre Tablas:}
+    \begin{itemize}
+        \item Las tablas locales y globales se relacionan para gestionar el alcance de los símbolos.
+        \item Los símbolos locales y globales pueden compartir nombres sin interferir, ya que se encuentran en tablas separadas, lo que evita conflictos de nombres.
+        \item Para \textbf{acceder a un símbolo}, el programa primero consulta la tabla local asociada al bloque o función actual. Si el símbolo no se encuentra allí, se consulta la tabla global.
+    \end{itemize}
+
+\end{enumerate}
