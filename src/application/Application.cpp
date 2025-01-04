@@ -1,18 +1,18 @@
 #include "Application.h"
-#include "Parser.h"
+
+#include "language/process/Lexer.h"
+#include "language/process/Parser.h"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <format>
 
 namespace {
     void LogCriticalError(const CriticalLanguageException& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "ERROR CRÍTICO: " << e.what() << std::endl;
     }
-}
 
-namespace {
+
     int GenerateTokens(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
         GlobalState globals = {

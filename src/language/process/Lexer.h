@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Token.h"
-#include "LexicalError.h"
-#include "GlobalState.h"
+#include "language/core/Token.h"
+#include "language/errors/LexicalError.h"
+#include "language/core/GlobalState.h"
 
 class Lexer {
     std::istream& m_input;

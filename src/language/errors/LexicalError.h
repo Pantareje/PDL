@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Characters.h"
+#include "language/core/Characters.h"
 
 #include <stdexcept>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LexicalError.h"
-#include "SyntaxException.h"
+#include "language/errors/LexicalError.h"
+#include "language/errors/SyntaxError.h"
 
 class Lexer;
 class Parser;

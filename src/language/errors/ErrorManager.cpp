@@ -1,6 +1,7 @@
 #include "ErrorManager.h"
 
-#include "Lexer.h"
+#include "language/process/Lexer.h"
+#include "language/process/Parser.h"
 
 #include <iostream>
 

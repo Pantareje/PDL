@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Lexer.h"
-#include "SyntaxException.h"
-#include "ValueProduct.h"
+#include "language/process/Lexer.h"
+#include "language/errors/SyntaxError.h"
+#include "language/core/ValueProduct.h"
 
 #include <sstream>
 

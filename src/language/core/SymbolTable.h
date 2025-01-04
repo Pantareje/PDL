@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Symbol.h"
+#include "language/core/Symbol.h"
 
 #include <cassert>
 #include <vector>

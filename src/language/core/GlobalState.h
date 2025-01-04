@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ErrorManager.h"
-#include "SymbolTable.h"
-#include "ValueProduct.h"
+#include "language/errors/ErrorManager.h"
+#include "language/core/ValueProduct.h"
+#include "language/core/SymbolTable.h"
 
 #include <cstdio>
 

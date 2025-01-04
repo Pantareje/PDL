@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ApplicationAttributes.h"
+#include "application/ApplicationAttributes.h"
 
 class Application {
     TaskType m_taskType;

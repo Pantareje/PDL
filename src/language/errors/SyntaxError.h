@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Token.h"
+#include "language/core/Token.h"
 
 #include <stdexcept>
 #include <utility>

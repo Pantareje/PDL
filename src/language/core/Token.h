@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SymbolPos.h"
-#include "Characters.h"
+#include "language/core/Characters.h"
+#include "language/core/SymbolPos.h"
 
 #include <cassert>
 #include <cstdint>
