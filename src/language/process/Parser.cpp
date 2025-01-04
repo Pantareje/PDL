@@ -207,7 +207,7 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
             LogSemanticError(
                 globals,
                 funType,
-                SemanticError::INCOHERENT_TYPES,
+                SemanticError::INVALID_RETURN_TYPE,
                 std::format(
                     "El tipo de retorno de la función «{}» («{}») no coincide con el "
                     "devuelto («{}»).",
@@ -695,7 +695,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
                 LogSemanticError(
                     globals,
                     exp1,
-                    SemanticError::INVALID_TYPE,
+                    SemanticError::INVALID_FOR_CONDITION_TYPE,
                     std::format(
                         "El segundo argumento de «for» debe ser de tipo «boolean». El tipo "
                         "evaluado es «{}».",
@@ -836,7 +836,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                     LogSemanticError(
                         globals,
                         idAct,
-                        SemanticError::VARIABLE_AS_FUNCTION,
+                        SemanticError::INCOHERENT_VARIABLE_AS_FUNCTION_TYPES,
                         "No se puede llamar a una variable como si fuera una función."
                     );
                 } else if (idAct.at(aType) == tError) {
@@ -848,7 +848,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                     LogSemanticError(
                         globals,
                         idAct,
-                        SemanticError::INCOHERENT_TYPES,
+                        SemanticError::INCOHERENT_CALL_PARAM_TYPES,
                         std::format(
                             "Los tipos de los argumentos de llamada a la función no "
                             "coinciden con los de la definición. Se esperaba «{}», "
@@ -864,7 +864,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                     LogSemanticError(
                         globals,
                         idAct,
-                        SemanticError::FUNCTION_AS_VARIABLE,
+                        SemanticError::INCOHERENT_FUNCTION_AS_VARIABLE_TYPES,
                         "No se puede asignar valores a una función."
                     );
                 } else if (idAct.at(aType) == tError) {
@@ -923,7 +923,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                 LogSemanticError(
                     globals,
                     exp1,
-                    SemanticError::INVALID_TYPE,
+                    SemanticError::INVALID_OUTPUT_TYPE,
                     std::format(
                         "Una expresión con tipo «{}» no se puede mostrar con «output». "
                         "«output» permite mostrar «int» y «string».",
@@ -971,7 +971,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                 LogSemanticError(
                     globals,
                     id,
-                    SemanticError::INVALID_TYPE,
+                    SemanticError::INVALID_INPUT_TYPE,
                     std::format(
                         "Un objeto tipo «{}» no se puede usar con «input». "
                         "«input» acepta variables de tipo «int» o «string»",
@@ -1140,7 +1140,7 @@ Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
                 LogSemanticError(
                     globals,
                     forAct,
-                    SemanticError::INVALID_TYPE,
+                    SemanticError::INVALID_FOR_ACTION_TYPE,
                     std::format(
                         "El tipo de una variable en «for» debe de ser «int». El tipo actual es «{}».",
                         type.ToReadableString()
@@ -2041,7 +2041,7 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                     LogSemanticError(
                         globals,
                         idVal,
-                        SemanticError::VARIABLE_AS_FUNCTION,
+                        SemanticError::INCOHERENT_VARIABLE_AS_FUNCTION_TYPES,
                         "No se puede llamar a una variable como si fuera una función."
                     );
                 } else if (idVal.at(aType) == tError) {
@@ -2053,7 +2053,7 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                     LogSemanticError(
                         globals,
                         idVal,
-                        SemanticError::INCOHERENT_TYPES,
+                        SemanticError::INCOHERENT_CALL_PARAM_TYPES,
                         std::format(
                             "Los tipos de los argumentos de llamada a la función no "
                             "coinciden con los de la definición. Se esperaba «{}», "
@@ -2069,26 +2069,11 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                     LogSemanticError(
                         globals,
                         idVal,
-                        SemanticError::FUNCTION_AS_VARIABLE,
+                        SemanticError::INCOHERENT_FUNCTION_AS_VARIABLE_TYPES,
                         "No se puede asignar valores a una función."
                     );
-                } else if (type == tInt) {
-                    expAtom[aType] = tInt;
-                } else if (type == tStr) {
-                    expAtom[aType] = tStr;
-                } else if (type == tLog) {
-                    expAtom[aType] = tLog;
                 } else {
-                    expAtom[aType] = tError;
-                    LogSemanticError(
-                        globals,
-                        id,
-                        SemanticError::INVALID_TYPE,
-                        std::format(
-                            "Tipo de variable «{}» ilegal.",
-                            type.ToReadableString()
-                        )
-                    );
+                    expAtom[aType] = type;
                 }
             }
         }
