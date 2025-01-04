@@ -21,6 +21,7 @@ add_executable(PDL
         src/language/core/GlobalState.h
         src/language/errors/LexicalError.h
         src/language/errors/SyntaxError.h
+        src/language/errors/SemanticError.h
         src/language/errors/ErrorManager.h
         src/language/errors/ErrorManager.cpp
         src/language/process/Lexer.h

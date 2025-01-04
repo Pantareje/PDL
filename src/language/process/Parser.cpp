@@ -40,42 +40,41 @@ namespace {
 
         const auto& values = type.GetStrings();
 
-        ValueProduct result = {};
+        ValueProduct res = {};
 
         if (values.size() == 2) {
-            result.Append(tVoid);
+            res.Append(tVoid);
         } else {
             for (size_t i = 2; i < values.size(); i++) {
-                result.Append(values[i]);
+                res.Append(values[i]);
             }
         }
 
-        return result;
+        return res;
     }
 }
 
 using enum TokenType;
 
-// HECHO
-RuleAttributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
-    RuleAttributes axiom = {};
+Parser::Attributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef axiom = CreateRuleAttributes();
 
     // P -> FUNCTION P | STATEMENT P | eof
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (FUNCTION P)
     case FUNCTION: {
         WriteParse(output, globals, 1);
 
         // ------ //
-        
+
         (void) Function(output, globals);
 
         // ------ //
-        
+
         (void) Axiom(output, globals);
 
         // ------ //
-        
+
         break;
     }
 
@@ -90,15 +89,15 @@ RuleAttributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
         WriteParse(output, globals, 2);
 
         // ------ //
-        
+
         (void) Statement(output, globals);
 
         // ------ //
-        
+
         (void) Axiom(output, globals);
 
         // ------ //
-        
+
         break;
     }
 
@@ -107,34 +106,35 @@ RuleAttributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
         WriteParse(output, globals, 3);
 
         // ------ //
-        
+
         break;
     }
 
     default:
-        ThrowSyntaxError(
-            "Instancia incorrecta: "
-            "Se esperaba una instancia o una declaración de función."
-        );
+        ThrowSyntaxError(SyntaxError::TOP_LEVEL_INVALID);
     }
 
-    return axiom;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
-    RuleAttributes function = {};
+Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef function = CreateRuleAttributes();
 
     // FUNCTION -> function FUNTYPE id ( FUNATTRIBUTES ) { BODY }
 
-    assert(m_lastToken.type == FUNCTION);
+    assert(m_currentToken.type == FUNCTION);
     WriteParse(output, globals, 4);
 
     // ------ //
 
     if (globals.useSemantic) {
         if (globals.localTable.has_value()) {
-            LogSemanticError(globals, "TODO: NO SE PERMITEN FUNCIONES ANIDADAS."); // TODO
+            LogSemanticError(
+                globals,
+                function,
+                SemanticError::FUNCTION_NESTED,
+                "No se puede declarar una función dentro de otra función."
+            );
         }
 
         globals.implicitDeclaration = false;
@@ -148,13 +148,9 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     // ------ //
 
-    VerifyTokenType(
-        IDENTIFIER,
-        "Declaración de función incorrecta: "
-        "Se esperaba el nombre de la función."
-    );
+    VerifyTokenType(IDENTIFIER, SyntaxError::FUNCTION_MISSING_IDENTIFIER);
 
-    const auto id = m_lastToken;
+    const auto id = m_currentToken;
 
     if (globals.useSemantic) {
         globals.localTable = SymbolTable(globals.tableCounter);
@@ -166,11 +162,7 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     // ------ //
 
-    VerifyTokenType(
-        PARENTHESIS_OPEN,
-        "Declaración de función incorrecta: "
-        "Falta un paréntesis de apertura para declarar los parámetros de la función."
-    );
+    VerifyTokenType(PARENTHESIS_OPEN, SyntaxError::FUNCTION_MISSING_PAREN_OPEN);
 
     GetNextToken(globals);
 
@@ -182,9 +174,15 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
         const auto& pos = std::get<SymbolPos>(id.attribute);
 
         if (globals.HasType(pos)) {
-            LogSemanticError(globals, "TODO: YA EXISTE UN IDENTIDICADOR CON ESE NOMBRE."); // TODO
+            LogSemanticError(
+                globals,
+                id,
+                SemanticError::IDENTIFIER_ALREADY_EXISTS,
+                "El nombre de la función ya está en uso."
+            );
         } else {
             globals.AddFunctionType(pos, funType.at(aType), funAttributes.at(aType));
+            globals.AddFunctionTag(pos);
         }
 
         globals.implicitDeclaration = true;
@@ -192,21 +190,13 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     // ------ //
 
-    VerifyTokenType(
-        PARENTHESIS_CLOSE,
-        "Declaración de función incorrecta: "
-        "Falta un paréntesis de cierre tras declarar los parámetros de la función."
-    );
+    VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::FUNCTION_MISSING_PAREN_CLOSE);
 
     GetNextToken(globals);
 
     // ------ //
 
-    VerifyTokenType(
-        CURLY_BRACKET_OPEN,
-        "Declaración de función incorrecta: "
-        "Es necesario abrir el cuerpo de la función con una llave «{»."
-    );
+    VerifyTokenType(CURLY_BRACKET_OPEN, SyntaxError::FUNCTION_MISSING_BRACK_OPEN);
 
     GetNextToken(globals);
 
@@ -216,18 +206,24 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     // ------ //
 
-    VerifyTokenType(
-        CURLY_BRACKET_CLOSE,
-        "Declaración de función incorrecta: "
-        "Es necesario cerrar el cuerpo de la función con una llave «}»."
-    );
+    VerifyTokenType(CURLY_BRACKET_CLOSE, SyntaxError::FUNCTION_MISSING_BRACK_CLOSE);
 
     if (globals.useSemantic) {
-        if (body.at(aType) != tOk) {
-            LogSemanticError(globals, "TODO: ERROR EN EL CUERPO DE LA FUNCIÓN"); // TODO
-        }
-        if (body.at(aRetType) != funType.at(aType)) {
-            LogSemanticError(globals, "TODO: TIPO DE RETORNO INCOHERENTE"); // TODO
+        if (funType.at(aType) != body.at(aRetType)) {
+            const auto& pos = std::get<SymbolPos>(id.attribute);
+
+            LogSemanticError(
+                globals,
+                funType,
+                SemanticError::INCOHERENT_TYPES,
+                std::format(
+                    "El tipo de retorno de la función «{}» («{}») no coincide con el "
+                    "devuelto («{}»).",
+                    globals.GetSymbolName(pos),
+                    funType.at(aType).ToReadableString(),
+                    body.at(aRetType).ToReadableString()
+                )
+            );
         }
 
         WriteCurrentTable(output, globals);
@@ -238,15 +234,14 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     // ------ //
 
-    return function;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::FunType(std::ostream& output, GlobalState& globals) {
-    RuleAttributes funType = {};
+Parser::Attributes Parser::FunType(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef funType = CreateRuleAttributes();
 
-    // FUNTYPE -> RuleAttributes | VARTYPE
-    switch (m_lastToken.type) {
+    // FUNTYPE -> [[maybe_unused]] RuleAttributesPos | VARTYPE
+    switch (m_currentToken.type) {
     // First (void)
     case VOID: {
         WriteParse(output, globals, 5);
@@ -284,21 +279,17 @@ RuleAttributes Parser::FunType(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            "Declaración de función incorrecta: "
-            "Se esperaba el tipo de retorno de la función (int, boolean, string) o «void»."
-        );
+        ThrowSyntaxError(SyntaxError::FUNTYPE_INVALID);
     }
 
-    return funType;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::VarType(std::ostream& output, GlobalState& globals) {
-    RuleAttributes varType = {};
+Parser::Attributes Parser::VarType(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef varType = CreateRuleAttributes();
 
     // VARTYPE -> int | boolean | string
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (int)
     case INT: {
         WriteParse(output, globals, 7);
@@ -354,21 +345,20 @@ RuleAttributes Parser::VarType(std::ostream& output, GlobalState& globals) {
     }
 
     case VOID:
-        ThrowSyntaxError("Una variable no puede ser de tipo «void».");
+        ThrowSyntaxError(SyntaxError::VARTYPE_VOID);
 
     default:
-        ThrowSyntaxError("Tipo de variable desconocido.");
+        ThrowSyntaxError(SyntaxError::VARTYPE_INVALID);
     }
 
-    return varType;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals) {
-    RuleAttributes funAttributes = {};
+Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef funAttributes = CreateRuleAttributes();
 
-    // FUNATTRIBUTES -> RuleAttributes | VARTYPE id NEXTATTRIBUTES
-    switch (m_lastToken.type) {
+    // FUNATTRIBUTES -> [[maybe_unused]] RuleAttributesPos | VARTYPE id NEXTATTRIBUTES
+    switch (m_currentToken.type) {
     // First (void)
     case VOID: {
         WriteParse(output, globals, 10);
@@ -398,20 +388,21 @@ RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        VerifyTokenType(
-            IDENTIFIER,
-            "Declaración de función incorrecta: "
-            "Se espera el nombre del atributo tras declarar su tipo."
-        );
+        VerifyTokenType(IDENTIFIER, SyntaxError::FUNATTRIBUTES_MISSING_IDENTIFIER);
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         if (globals.useSemantic) {
             const auto& pos = std::get<SymbolPos>(id.attribute);
 
             if (globals.HasType(pos)) {
                 funAttributes[aType] = tError;
-                LogSemanticError(globals, "TODO: YA EXISTE UN ATRIBUTO CON ESE NOMBRE."); // TODO
+                LogSemanticError(
+                    globals,
+                    id,
+                    SemanticError::IDENTIFIER_ALREADY_EXISTS,
+                    "El nombre de este atributo ya está en uso."
+                );
             } else {
                 funAttributes[aType] = tOk;
                 globals.AddType(pos, varType.at(aType));
@@ -442,30 +433,20 @@ RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals)
     }
 
     case PARENTHESIS_CLOSE:
-        ThrowSyntaxError(
-            "Declaración de función incorrecta: "
-            "Es necesario definir algún atributo para la función, o «void» si no toma argumentos."
-        );
+        ThrowSyntaxError(SyntaxError::FUNATTRIBUTES_EMPTY);
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Declaración de función incorrecta: "
-                "Elemento de tipo «{}» inesperado en la declaración de atributos de la función.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::FUNATTRIBUTES_INVALID);
     }
 
-    return funAttributes;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals) {
-    RuleAttributes nextAttributes = {};
+Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef nextAttributes = CreateRuleAttributes();
 
     // NEXTATTRIBUTES -> , VARTYPE id NEXTATTRIBUTES | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (, VARTYPE id NEXTATTRIBUTES)
     case COMMA: {
         WriteParse(output, globals, 12);
@@ -480,20 +461,21 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
 
         // ------ //
 
-        VerifyTokenType(
-            IDENTIFIER,
-            "Declaración de función incorrecta: "
-            "Se espera el nombre del atributo tras declarar su tipo."
-        );
+        VerifyTokenType(IDENTIFIER, SyntaxError::FUNATTRIBUTES_MISSING_IDENTIFIER);
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         if (globals.useSemantic) {
             const auto& pos = std::get<SymbolPos>(id.attribute);
 
             if (globals.HasType(pos)) {
                 nextAttributes[aType] = tError;
-                LogSemanticError(globals, "TODO: YA EXISTE UN ATRIBUTO CON ESE NOMBRE."); // TODO
+                LogSemanticError(
+                    globals,
+                    id,
+                    SemanticError::IDENTIFIER_ALREADY_EXISTS,
+                    "El nombre de este atributo ya está en uso."
+                );
             } else {
                 nextAttributes[aType] = tOk;
                 globals.AddType(pos, varType.at(aType));
@@ -524,7 +506,7 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
     }
 
     // Como NEXTATTRIBUTES -> lambda, Follow (NEXTATTRIBUTES)
-    case PARENTHESIS_CLOSE: {
+    default: {
         WriteParse(output, globals, 13);
 
         // ------ //
@@ -537,26 +519,16 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Declaración de función incorrecta: "
-                "Elemento de tipo «{}» inesperado en la declaración de atributos de la función.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return nextAttributes;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Body(std::ostream& output, GlobalState& globals) {
-    RuleAttributes body;
+Parser::Attributes Parser::Body(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef body = CreateRuleAttributes();
 
     // BODY -> STATEMENT BODY | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (STATEMENT BODY)
     case IF:
     case FOR:
@@ -597,7 +569,7 @@ RuleAttributes Parser::Body(std::ostream& output, GlobalState& globals) {
     }
 
     // Como BODY -> lambda, Follow (BODY)
-    case CURLY_BRACKET_CLOSE: {
+    default: {
         WriteParse(output, globals, 15);
 
         // ------ //
@@ -611,27 +583,17 @@ RuleAttributes Parser::Body(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Sentencia incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return body;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
-    RuleAttributes statement;
+Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef statement = CreateRuleAttributes();
 
     // STATEMENT -> if ( EXP1 ) ATOMSTATEMENT | for ( FORACT ; EXP1 ; FORACT ) { BODY } |
     //              var VARTYPE id ; | ATOMSTATEMENT
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (if ( EXP1 ) ATOMSTATEMENT)
     case IF: {
         WriteParse(output, globals, 16);
@@ -642,11 +604,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            PARENTHESIS_OPEN,
-            "Sentencia if incorrecta: "
-            "Se esperaba «(» tras «if»."
-        );
+        VerifyTokenType(PARENTHESIS_OPEN, SyntaxError::STATEMENT_IF_MISSING_PAREN_OPEN);
 
         GetNextToken(globals);
 
@@ -656,11 +614,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            PARENTHESIS_CLOSE,
-            "Sentencia if incorrecta: "
-            "Se esperaba «)» tras la condición del «if»."
-        );
+        VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::STATEMENT_IF_MISSING_PAREN_CLOSE);
 
         GetNextToken(globals);
 
@@ -693,11 +647,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            PARENTHESIS_OPEN,
-            "Sentencia for incorrecta: "
-            "Se esperaba «(» tras «for»."
-        );
+        VerifyTokenType(PARENTHESIS_OPEN, SyntaxError::STATEMENT_FOR_MISSING_PAREN_OPEN);
 
         GetNextToken(globals);
 
@@ -707,11 +657,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            SEMICOLON,
-            "Sentencia for incorrecta: "
-            "Las instancias del bucle for deben ir separadas por «;»."
-        );
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_FOR_MISSING_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -721,11 +667,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            SEMICOLON,
-            "Sentencia for incorrecta: "
-            "Las instancias del bucle for deben ir separadas por «;»."
-        );
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_FOR_MISSING_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -735,21 +677,13 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            PARENTHESIS_CLOSE,
-            "Sentencia for incorrecta: "
-            "Se esperaba «)» tras declarar las instancias del bucle."
-        );
+        VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::STATEMENT_FOR_MISSING_PAREN_CLOSE);
 
         GetNextToken(globals);
 
         // ------ //
 
-        VerifyTokenType(
-            CURLY_BRACKET_OPEN,
-            "Sentencia for incorrecta: "
-            "Se esperaba «{» para definir el cuerpo del bucle."
-        );
+        VerifyTokenType(CURLY_BRACKET_OPEN, SyntaxError::STATEMENT_FOR_MISSING_BRACK_OPEN);
 
         GetNextToken(globals);
 
@@ -759,22 +693,25 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            CURLY_BRACKET_CLOSE,
-            "Sentencia for incorrecta: "
-            "Se esperaba «}» para cerrar el cuerpo del bucle."
-        );
+        VerifyTokenType(CURLY_BRACKET_CLOSE, SyntaxError::STATEMENT_FOR_MISSING_BRACK_CLOSE);
 
         if (globals.useSemantic) {
             if (forAct_1.at(aType) != tOk) {
                 statement[aType] = tError;
-                LogSemanticError(globals, "TODO 1"); // TODO
             } else if (exp1.at(aType) != tLog) {
                 statement[aType] = tError;
-                LogSemanticError(globals, "TODO 2"); // TODO
+                LogSemanticError(
+                    globals,
+                    exp1,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "El segundo argumento de «for» debe ser de tipo «boolean». El tipo "
+                        "evaluado es «{}».",
+                        exp1.at(aType).ToReadableString()
+                    )
+                );
             } else if (forAct_2.at(aType) != tOk) {
                 statement[aType] = tError;
-                LogSemanticError(globals, "TODO 3"); // TODO
             } else {
                 statement[aType] = body.at(aType);
             }
@@ -791,7 +728,6 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
     // First (var VARTYPE id ;)
     case VAR: {
-        // TODO: Arreglar acc sem.
         WriteParse(output, globals, 18);
 
         // ------ //
@@ -808,13 +744,9 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            IDENTIFIER,
-            "Declaración de variable incorrecta: "
-            "Se esperaba un identificador tras el tipo de variable."
-        );
+        VerifyTokenType(IDENTIFIER, SyntaxError::STATEMENT_VAR_MISSING_IDENTIFIER);
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         if (globals.useSemantic) {
             const auto& pos = std::get<SymbolPos>(id.attribute);
@@ -823,7 +755,12 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
             if (globals.HasType(pos)) {
                 statement[aType] = tError;
-                LogSemanticError(globals, "TODO: LA VARIABLE YA EXISTE"); // TODO
+                LogSemanticError(
+                    globals,
+                    id,
+                    SemanticError::IDENTIFIER_ALREADY_EXISTS,
+                    "El nombre de la variable a declarar ya está en uso."
+                );
             } else {
                 globals.AddType(pos, varType.at(aType));
                 auto& offset = globals.CurrentOffset();
@@ -839,11 +776,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            SEMICOLON,
-            "Declaración de variable incorrecta: "
-            "Se esperaba «;» tras declarar la variable."
-        );
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_MISSING_END_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -874,31 +807,24 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Sentencia incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::STATEMENT_INVALID);
     }
 
-    return statement;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals) {
-    RuleAttributes atomStatement;
+Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef atomStatement = CreateRuleAttributes();
 
     // ATOMSTATEMENT -> id IDACT ; | output EXP1 ; | input id ; | return RETURNEXP ;
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (id IDACT ;)
     case IDENTIFIER: {
         WriteParse(output, globals, 20);
 
         // ------ //
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         GetNextToken(globals);
 
@@ -915,33 +841,64 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
             if (idAct.at(aFunCall)) {
                 if (!IsFunction(type)) {
                     atomStatement[aType] = tError;
-                    LogSemanticError(globals, "TODO: NO SE PUEDE LLAMAR USAR UNA VARIABLE COMO FUNCIÓN"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idAct,
+                        SemanticError::VARIABLE_AS_FUNCTION,
+                        "No se puede llamar a una variable como si fuera una función."
+                    );
                 } else if (idAct.at(aType) == tError) {
                     atomStatement[aType] = tError;
                 } else if (idAct.at(aType) == GetFunctionArgsType(type)) {
                     atomStatement[aType] = tOk;
                 } else {
                     atomStatement[aType] = tError;
-                    LogSemanticError(globals, "TODO: NO COINCIDEN LOS TIPOS EN LA LLAMADA A LA FUNCIÓN"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idAct,
+                        SemanticError::INCOHERENT_TYPES,
+                        std::format(
+                            "Los tipos de los argumentos de llamada a la función no "
+                            "coinciden con los de la definición. Se esperaba «{}», "
+                            "pero se recibió «{}»",
+                            GetFunctionArgsType(type).ToReadableString(),
+                            idAct.at(aType).ToReadableString()
+                        )
+                    );
                 }
             } else {
                 if (IsFunction(type)) {
                     atomStatement[aType] = tError;
-                    LogSemanticError(globals, "TODO: NO SE PUEDE USAR UNA FUNCIÓN COMO VARIABLE"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idAct,
+                        SemanticError::FUNCTION_AS_VARIABLE,
+                        "No se puede asignar valores a una función."
+                    );
                 } else if (idAct.at(aType) == tError) {
                     atomStatement[aType] = tError;
                 } else if (idAct.at(aType) == type) {
                     atomStatement[aType] = tOk;
                 } else {
                     atomStatement[aType] = tError;
-                    LogSemanticError(globals, "TODO: LOS TIPOS DE LA ASIGNACIÓN NO COINCIDEN"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idAct,
+                        SemanticError::INCOHERENT_TYPES,
+                        std::format(
+                            "Los tipos a ambos lados de la asignación no coinciden. "
+                            "La variable es de tipo «{}», pero la expresión es «{}».",
+                            type.ToReadableString(),
+                            idAct.at(aType).ToReadableString()
+                        )
+                    );
                 }
             }
         }
 
         // ------ //
 
-        VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_MISSING_END_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -971,13 +928,22 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
                 atomStatement[aType] = tOk;
             } else {
                 atomStatement[aType] = tError;
-                LogSemanticError(globals, "TODO: TIPO ILEGAL PARA OUTPUT"); // TODO
+                LogSemanticError(
+                    globals,
+                    exp1,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Una expresión con tipo «{}» no se puede mostrar con «output». "
+                        "«output» permite mostrar «int» y «string».",
+                        exp1.at(aType).ToReadableString()
+                    )
+                );
             }
         }
 
         // ------ //
 
-        VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_MISSING_END_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -996,9 +962,9 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        VerifyTokenType(IDENTIFIER, "Se esperaba un identificador como parámetro de entrada.");
+        VerifyTokenType(IDENTIFIER, SyntaxError::STATEMENT_INPUT_MISSING_IDENTIFIER);
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         if (globals.useSemantic) {
             const auto& pos = std::get<SymbolPos>(id.attribute);
@@ -1010,7 +976,16 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
                 atomStatement[aType] = tOk;
             } else {
                 atomStatement[aType] = tError;
-                LogSemanticError(globals, "TODO: TIPO ILEGAL PARA INPUT"); // TODO
+                LogSemanticError(
+                    globals,
+                    id,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Un objeto tipo «{}» no se puede usar con «input». "
+                        "«input» acepta variables de tipo «int» o «string»",
+                        type.ToReadableString()
+                    )
+                );
             }
         }
 
@@ -1018,7 +993,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_MISSING_END_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -1051,7 +1026,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
+        VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_MISSING_END_SEMICOLON);
 
         GetNextToken(globals);
 
@@ -1061,24 +1036,17 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Sentencia incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::STATEMENT_INVALID);
     }
 
-    return atomStatement;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
-    RuleAttributes idAct = {};
+Parser::Attributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef idAct = CreateRuleAttributes();
 
     // IDACT -> ASS EXP1 | ( CALLPARAMS )
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (ASS EXP1)
     case ASSIGN:
     case CUMULATIVE_ASSIGN: {
@@ -1132,7 +1100,7 @@ RuleAttributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(PARENTHESIS_CLOSE, "Falta un paréntesis de cierre en la llamada a la función.");
+        VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::IDACT_CALL_MISSING_PAREN_CLOSE);
 
         GetNextToken(globals);
 
@@ -1142,28 +1110,24 @@ RuleAttributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            "Sentencia incorrecta: "
-            "Se debe realizar una asignación o llamada sobre el identificador."
-        );
+        ThrowSyntaxError(SyntaxError::IDACT_INVALID);
     }
 
-    return idAct;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
-    RuleAttributes forAct = {};
+Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef forAct = CreateRuleAttributes();
 
     // FORACT -> id ASS EXP1 | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (id ASS EXP1)
     case IDENTIFIER: {
         WriteParse(output, globals, 26);
 
         // ------ //
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         GetNextToken(globals);
 
@@ -1181,13 +1145,28 @@ RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
 
             if (type != tInt) {
                 forAct[aType] = tError;
-                LogSemanticError(globals, "TODO 1"); // TODO
+                LogSemanticError(
+                    globals,
+                    forAct,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "El tipo de una variable en «for» debe de ser «int». El tipo actual es «{}».",
+                        type.ToReadableString()
+                    )
+                );
             } else if (exp1.at(aType) == tError) {
                 forAct[aType] = tError;
-                LogSemanticError(globals, "TODO 2"); // TODO
             } else if (exp1.at(aType) != tInt) {
                 forAct[aType] = tError;
-                LogSemanticError(globals, "TODO 3"); // TODO
+                LogSemanticError(
+                    globals,
+                    forAct,
+                    SemanticError::INCOHERENT_TYPES,
+                    std::format(
+                        "Se experaba una expresión con tipo «int». El tipo de la expresión es «{}»",
+                        exp1.at(aType).ToReadableString()
+                    )
+                );
             } else {
                 forAct[aType] = tOk;
             }
@@ -1199,8 +1178,7 @@ RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
     }
 
     // Como FORACT -> lambda, Follow (FORACT)
-    case PARENTHESIS_CLOSE:
-    case SEMICOLON: {
+    default: {
         WriteParse(output, globals, 27);
 
         // ------ //
@@ -1213,26 +1191,16 @@ RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Acción incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return forAct;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Ass(std::ostream& output, GlobalState& globals) {
-    RuleAttributes ass = {};
+Parser::Attributes Parser::Ass(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef ass = CreateRuleAttributes();
 
     // ASS -> = | +=
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     case ASSIGN: {
         WriteParse(output, globals, 28);
 
@@ -1266,21 +1234,17 @@ RuleAttributes Parser::Ass(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            "Asignación incorrecta: "
-            "Se esperaba «=» o «+=»."
-        );
+        ThrowSyntaxError(SyntaxError::ASS_INVALID);
     }
 
-    return ass;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
-    RuleAttributes callParams = {};
+Parser::Attributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef callParams = CreateRuleAttributes();
 
     // CALLPARAMS -> EXP1 NEXTPARAMS | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (EXP1 NEXTPARAMS)
     case PARENTHESIS_OPEN:
     case CINT:
@@ -1314,7 +1278,7 @@ RuleAttributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
     }
 
     // Como CALLPARAMS -> lambda, Follow (CALLPARAMS)
-    case PARENTHESIS_CLOSE: {
+    default: {
         WriteParse(output, globals, 31);
 
         // ------ //
@@ -1327,26 +1291,16 @@ RuleAttributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Lista de parámetros incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return callParams;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
-    RuleAttributes nextParams = {};
+Parser::Attributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef nextParams = CreateRuleAttributes();
 
     // NEXTPARAMS -> , EXP1 NEXTPARAMS | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (EXP1 NEXTPARAMS)
     case COMMA: {
         WriteParse(output, globals, 32);
@@ -1379,7 +1333,7 @@ RuleAttributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
     }
 
     // Como NEXTPARAMS -> lambda, Follow (NEXTPARAMS)
-    case PARENTHESIS_CLOSE: {
+    default: {
         WriteParse(output, globals, 33);
 
         // ------ //
@@ -1392,26 +1346,16 @@ RuleAttributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Lista de parámetros incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return nextParams;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::ReturnExp(std::ostream& output, GlobalState& globals) {
-    RuleAttributes returnExp = {};
+Parser::Attributes Parser::ReturnExp(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef returnExp = CreateRuleAttributes();
 
     // RETURNEXP -> EXP1 | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (EXP1)
     case PARENTHESIS_OPEN:
     case CINT:
@@ -1435,7 +1379,7 @@ RuleAttributes Parser::ReturnExp(std::ostream& output, GlobalState& globals) {
     }
 
     // Como RETURNEXP -> lambda, Follow (RETURNEXP)
-    case SEMICOLON: {
+    default: {
         WriteParse(output, globals, 35);
 
         // ------ //
@@ -1448,26 +1392,16 @@ RuleAttributes Parser::ReturnExp(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión de retorno incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return returnExp;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
-    RuleAttributes exp1 = {};
+Parser::Attributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef exp1 = CreateRuleAttributes();
 
     // EXP1 -> EXP2 EXPOR
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First ( EXP2 EXPOR )
     case PARENTHESIS_OPEN:
     case CSTR:
@@ -1488,9 +1422,20 @@ RuleAttributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (expOr.at(aType) == tVoid) {
                 exp1[aType] = exp2.at(aType);
+            } else if (exp2.at(aType) == tError) {
+                exp1[aType] = tError;
             } else if (exp2.at(aType) != tLog) {
                 exp1[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+                LogSemanticError(
+                    globals,
+                    exp2,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Para poder aplicar un operador lógico, la expresión debe ser de tipo «boolean». "
+                        "El tipo de la expresión es «{}».",
+                        exp2.at(aType).ToReadableString()
+                    )
+                );
             } else if (expOr.at(aType) == tError) {
                 exp1[aType] = tError;
             } else {
@@ -1504,23 +1449,17 @@ RuleAttributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Sergio cambia esto."
-            )
-        );
+        ThrowSyntaxError(SyntaxError::EXP_INVALID);
     }
 
-    return exp1;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
-    RuleAttributes expOr = {};
+Parser::Attributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef expOr = CreateRuleAttributes();
 
     // EXPOR -> || EXP2 EXPOR | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First ( || EXP2 EXPOR )
     case OR: {
         WriteParse(output, globals, 37);
@@ -1538,9 +1477,20 @@ RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
         const auto expOr_1 = ExpOr(output, globals);
 
         if (globals.useSemantic) {
-            if (exp2.at(aType) != tLog) {
+            if (exp2.at(aType) == tError) {
                 expOr[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+            } else if (exp2.at(aType) != tLog) {
+                expOr[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    exp2,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Para poder aplicar un operador lógico, la expresión debe ser de tipo «boolean». "
+                        "El tipo de la expresión es «{}».",
+                        exp2.at(aType).ToReadableString()
+                    )
+                );
             } else if (expOr_1.at(aType) == tError) {
                 expOr[aType] = tError;
             } else {
@@ -1554,9 +1504,7 @@ RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
     }
 
     // Como EXPOR -> lambda, Follow (EXPOR)
-    case PARENTHESIS_CLOSE:
-    case COMMA:
-    case SEMICOLON: {
+    default: {
         WriteParse(output, globals, 38);
 
         // ------ //
@@ -1569,25 +1517,16 @@ RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Sergio cambia esto."
-            )
-        );
     }
 
-    return expOr;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
-    RuleAttributes exp2 = {};
+Parser::Attributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef exp2 = CreateRuleAttributes();
 
     // EXP2 -> EXP3 EXPAND
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (EXP3 EXPAND)
     case PARENTHESIS_OPEN:
     case CINT:
@@ -1608,9 +1547,20 @@ RuleAttributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (expAnd.at(aType) == tVoid) {
                 exp2[aType] = exp3.at(aType);
+            } else if (exp3.at(aType) == tError) {
+                exp2[aType] = tError;
             } else if (exp3.at(aType) != tLog) {
                 exp2[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+                LogSemanticError(
+                    globals,
+                    exp3,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Para poder aplicar un operador lógico, la expresión debe ser de tipo «boolean». "
+                        "El tipo de la expresión es «{}».",
+                        exp3.at(aType).ToReadableString()
+                    )
+                );
             } else if (expAnd.at(aType) == tError) {
                 exp2[aType] == tError;
             } else {
@@ -1624,24 +1574,17 @@ RuleAttributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::EXP_INVALID);
     }
 
-    return exp2;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
-    RuleAttributes expAnd = {};
+Parser::Attributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef expAnd = CreateRuleAttributes();
 
     // EXPAND -> && EXP3 EXPAND | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First ( && EXP3 EXPAND )
     case AND: {
         WriteParse(output, globals, 40);
@@ -1659,9 +1602,20 @@ RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
         const auto expAnd_1 = ExpAnd(output, globals);
 
         if (globals.useSemantic) {
-            if (exp3.at(aType) != tLog) {
+            if (exp3.at(aType) == tError) {
                 expAnd[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+            } else if (exp3.at(aType) != tLog) {
+                expAnd[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    exp3,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Para poder aplicar un operador lógico, la expresión debe ser de tipo «boolean». "
+                        "El tipo de la expresión es «{}».",
+                        exp3.at(aType).ToReadableString()
+                    )
+                );
             } else if (expAnd_1.at(aType) == tError) {
                 expAnd[aType] = tError;
             } else {
@@ -1675,10 +1629,7 @@ RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
     }
 
     // Como EXPAND -> lambda, Follow (EXPAND)
-    case PARENTHESIS_CLOSE:
-    case COMMA:
-    case SEMICOLON:
-    case OR: {
+    default: {
         WriteParse(output, globals, 41);
 
         // ------ //
@@ -1691,25 +1642,16 @@ RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Sergio cambia esto."
-            )
-        );
     }
 
-    return expAnd;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
-    RuleAttributes exp3 = {};
+Parser::Attributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef exp3 = CreateRuleAttributes();
 
     // EXP3 -> EXP4 COMP
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (EXP4 COMP)
     case PARENTHESIS_OPEN:
     case CINT:
@@ -1730,9 +1672,20 @@ RuleAttributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (comp.at(aType) == tVoid) {
                 exp3[aType] = exp4.at(aType);
+            }
+            else if (exp4.at(aType) == tError) {
+                exp3[aType] = tError;
             } else if (exp4.at(aType) != tInt) {
                 exp3[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+                LogSemanticError(
+                    globals,
+                    exp4,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Sólo se pueden comparar valores de tipo «int». El tipo actual es «{}».",
+                        exp4.at(aType).ToReadableString()
+                    )
+                );
             } else if (comp.at(aType) == tError) {
                 exp3[aType] = tError;
             } else {
@@ -1746,24 +1699,17 @@ RuleAttributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::EXP_INVALID);
     }
 
-    return exp3;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Comp(std::ostream& output, GlobalState& globals) {
-    RuleAttributes comp = {};
+Parser::Attributes Parser::Comp(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef comp = CreateRuleAttributes();
 
     // COMP -> COMPOP EXP4 COMP | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (COMPOP EXP4 COMP)
     case GREATER:
     case LESS: {
@@ -1784,9 +1730,19 @@ RuleAttributes Parser::Comp(std::ostream& output, GlobalState& globals) {
         // ------ //
 
         if (globals.useSemantic) {
-            if (exp4.at(aType) != tInt) {
+            if (exp4.at(aType) == tError) {
                 comp[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+            } else if (exp4.at(aType) != tInt) {
+                comp[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    exp4,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Sólo se pueden comparar valores de tipo «int». El tipo actual es «{}».",
+                        exp4.at(aType).ToReadableString()
+                    )
+                );
             } else if (comp_1.at(aType) == tError) {
                 comp[aType] = tError;
             } else {
@@ -1800,11 +1756,7 @@ RuleAttributes Parser::Comp(std::ostream& output, GlobalState& globals) {
     }
 
     // Como COMP -> lambda, Follow (COMP)
-    case AND:
-    case OR:
-    case PARENTHESIS_CLOSE:
-    case COMMA:
-    case SEMICOLON: {
+    default: {
         WriteParse(output, globals, 44);
 
         // ------ //
@@ -1817,26 +1769,16 @@ RuleAttributes Parser::Comp(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return comp;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
-    RuleAttributes parser = {};
+Parser::Attributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef parser = CreateRuleAttributes();
 
     // COMPOP -> > | <
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (>)
     case GREATER: {
         WriteParse(output, globals, 45);
@@ -1864,24 +1806,17 @@ RuleAttributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Comparación incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::COMP_INVALID);
     }
 
-    return parser;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
-    RuleAttributes exp4 = {};
+Parser::Attributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef exp4 = CreateRuleAttributes();
 
     // EXP4 -> EXPATOM ARITH
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (EXPATOM ARITH)
     case PARENTHESIS_OPEN:
     case CINT:
@@ -1902,13 +1837,34 @@ RuleAttributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (arith.at(aType) == tVoid) {
                 exp4[aType] = expAtom.at(aType);
-            } else if (expAtom.at(aType) != tInt) {
+            } else if (expAtom.at(aType) != tInt && expAtom.at(aType) != tStr) {
                 exp4[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    expAtom,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "Una operación aritmética requiere que el tipo sea «int» o «string»."
+                        " El tipo actual es «{}».",
+                        expAtom.at(aType).ToReadableString()
+                    )
+                );
             } else if (arith.at(aType) == tError) {
                 exp4[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+            } else if (expAtom.at(aType) != arith.at(aType)) {
+                exp4[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    exp4,
+                    SemanticError::INCOHERENT_TYPES,
+                    std::format(
+                        "Los tipos no concuerdan. Los tipos de las expresiones son «{}» y «{}».",
+                        expAtom.at(aType).ToReadableString(),
+                        arith.at(aType).ToReadableString()
+                    )
+                );
             } else {
-                exp4[aType] = tInt;
+                exp4[aType] = arith.at(aType);
             }
         }
 
@@ -1918,24 +1874,17 @@ RuleAttributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::EXP_INVALID);
     }
 
-    return exp4;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::Arith(std::ostream& output, GlobalState& globals) {
-    RuleAttributes arith = {};
+Parser::Attributes Parser::Arith(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef arith = CreateRuleAttributes();
 
     // ARITH -> ARITHOP EXPATOM ARITH | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (ARITHOP EXPATOM ARITH)
     case SUM:
     case SUB: {
@@ -1954,29 +1903,58 @@ RuleAttributes Parser::Arith(std::ostream& output, GlobalState& globals) {
         const auto arith_1 = Arith(output, globals);
 
         if (globals.useSemantic) {
-            if (expAtom.at(aType) != tInt) {
+            if (!arithOp.at(aSum) && expAtom.at(aType) != tInt) {
                 arith[aType] = tError;
-                LogSemanticError(globals, "TODO"); // TODO
+                LogSemanticError(
+                    globals,
+                    expAtom,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "La resta sólo se puede realizar sobre expresiones de "
+                        "tipo «int», pero el tipo de la expresión es «{}».",
+                        expAtom.at(aType).ToReadableString()
+                    )
+                );
+            } else if (arithOp.at(aSum) && expAtom.at(aType) != tInt && expAtom.at(aType) != tStr) {
+                arith[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    expAtom,
+                    SemanticError::INVALID_TYPE,
+                    std::format(
+                        "El operador «+» sólo se puede aplicar a expresiones de tipo "
+                        "«int» o «string», pero el tipo de la expresión es «{}».",
+                        expAtom.at(aType).ToReadableString()
+                    )
+                );
             } else if (arith_1.at(aType) == tError) {
                 arith[aType] = tError;
+            } else if (arith_1.at(aType) != tVoid && expAtom.at(aType) != arith_1.at(aType)) {
+                arith[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    expAtom,
+                    arith_1,
+                    SemanticError::INCOHERENT_TYPES,
+                    std::format(
+                        "Los tipos no concuerdan. Los tipos de las expresiones son «{}» y «{}».",
+                        expAtom.at(aType).ToReadableString(),
+                        arith_1.at(aType).ToReadableString()
+                    )
+                );
             } else {
-                arith[aType] = tInt;
+                arith[aType] = expAtom.at(aType);
             }
         }
 
         // ------ //
 
+
         break;
     }
 
     // Como ARITH -> lambda, Follow (ARITH)
-    case AND:
-    case OR:
-    case PARENTHESIS_CLOSE:
-    case COMMA:
-    case SEMICOLON:
-    case LESS:
-    case GREATER: {
+    default: {
         WriteParse(output, globals, 49);
 
         // ------ //
@@ -1989,31 +1967,25 @@ RuleAttributes Parser::Arith(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return arith;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
-    RuleAttributes arithOp = {};
+Parser::Attributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef arithOp = CreateRuleAttributes();
 
     // ARITHOP -> + | -
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (+)
     case SUM: {
         WriteParse(output, globals, 50);
 
         // ------ //
+
+        if (globals.useSemantic) {
+            arithOp[aSum] = true;
+        }
 
         GetNextToken(globals);
 
@@ -2028,6 +2000,10 @@ RuleAttributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
+        if (globals.useSemantic) {
+            arithOp[aSum] = false;
+        }
+
         GetNextToken(globals);
 
         // ------ //
@@ -2036,31 +2012,24 @@ RuleAttributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Operación aritmética incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::ARITH_INVALID);
     }
 
-    return arithOp;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
-    RuleAttributes expAtom = {};
+Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef expAtom = CreateRuleAttributes();
 
     // EXPATOM -> id IDVAL | ( EXP1 ) | cint | cstr | true | false
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (id IDVAL)
     case IDENTIFIER: {
         WriteParse(output, globals, 52);
 
         // ------ //
 
-        const auto id = m_lastToken;
+        const auto id = m_currentToken;
 
         GetNextToken(globals);
 
@@ -2077,19 +2046,40 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 
                 if (!IsFunction(type)) {
                     expAtom[aType] = tError;
-                    LogSemanticError(globals, "TODO: NO SE PUEDE LLAMAR USAR UNA VARIABLE COMO FUNCIÓN"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idVal,
+                        SemanticError::VARIABLE_AS_FUNCTION,
+                        "No se puede llamar a una variable como si fuera una función."
+                    );
                 } else if (idVal.at(aType) == tError) {
                     expAtom[aType] = tError;
                 } else if (idVal.at(aType) == GetFunctionArgsType(type)) {
                     expAtom[aType] = GetFunctionReturnType(type);
                 } else {
                     expAtom[aType] = tError;
-                    LogSemanticError(globals, "TODO: NO COINCIDEN LOS TIPOS EN LA LLAMADA A LA FUNCIÓN"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idVal,
+                        SemanticError::INCOHERENT_TYPES,
+                        std::format(
+                            "Los tipos de los argumentos de llamada a la función no "
+                            "coinciden con los de la definición. Se esperaba «{}», "
+                            "pero se recibió «{}»",
+                            GetFunctionArgsType(type).ToReadableString(),
+                            idVal.at(aType).ToReadableString()
+                        )
+                    );
                 }
             } else {
                 if (IsFunction(type)) {
                     expAtom[aType] = tError;
-                    LogSemanticError(globals, "TODO: NO SE PUEDE USAR UNA FUNCIÓN COMO VARIABLE"); // TODO
+                    LogSemanticError(
+                        globals,
+                        idVal,
+                        SemanticError::FUNCTION_AS_VARIABLE,
+                        "No se puede asignar valores a una función."
+                    );
                 } else if (type == tInt) {
                     expAtom[aType] = tInt;
                 } else if (type == tStr) {
@@ -2098,7 +2088,15 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                     expAtom[aType] = tLog;
                 } else {
                     expAtom[aType] = tError;
-                    LogSemanticError(globals, "TODO: TIPO DE VARIABLE ILEGAL"); // TODO
+                    LogSemanticError(
+                        globals,
+                        id,
+                        SemanticError::INVALID_TYPE,
+                        std::format(
+                            "Tipo de variable «{}» ilegal.",
+                            type.ToReadableString()
+                        )
+                    );
                 }
             }
         }
@@ -2126,11 +2124,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            PARENTHESIS_CLOSE,
-            "Expresión incorrecta: "
-            "Falta el paréntesis de cierre."
-        );
+        VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::EXP_MISSING_PAREN_CLOSE);
 
         GetNextToken(globals);
 
@@ -2208,24 +2202,17 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Elemento de tipo «{}» inesperado.",
-                ToString(m_lastToken.type)
-            )
-        );
+        ThrowSyntaxError(SyntaxError::EXP_INVALID);
     }
 
-    return expAtom;
+    return PopCurrentAttributes();
 }
 
-// HECHO
-RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
-    RuleAttributes idVal = {};
+Parser::Attributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
+    [[maybe_unused]] const AttributesPosRef idVal = CreateRuleAttributes();
 
     // IDVAL -> ( CALLPARAMS ) | lambda
-    switch (m_lastToken.type) {
+    switch (m_currentToken.type) {
     // First (( CALLPARAMS ))
     case PARENTHESIS_OPEN: {
         WriteParse(output, globals, 58);
@@ -2245,11 +2232,7 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        VerifyTokenType(
-            PARENTHESIS_CLOSE,
-            "Expresión incorrecta: "
-            "Falta el paréntesis de cierre."
-        );
+        VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::IDACT_CALL_MISSING_PAREN_CLOSE);
 
         GetNextToken(globals);
 
@@ -2259,15 +2242,7 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
     }
 
     // Como IDVAL -> lambda, Follow (IDVAL)
-    case AND:
-    case OR:
-    case PARENTHESIS_CLOSE:
-    case SUM:
-    case SUB:
-    case COMMA:
-    case SEMICOLON:
-    case GREATER:
-    case LESS: {
+    default: {
         WriteParse(output, globals, 59);
 
         // ------ //
@@ -2280,21 +2255,11 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
 
         break;
     }
-
-    default:
-        ThrowSyntaxError(
-            std::format(
-                "Expresión incorrecta: "
-                "Se esperaba alguna acción sobre el identificador.",
-                ToString(m_lastToken.type)
-            )
-        );
     }
 
-    return idVal;
+    return PopCurrentAttributes();
 }
 
-// HECHO
 void Parser::Parse(std::ostream& output, GlobalState& globals) {
     try {
         globals.errorManager.SetLexicalRecoveryMode(LexicalRecoveryMode::SkipChar);
@@ -2308,7 +2273,7 @@ void Parser::Parse(std::ostream& output, GlobalState& globals) {
 
         (void) Axiom(output, globals);
     } catch (const SyntaxException& e) {
-        globals.errorManager.ProcessSyntaxException(*this, e);
+        globals.errorManager.ProcessSyntaxException(m_lexer, e);
     }
 }
 

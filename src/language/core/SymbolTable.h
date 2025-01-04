@@ -18,10 +18,10 @@ constexpr char tOk[] = "type_ok";
 constexpr char tError[] = "type_error";
 
 constexpr char tVoid[] = "void";
-constexpr char tFun[] = "fun";
+constexpr char tFun[] = "function";
 constexpr char tInt[] = "int";
-constexpr char tLog[] = "log";
-constexpr char tStr[] = "str";
+constexpr char tLog[] = "boolean";
+constexpr char tStr[] = "string";
 
 constexpr int16_t wInt = 2;
 constexpr int16_t wLog = 1;
@@ -45,6 +45,11 @@ public:
         m_nameMap.emplace(name, symbolPosition);
 
         return symbolPosition;
+    }
+
+    [[nodiscard]] std::string_view GetSymbolName(uint64_t pos) const {
+        assert(m_symbols.size() > pos);
+        return m_symbols[pos].lex;
     }
 
     void AddAttribute(uint64_t pos, std::string_view name, std::string_view value) {

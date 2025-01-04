@@ -93,6 +93,40 @@ public:
         assert(data.size() == 1);
         return data[0];
     }
+
+    constexpr std::string ToReadableString() const {
+        if (std::holds_alternative<std::monostate>(m_data)) {
+            return "Ø";
+        }
+        if (std::holds_alternative<std::vector<std::string>>(m_data)) {
+            const auto& data = std::get<std::vector<std::string>>(m_data);
+            if (data.empty())
+                return "Ø";
+
+            std::string result;
+            for (size_t i = 0; i < data.size() - 1; i++) {
+                result += data[i];
+                result += "⨯";
+            }
+            result += data.back();
+            return result;
+        }
+        if (std::holds_alternative<std::vector<int16_t>>(m_data)) {
+            const auto& data = std::get<std::vector<int16_t>>(m_data);
+            if (data.empty())
+                return "Ø";
+
+            std::string result;
+            for (size_t i = 0; i < data.size() - 1; i++) {
+                result += std::to_string(data[i]);
+                result += "⨯";
+            }
+            result += data.back();
+            return result;
+        }
+
+        std::unreachable();
+    }
 };
 
 constexpr bool operator==(const ValueProduct& a, const ValueProduct& b) {

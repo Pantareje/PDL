@@ -58,7 +58,6 @@ void Lexer::ReadDelAndComments() {
 Token Lexer::ReadToken(GlobalState& globals) {
     ReadDelAndComments();
 
-    m_tokenLine = m_line;
     m_tokenColumn = m_column;
 
     // 0 : l : 1

@@ -8,6 +8,7 @@
 #include <string>
 #include <variant>
 #include <format>
+#include <utility>
 
 /** El tipo del token del analizador léxico. **/
 enum class TokenType : unsigned char {
@@ -55,6 +56,7 @@ struct Token {
 
     unsigned line;
     unsigned column;
+    unsigned length;
 
     /**
      * El contenido del token. Dependiendo del tipo puede estar vacío
@@ -87,7 +89,7 @@ constexpr TokenType KeywordToToken(const std::string_view str) {
 }
 
 /**
- * Devuelve una cadena con el nombre del token.
+ * Devuelve una cadena con el identificador del token.
  * @param token El tipo del token.
  * @return El identificador del token.
  */
@@ -130,6 +132,51 @@ constexpr const char* ToString(const TokenType token) noexcept {
 
     assert(false);
     abort();
+}
+
+/**
+ * Devuelve una cadena con la cadena a mostrar del token.
+ * @param token El tipo del token.
+ * @return El identificador del token.
+ */
+constexpr const char* GetDisplayString(const TokenType token) noexcept {
+    using enum TokenType;
+
+    switch (token) {
+    case END: return "fin del fichero";
+    case BOOL: return "boolean";
+    case FOR: return "for";
+    case FUNCTION: return "function";
+    case IF: return "if";
+    case INPUT: return "in";
+    case OUTPUT: return "out";
+    case RETURN: return "return";
+    case INT: return "int";
+    case STRING: return "str";
+    case VAR: return "var";
+    case VOID: return "void";
+    case IDENTIFIER: return "identificador";
+    case ASSIGN: return "=";
+    case CUMULATIVE_ASSIGN: return "+=";
+    case SUM: return "+";
+    case SUB: return "-";
+    case AND: return "&&";
+    case OR: return "||";
+    case LESS: return "<";
+    case GREATER: return ">";
+    case TRUE: return "true";
+    case FALSE: return "false";
+    case COMMA: return ",";
+    case SEMICOLON: return ";";
+    case PARENTHESIS_OPEN: return "(";
+    case PARENTHESIS_CLOSE: return ")";
+    case CURLY_BRACKET_OPEN: return "{";
+    case CURLY_BRACKET_CLOSE: return "}";
+    case CINT: return "cte. entera";
+    case CSTR: return "cte. cadena";
+    }
+
+    std::unreachable();
 }
 
 /**

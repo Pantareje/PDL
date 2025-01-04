@@ -147,9 +147,19 @@ struct GlobalState {
         }
     }
 
-    [[deprecated]]
-    void AddFunctionTag(SymbolPos pos, const ValueProduct& tag) {
-        AddStringAttribute(pos, FUN_TAG_KEY, tag);
+    void AddFunctionTag(SymbolPos pos) {
+        assert(!pos.isLocal);
+        AddStringAttribute(pos, FUN_TAG_KEY, globalTable->GetSymbolName(pos.pos));
+    }
+
+    [[nodiscard]] std::string_view GetSymbolName(SymbolPos pos) const {
+        if (pos.isLocal) {
+            assert(localTable.has_value());
+            return localTable->GetSymbolName(pos.pos);
+        }
+
+        assert(globalTable.has_value());
+        return globalTable->GetSymbolName(pos.pos);
     }
 
     [[nodiscard]] bool HasType(SymbolPos pos) const {

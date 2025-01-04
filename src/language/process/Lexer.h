@@ -8,11 +8,14 @@ class Lexer {
     std::istream& m_input;
     char32_t m_lastChar = U' ';
 
-    unsigned m_line = 1;
+    std::basic_string<char32_t> m_currentLine;
+
+    bool m_newLine = true;
+
+    unsigned m_line = 0;
     unsigned m_column = 0;
 
-    unsigned m_tokenLine = m_line;
-    unsigned m_tokenColumn = m_column;
+    unsigned m_tokenColumn = 0;
 
     [[noreturn]]
     void ThrowLexicalError(LexicalError error) const {
@@ -20,8 +23,15 @@ class Lexer {
     }
 
     template<typename T>
-    constexpr Token CreateToken(TokenType tokenType, T&& args) {
-        return { tokenType, m_tokenLine, m_tokenColumn, args };
+    constexpr Token CreateToken(TokenType tokenType, T&& attribute) {
+        assert(m_column > m_tokenColumn);
+        return Token {
+            .type = tokenType,
+            .line = m_line,
+            .column = m_tokenColumn,
+            .length = m_column - m_tokenColumn,
+            .attribute = attribute
+        };
     }
 
     constexpr Token CreateToken(TokenType tokenType) {
@@ -29,13 +39,20 @@ class Lexer {
     }
 
     void Read() {
-        m_lastChar = ReadUtf8Codepoint(m_input);
-
-        if (m_lastChar == '\n') {
+        if (m_newLine) {
             m_column = 0;
             m_line += 1;
+            m_currentLine.clear();
+            m_newLine = false;
+        }
+
+        m_lastChar = ReadUtf8Codepoint(m_input);
+        m_column += 1;
+
+        if (m_lastChar == '\n') {
+            m_newLine = true;
         } else {
-            m_column += 1;
+            m_currentLine += m_lastChar;
         }
 
         if (m_lastChar == U'€') {
@@ -70,5 +87,15 @@ public:
 
     void SkipChar() {
         Read();
+    }
+
+    std::string GetCurrentLine() const {
+        std::string result;
+
+        for (const char32_t& c : m_currentLine) {
+            result += CodepointToUtf8(c);
+        }
+
+        return result;
     }
 };

@@ -3,6 +3,8 @@
 #include "language/core/Characters.h"
 
 #include <stdexcept>
+#include <format>
+#include <utility>
 
 enum class LexicalError : uint32_t {
     MISSING_COMMENT_START = 0x0000,
@@ -18,10 +20,6 @@ enum class LexicalError : uint32_t {
     INT_TOO_BIG = 0x0200,
 
     UNEXPECTED_START_CHARACTER = 0xFF00
-};
-
-struct LexicalErrorData {
-    char32_t invalidCharacter;
 };
 
 constexpr std::string GetErrorMessage(LexicalError error, char32_t invalidCharacter) {
@@ -63,10 +61,9 @@ constexpr std::string GetErrorMessage(LexicalError error, char32_t invalidCharac
             IsPrintUnicode(invalidCharacter) ? CodepointToUtf8(invalidCharacter) : "\uFFFD",
             static_cast<int32_t>(invalidCharacter)
         );
-
-    default:
-        return "";
     }
+
+    std::unreachable();
 }
 
 class LexicalException final : public std::runtime_error {

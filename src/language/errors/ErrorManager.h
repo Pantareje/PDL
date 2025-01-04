@@ -2,6 +2,7 @@
 
 #include "language/errors/LexicalError.h"
 #include "language/errors/SyntaxError.h"
+#include "language/errors/SemanticError.h"
 
 class Lexer;
 class Parser;
@@ -25,9 +26,15 @@ public:
     void SetLexicalRecoveryMode(LexicalRecoveryMode mode) { m_lexicalMode = mode; }
 
     void ProcessLexicalException(Lexer& lexer, const LexicalException& e);
-    void ProcessSyntaxException(Parser& parser, const SyntaxException& e);
+    void ProcessSyntaxException(Lexer& lexer, const SyntaxException& e);
 
-    void LogSemanticError(unsigned line, unsigned column, std::string_view message);
+    void LogSemanticError(
+        std::string_view currentLine,
+        unsigned line, unsigned column,
+        unsigned length,
+        SemanticError error,
+        std::string_view message
+    );
 
     [[nodiscard]] bool GetStatus() const { return m_status; }
 };
