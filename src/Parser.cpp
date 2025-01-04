@@ -2296,16 +2296,20 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
 
 // HECHO
 void Parser::Parse(std::ostream& output, GlobalState& globals) {
-    globals.errorManager.SetLexicalRecoveryMode(LexicalRecoveryMode::SkipChar);
+    try {
+        globals.errorManager.SetLexicalRecoveryMode(LexicalRecoveryMode::SkipChar);
 
-    globals.globalTable = SymbolTable(0);
-    globals.tableCounter = 1;
-    globals.globalOffset = 0;
-    globals.implicitDeclaration = true;
+        globals.globalTable = SymbolTable(0);
+        globals.tableCounter = 1;
+        globals.globalOffset = 0;
+        globals.implicitDeclaration = true;
 
-    GetNextToken(globals);
+        GetNextToken(globals);
 
-    (void) Axiom(output, globals);
+        (void) Axiom(output, globals);
+    } catch (const SyntaxException& e) {
+        globals.errorManager.ProcessSyntaxException(*this, e);
+    }
 }
 
 #pragma clang diagnostic pop

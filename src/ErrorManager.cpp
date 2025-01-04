@@ -5,7 +5,6 @@
 #include <iostream>
 
 void ErrorManager::ProcessLexicalException(Lexer& lexer, const LexicalException& e) {
-    m_hasError = true;
     std::cerr << std::format(
         "({}:{}) LE-{:04X}: ",
         e.GetLine(), e.GetColumn(),
@@ -14,17 +13,21 @@ void ErrorManager::ProcessLexicalException(Lexer& lexer, const LexicalException&
     std::cerr << e.what() << std::endl;
 
     switch (m_lexicalMode) {
+    case LexicalRecoveryMode::Critical:
+        m_status = 2;
+        throw CriticalLanguageException();
     case LexicalRecoveryMode::SkipLine:
+        m_status = 1;
         lexer.SkipLine();
         break;
     case LexicalRecoveryMode::SkipChar:
+        m_status = 1;
         lexer.SkipChar();
         break;
     }
 }
 
 void ErrorManager::ProcessSyntaxException([[maybe_unused]] Parser& parser, const SyntaxException& e) {
-    m_hasError = true;
     std::cerr << std::format(
         "({}:{}) SE-{:04X}: ",
         e.GetLine(), e.GetColumn(),
@@ -32,15 +35,17 @@ void ErrorManager::ProcessSyntaxException([[maybe_unused]] Parser& parser, const
     );
     std::cerr << e.what() << std::endl;
 
-    // Recuperar de un error sintáctico es mucho más complicado que uno léxico o semántico.
+    m_status = 2;
+    throw CriticalLanguageException();
 }
 
 void ErrorManager::LogSemanticError(unsigned line, unsigned column, std::string_view message) {
-    m_hasError = true;
     std::cerr << std::format(
         "({}:{}) UE-{:04X}: ",
         line, column,
         0xFFFF
     );
+
+    m_status = 1;
     std::cerr << message << std::endl;
 }

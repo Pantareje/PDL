@@ -33,26 +33,13 @@ class Parser {
 
 
     void GetNextToken(GlobalState& globals) {
-        bool running = true;
-        while (running) {
-            try {
-                m_lastToken = m_lexer.GetToken(globals);
-                running = false;
-            } catch (const LexicalException& e) {
-                globals.errorManager.ProcessLexicalException(m_lexer, e);
-            }
-        }
+        m_lastToken = m_lexer.GetToken(globals);
     }
 
 
     void VerifyTokenType(TokenType expectedType, const char* errorMessage) const {
         if (m_lastToken.type != expectedType)
             ThrowSyntaxError(errorMessage);
-    }
-
-    void VerifyTokenType(TokenType expectedType, SyntaxError error) const {
-        if (m_lastToken.type != expectedType)
-            ThrowSyntaxError(error);
     }
 
 

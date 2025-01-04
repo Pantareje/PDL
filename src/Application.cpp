@@ -7,6 +7,12 @@
 #include <format>
 
 namespace {
+    void LogCriticalError(const CriticalLanguageException& e) {
+        std::cerr << e.what() << std::endl;
+    }
+}
+
+namespace {
     int GenerateTokens(std::istream& input, std::ostream& output) {
         Lexer lexer(input);
         GlobalState globals = {
@@ -14,19 +20,19 @@ namespace {
             .globalTable = { SymbolTable(0) }
         };
 
-        bool isRunning = true;
-        while (isRunning) {
-            try {
+        try {
+            bool isRunning = true;
+            while (isRunning) {
                 const auto token = lexer.GetToken(globals);
                 std::string content = TokenAttributeToString(token);
                 output << "<" << ToString(token.type) << ", " << content << ">" << std::endl;
                 if (token.type == TokenType::END) isRunning = false;
-            } catch (const LexicalException& e) {
-                globals.errorManager.ProcessLexicalException(lexer, e);
             }
+        } catch (const CriticalLanguageException& e) {
+            LogCriticalError(e);
         }
 
-        return globals.errorManager.HasError();
+        return globals.errorManager.GetStatus();
     }
 
     int GenerateTokens(std::istream& input, const std::string& outputFileName) {
@@ -56,12 +62,12 @@ namespace {
 
         try {
             parser.Parse(ss, globals);
-        } catch (const SyntaxException& e) {
-            globals.errorManager.ProcessSyntaxException(parser, e);
+        } catch (const CriticalLanguageException& e) {
+            LogCriticalError(e);
         }
 
         output << "Des" << ss.str() << std::endl;
-        return globals.errorManager.HasError();
+        return globals.errorManager.GetStatus();
     }
 
     int GenerateParse(std::istream& input, const std::string& outputFileName, bool useSemantic) {
@@ -96,20 +102,20 @@ namespace {
             .globalTable = { SymbolTable(0) }
         };
 
-        bool isRunning = true;
-        while (isRunning) {
-            try {
+        try {
+            bool isRunning = true;
+            while (isRunning) {
                 const auto token = lexer.GetToken(globals);
                 if (token.type == TokenType::END) isRunning = false;
-            } catch (const LexicalException& e) {
-                globals.errorManager.ProcessLexicalException(lexer, e);
             }
+        } catch (const CriticalLanguageException& e) {
+            LogCriticalError(e);
         }
 
         globals.globalTable->WriteTable(output);
         globals.globalTable = std::nullopt;
 
-        return globals.errorManager.HasError();
+        return globals.errorManager.GetStatus();
     }
 
     int GenerateSemanticSymbols(std::istream& input, std::ostream& output) {
@@ -123,8 +129,8 @@ namespace {
 
         try {
             parser.Parse(ss, globals);
-        } catch (const SyntaxException& e) {
-            globals.errorManager.ProcessSyntaxException(parser, e);
+        } catch (const CriticalLanguageException& e) {
+            LogCriticalError(e);
         }
 
         assert(globals.globalTable.has_value());
@@ -135,7 +141,7 @@ namespace {
 
         output << ss.str();
 
-        return globals.errorManager.HasError();
+        return globals.errorManager.GetStatus();
     }
 
     int GenerateSymbols(std::istream& input, std::ostream& output, bool useSemantic) {
@@ -210,11 +216,10 @@ int Application::Run() const {
         case TaskType::None:
             std::unreachable();
         }
-    } catch (int) {}
-    /*const std::exception& e) {
-        std::cerr << "ERROR CRÍTICO: " << e.what() << std::endl;
-        result = 2;
-    }*/
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR INESPERADO: " << e.what() << std::endl;
+        result = 3;
+    }
 
     return result;
 }

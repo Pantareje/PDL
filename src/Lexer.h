@@ -51,7 +51,15 @@ public:
     explicit Lexer(std::istream& input) : m_input(input) {}
 
     Token GetToken(GlobalState& globals) {
-        return ReadToken(globals);
+        for (size_t i = 0; i < 5000; i++) {
+            try {
+                return ReadToken(globals);
+            } catch (const LexicalException& e) {
+                globals.errorManager.ProcessLexicalException(*this, e);
+            }
+        }
+
+        throw CriticalLanguageException();
     }
 
     void SkipLine() {
