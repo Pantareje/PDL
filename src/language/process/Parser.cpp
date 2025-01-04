@@ -1,7 +1,8 @@
 #include "Parser.h"
 
 #pragma clang diagnostic push
-#pragma ide diagnostic ignored "misc-no-recursion"
+#pragma clang diagnostic ignored "misc-no-recursion"
+#pragma clang diagnostic ignored "bugprone-branch-clone"
 
 namespace {
     void WriteParse(std::ostream& output, const GlobalState& globals, int transition) {
@@ -128,15 +129,6 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
     // ------ //
 
     if (globals.useSemantic) {
-        if (globals.localTable.has_value()) {
-            LogSemanticError(
-                globals,
-                function,
-                SemanticError::FUNCTION_NESTED,
-                "No se puede declarar una función dentro de otra función."
-            );
-        }
-
         globals.implicitDeclaration = false;
     }
 
@@ -696,7 +688,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
         VerifyTokenType(CURLY_BRACKET_CLOSE, SyntaxError::STATEMENT_FOR_MISSING_BRACK_CLOSE);
 
         if (globals.useSemantic) {
-            if (forAct_1.at(aType) != tOk) {
+            if (forAct_1.at(aType) == tError) {
                 statement[aType] = tError;
             } else if (exp1.at(aType) != tLog) {
                 statement[aType] = tError;
@@ -710,7 +702,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
                         exp1.at(aType).ToReadableString()
                     )
                 );
-            } else if (forAct_2.at(aType) != tOk) {
+            } else if (forAct_2.at(aType) == tError) {
                 statement[aType] = tError;
             } else {
                 statement[aType] = body.at(aType);
