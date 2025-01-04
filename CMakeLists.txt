@@ -10,7 +10,6 @@ add_executable(PDL
         src/Characters.h
         src/Characters.cpp
         src/Token.h
-        src/LexicalError.h
         src/Lexer.h
         src/SymbolTable.h
         src/Parser.h
@@ -25,6 +24,8 @@ add_executable(PDL
         src/Symbol.h
         src/SymbolPos.h
         src/Lexer.cpp
+        src/ErrorManager.cpp
+        src/ErrorManager.h
 )
 
 target_link_libraries(PDL PRIVATE ICU::uc)

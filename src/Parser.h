@@ -12,29 +12,47 @@ class Parser {
     Lexer m_lexer;
     Token m_lastToken;
 
-    void ThrowError(SyntaxError error) const {
+    [[noreturn]]
+    void ThrowSyntaxError(SyntaxError error) const {
         throw SyntaxException(error, m_lastToken);
     }
 
     [[noreturn]]
-    void ThrowError(const char* errorMessage) const {
+    void ThrowSyntaxError(const char* errorMessage) const {
         throw SyntaxException(m_lastToken.line, m_lastToken.column, errorMessage);
     }
 
     [[noreturn]]
-    void ThrowError(const std::string& errorMessage) const {
+    void ThrowSyntaxError(const std::string& errorMessage) const {
         throw SyntaxException(m_lastToken.line, m_lastToken.column, errorMessage);
+    }
+
+    void LogSemanticError(GlobalState& globals, std::string_view message) const {
+        globals.errorManager.LogSemanticError(m_lastToken.line, m_lastToken.column, message);
+    }
+
+
+    void GetNextToken(GlobalState& globals) {
+        bool running = true;
+        while (running) {
+            try {
+                m_lastToken = m_lexer.GetToken(globals);
+                running = false;
+            } catch (const LexicalException& e) {
+                globals.errorManager.ProcessLexicalException(m_lexer, e);
+            }
+        }
     }
 
 
     void VerifyTokenType(TokenType expectedType, const char* errorMessage) const {
         if (m_lastToken.type != expectedType)
-            ThrowError(errorMessage);
+            ThrowSyntaxError(errorMessage);
     }
 
     void VerifyTokenType(TokenType expectedType, SyntaxError error) const {
         if (m_lastToken.type != expectedType)
-            ThrowError(error);
+            ThrowSyntaxError(error);
     }
 
 

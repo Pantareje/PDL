@@ -86,7 +86,7 @@ public:
           m_lineNumber(lineNumber),
           m_columnNumber(columnNumber) {}
 
-    [[nodiscard]] LexicalError GetError() const { return m_error; }
+    [[nodiscard]] LexicalError GetCode() const { return m_error; }
     [[nodiscard]] unsigned GetLine() const { return m_lineNumber; }
     [[nodiscard]] unsigned GetColumn() const { return m_columnNumber; }
 };

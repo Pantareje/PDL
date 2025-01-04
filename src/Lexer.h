@@ -15,7 +15,7 @@ class Lexer {
     unsigned m_tokenColumn = m_column;
 
     [[noreturn]]
-    void ThrowError(LexicalError error) const {
+    void ThrowLexicalError(LexicalError error) const {
         throw LexicalException(m_line, m_column, error, m_lastChar);
     }
 
@@ -50,13 +50,17 @@ class Lexer {
 public:
     explicit Lexer(std::istream& input) : m_input(input) {}
 
-    Token GetToken(GlobalState& semanticState) {
-        return ReadToken(semanticState);
+    Token GetToken(GlobalState& globals) {
+        return ReadToken(globals);
     }
 
     void SkipLine() {
         while (m_lastChar != U'\n' && m_lastChar != EOF) {
             Read();
         }
+    }
+
+    void SkipChar() {
+        Read();
     }
 };

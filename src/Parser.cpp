@@ -65,8 +65,17 @@ RuleAttributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
     // First (FUNCTION P)
     case FUNCTION: {
         WriteParse(output, globals, 1);
+
+        // ------ //
+        
         (void) Function(output, globals);
+
+        // ------ //
+        
         (void) Axiom(output, globals);
+
+        // ------ //
+        
         break;
     }
 
@@ -79,19 +88,31 @@ RuleAttributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
     case INPUT:
     case RETURN: {
         WriteParse(output, globals, 2);
+
+        // ------ //
+        
         (void) Statement(output, globals);
+
+        // ------ //
+        
         (void) Axiom(output, globals);
+
+        // ------ //
+        
         break;
     }
 
     // First (eof)
     case END: {
         WriteParse(output, globals, 3);
+
+        // ------ //
+        
         break;
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             "Instancia incorrecta: "
             "Se esperaba una instancia o una declaración de función."
         );
@@ -113,13 +134,13 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     if (globals.useSemantic) {
         if (globals.localTable.has_value()) {
-            throw std::runtime_error("TODO: NO SE PERMITEN FUNCIONES ANIDADAS."); // TODO
+            LogSemanticError(globals, "TODO: NO SE PERMITEN FUNCIONES ANIDADAS."); // TODO
         }
 
         globals.implicitDeclaration = false;
     }
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
 
     // ------ //
 
@@ -141,7 +162,7 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
         globals.localOffset = 0;
     }
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
 
     // ------ //
 
@@ -151,7 +172,7 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
         "Falta un paréntesis de apertura para declarar los parámetros de la función."
     );
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
 
     // ------ //
 
@@ -161,7 +182,7 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
         const auto& pos = std::get<SymbolPos>(id.attribute);
 
         if (globals.HasType(pos)) {
-            throw std::runtime_error("TODO: YA EXISTE UN IDENTIDICADOR CON ESE NOMBRE."); // TODO
+            LogSemanticError(globals, "TODO: YA EXISTE UN IDENTIDICADOR CON ESE NOMBRE."); // TODO
         } else {
             globals.AddFunctionType(pos, funType.at(aType), funAttributes.at(aType));
         }
@@ -177,7 +198,7 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
         "Falta un paréntesis de cierre tras declarar los parámetros de la función."
     );
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
 
     // ------ //
 
@@ -187,7 +208,7 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
         "Es necesario abrir el cuerpo de la función con una llave «{»."
     );
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
 
     // ------ //
 
@@ -203,17 +224,17 @@ RuleAttributes Parser::Function(std::ostream& output, GlobalState& globals) {
 
     if (globals.useSemantic) {
         if (body.at(aType) != tOk) {
-            throw std::runtime_error("TODO: ERROR EN EL CUERPO DE LA FUNCIÓN"); // TODO
+            LogSemanticError(globals, "TODO: ERROR EN EL CUERPO DE LA FUNCIÓN"); // TODO
         }
         if (body.at(aRetType) != funType.at(aType)) {
-            throw std::runtime_error("TODO: TIPO DE RETORNO INCOHERENTE"); // TODO
+            LogSemanticError(globals, "TODO: TIPO DE RETORNO INCOHERENTE"); // TODO
         }
 
         WriteCurrentTable(output, globals);
         globals.localTable = std::nullopt;
     }
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
 
     // ------ //
 
@@ -236,7 +257,7 @@ RuleAttributes Parser::FunType(std::ostream& output, GlobalState& globals) {
             funType[aType] = tVoid;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -263,7 +284,7 @@ RuleAttributes Parser::FunType(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             "Declaración de función incorrecta: "
             "Se esperaba el tipo de retorno de la función (int, boolean, string) o «void»."
         );
@@ -289,7 +310,7 @@ RuleAttributes Parser::VarType(std::ostream& output, GlobalState& globals) {
             varType[aWidth] = wInt;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -307,7 +328,7 @@ RuleAttributes Parser::VarType(std::ostream& output, GlobalState& globals) {
             varType[aWidth] = wLog;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -325,7 +346,7 @@ RuleAttributes Parser::VarType(std::ostream& output, GlobalState& globals) {
             varType[aWidth] = wStr;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -333,10 +354,10 @@ RuleAttributes Parser::VarType(std::ostream& output, GlobalState& globals) {
     }
 
     case VOID:
-        ThrowError("Una variable no puede ser de tipo «void».");
+        ThrowSyntaxError("Una variable no puede ser de tipo «void».");
 
     default:
-        ThrowError("Tipo de variable desconocido.");
+        ThrowSyntaxError("Tipo de variable desconocido.");
     }
 
     return varType;
@@ -358,7 +379,7 @@ RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals)
             funAttributes[aType] = tVoid;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -390,7 +411,7 @@ RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals)
 
             if (globals.HasType(pos)) {
                 funAttributes[aType] = tError;
-                throw std::runtime_error("TODO: YA EXISTE UN ATRIBUTO CON ESE NOMBRE."); // TODO
+                LogSemanticError(globals, "TODO: YA EXISTE UN ATRIBUTO CON ESE NOMBRE."); // TODO
             } else {
                 funAttributes[aType] = tOk;
                 globals.AddType(pos, varType.at(aType));
@@ -399,7 +420,7 @@ RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals)
             }
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -421,13 +442,13 @@ RuleAttributes Parser::FunAttributes(std::ostream& output, GlobalState& globals)
     }
 
     case PARENTHESIS_CLOSE:
-        ThrowError(
+        ThrowSyntaxError(
             "Declaración de función incorrecta: "
             "Es necesario definir algún atributo para la función, o «void» si no toma argumentos."
         );
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Declaración de función incorrecta: "
                 "Elemento de tipo «{}» inesperado en la declaración de atributos de la función.",
@@ -451,7 +472,7 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -472,7 +493,7 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
 
             if (globals.HasType(pos)) {
                 nextAttributes[aType] = tError;
-                throw std::runtime_error("TODO: YA EXISTE UN ATRIBUTO CON ESE NOMBRE."); // TODO
+                LogSemanticError(globals, "TODO: YA EXISTE UN ATRIBUTO CON ESE NOMBRE."); // TODO
             } else {
                 nextAttributes[aType] = tOk;
                 globals.AddType(pos, varType.at(aType));
@@ -481,7 +502,7 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
             }
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -518,7 +539,7 @@ RuleAttributes Parser::NextAttributes(std::ostream& output, GlobalState& globals
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Declaración de función incorrecta: "
                 "Elemento de tipo «{}» inesperado en la declaración de atributos de la función.",
@@ -592,7 +613,7 @@ RuleAttributes Parser::Body(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Sentencia incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -617,7 +638,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -627,7 +648,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Se esperaba «(» tras «if»."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -641,7 +662,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Se esperaba «)» tras la condición del «if»."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -668,7 +689,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -678,7 +699,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Se esperaba «(» tras «for»."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -692,7 +713,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Las instancias del bucle for deben ir separadas por «;»."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -706,7 +727,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Las instancias del bucle for deben ir separadas por «;»."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -720,7 +741,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Se esperaba «)» tras declarar las instancias del bucle."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -730,7 +751,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Se esperaba «{» para definir el cuerpo del bucle."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -747,13 +768,13 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (forAct_1.at(aType) != tOk) {
                 statement[aType] = tError;
-                throw std::runtime_error("TODO 1"); // TODO
+                LogSemanticError(globals, "TODO 1"); // TODO
             } else if (exp1.at(aType) != tLog) {
                 statement[aType] = tError;
-                throw std::runtime_error("TODO 2"); // TODO
+                LogSemanticError(globals, "TODO 2"); // TODO
             } else if (forAct_2.at(aType) != tOk) {
                 statement[aType] = tError;
-                throw std::runtime_error("TODO 3"); // TODO
+                LogSemanticError(globals, "TODO 3"); // TODO
             } else {
                 statement[aType] = body.at(aType);
             }
@@ -761,7 +782,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             statement[aRetType] = body.at(aRetType);
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -775,7 +796,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         if (globals.useSemantic) {
             globals.implicitDeclaration = false;
@@ -802,7 +823,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
 
             if (globals.HasType(pos)) {
                 statement[aType] = tError;
-                throw std::runtime_error("TODO: LA VARIABLE YA EXISTE"); // TODO
+                LogSemanticError(globals, "TODO: LA VARIABLE YA EXISTE"); // TODO
             } else {
                 globals.AddType(pos, varType.at(aType));
                 auto& offset = globals.CurrentOffset();
@@ -814,7 +835,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             globals.implicitDeclaration = true;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -824,7 +845,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
             "Se esperaba «;» tras declarar la variable."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -853,7 +874,7 @@ RuleAttributes Parser::Statement(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Sentencia incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -879,7 +900,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         const auto id = m_lastToken;
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -894,26 +915,26 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
             if (idAct.at(aFunCall)) {
                 if (!IsFunction(type)) {
                     atomStatement[aType] = tError;
-                    throw std::runtime_error("TODO: NO SE PUEDE LLAMAR USAR UNA VARIABLE COMO FUNCIÓN"); // TODO
+                    LogSemanticError(globals, "TODO: NO SE PUEDE LLAMAR USAR UNA VARIABLE COMO FUNCIÓN"); // TODO
                 } else if (idAct.at(aType) == tError) {
                     atomStatement[aType] = tError;
                 } else if (idAct.at(aType) == GetFunctionArgsType(type)) {
                     atomStatement[aType] = tOk;
                 } else {
                     atomStatement[aType] = tError;
-                    throw std::runtime_error("TODO: NO COINCIDEN LOS TIPOS EN LA LLAMADA A LA FUNCIÓN"); // TODO
+                    LogSemanticError(globals, "TODO: NO COINCIDEN LOS TIPOS EN LA LLAMADA A LA FUNCIÓN"); // TODO
                 }
             } else {
                 if (IsFunction(type)) {
                     atomStatement[aType] = tError;
-                    throw std::runtime_error("TODO: NO SE PUEDE USAR UNA FUNCIÓN COMO VARIABLE"); // TODO
+                    LogSemanticError(globals, "TODO: NO SE PUEDE USAR UNA FUNCIÓN COMO VARIABLE"); // TODO
                 } else if (idAct.at(aType) == tError) {
                     atomStatement[aType] = tError;
                 } else if (idAct.at(aType) == type) {
                     atomStatement[aType] = tOk;
                 } else {
                     atomStatement[aType] = tError;
-                    throw std::runtime_error("TODO: LOS TIPOS DE LA ASIGNACIÓN NO COINCIDEN"); // TODO
+                    LogSemanticError(globals, "TODO: LOS TIPOS DE LA ASIGNACIÓN NO COINCIDEN"); // TODO
                 }
             }
         }
@@ -922,7 +943,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -935,7 +956,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -950,7 +971,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
                 atomStatement[aType] = tOk;
             } else {
                 atomStatement[aType] = tError;
-                throw std::runtime_error("TODO: TIPO ILEGAL PARA OUTPUT"); // TODO
+                LogSemanticError(globals, "TODO: TIPO ILEGAL PARA OUTPUT"); // TODO
             }
         }
 
@@ -958,7 +979,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -971,7 +992,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -989,17 +1010,17 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
                 atomStatement[aType] = tOk;
             } else {
                 atomStatement[aType] = tError;
-                throw std::runtime_error("TODO: TIPO ILEGAL PARA INPUT"); // TODO
+                LogSemanticError(globals, "TODO: TIPO ILEGAL PARA INPUT"); // TODO
             }
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
         VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1012,7 +1033,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1032,7 +1053,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
 
         VerifyTokenType(SEMICOLON, "Se esperaba «;» para finalizar la sentencia.");
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1040,7 +1061,7 @@ RuleAttributes Parser::AtomStatement(std::ostream& output, GlobalState& globals)
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Sentencia incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1098,7 +1119,7 @@ RuleAttributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1113,7 +1134,7 @@ RuleAttributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
 
         VerifyTokenType(PARENTHESIS_CLOSE, "Falta un paréntesis de cierre en la llamada a la función.");
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1121,7 +1142,7 @@ RuleAttributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             "Sentencia incorrecta: "
             "Se debe realizar una asignación o llamada sobre el identificador."
         );
@@ -1144,7 +1165,7 @@ RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
 
         const auto id = m_lastToken;
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1160,13 +1181,13 @@ RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
 
             if (type != tInt) {
                 forAct[aType] = tError;
-                throw std::runtime_error("TODO 1"); // TODO
+                LogSemanticError(globals, "TODO 1"); // TODO
             } else if (exp1.at(aType) == tError) {
                 forAct[aType] = tError;
-                throw std::runtime_error("TODO 2"); // TODO
+                LogSemanticError(globals, "TODO 2"); // TODO
             } else if (exp1.at(aType) != tInt) {
                 forAct[aType] = tError;
-                throw std::runtime_error("TODO 3"); // TODO
+                LogSemanticError(globals, "TODO 3"); // TODO
             } else {
                 forAct[aType] = tOk;
             }
@@ -1194,7 +1215,7 @@ RuleAttributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Acción incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1217,7 +1238,7 @@ RuleAttributes Parser::Ass(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         if (globals.useSemantic) {
             ass[aSum] = false;
@@ -1233,7 +1254,7 @@ RuleAttributes Parser::Ass(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         if (globals.useSemantic) {
             ass[aSum] = true;
@@ -1245,7 +1266,7 @@ RuleAttributes Parser::Ass(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             "Asignación incorrecta: "
             "Se esperaba «=» o «+=»."
         );
@@ -1308,7 +1329,7 @@ RuleAttributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Lista de parámetros incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1332,7 +1353,7 @@ RuleAttributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1373,7 +1394,7 @@ RuleAttributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Lista de parámetros incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1429,7 +1450,7 @@ RuleAttributes Parser::ReturnExp(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión de retorno incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1469,7 +1490,7 @@ RuleAttributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
                 exp1[aType] = exp2.at(aType);
             } else if (exp2.at(aType) != tLog) {
                 exp1[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (expOr.at(aType) == tError) {
                 exp1[aType] = tError;
             } else {
@@ -1483,7 +1504,7 @@ RuleAttributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Sergio cambia esto."
@@ -1506,7 +1527,7 @@ RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1519,7 +1540,7 @@ RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (exp2.at(aType) != tLog) {
                 expOr[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (expOr_1.at(aType) == tError) {
                 expOr[aType] = tError;
             } else {
@@ -1550,7 +1571,7 @@ RuleAttributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Sergio cambia esto."
@@ -1589,7 +1610,7 @@ RuleAttributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
                 exp2[aType] = exp3.at(aType);
             } else if (exp3.at(aType) != tLog) {
                 exp2[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (expAnd.at(aType) == tError) {
                 exp2[aType] == tError;
             } else {
@@ -1603,7 +1624,7 @@ RuleAttributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1627,7 +1648,7 @@ RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1640,7 +1661,7 @@ RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (exp3.at(aType) != tLog) {
                 expAnd[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (expAnd_1.at(aType) == tError) {
                 expAnd[aType] = tError;
             } else {
@@ -1672,7 +1693,7 @@ RuleAttributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Sergio cambia esto."
@@ -1711,7 +1732,7 @@ RuleAttributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
                 exp3[aType] = exp4.at(aType);
             } else if (exp4.at(aType) != tInt) {
                 exp3[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (comp.at(aType) == tError) {
                 exp3[aType] = tError;
             } else {
@@ -1725,7 +1746,7 @@ RuleAttributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1765,7 +1786,7 @@ RuleAttributes Parser::Comp(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (exp4.at(aType) != tInt) {
                 comp[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (comp_1.at(aType) == tError) {
                 comp[aType] = tError;
             } else {
@@ -1798,7 +1819,7 @@ RuleAttributes Parser::Comp(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1822,7 +1843,7 @@ RuleAttributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1835,7 +1856,7 @@ RuleAttributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -1843,7 +1864,7 @@ RuleAttributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Comparación incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1885,7 +1906,7 @@ RuleAttributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
                 exp4[aType] = tError;
             } else if (arith.at(aType) == tError) {
                 exp4[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else {
                 exp4[aType] = tInt;
             }
@@ -1897,7 +1918,7 @@ RuleAttributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1935,7 +1956,7 @@ RuleAttributes Parser::Arith(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (expAtom.at(aType) != tInt) {
                 arith[aType] = tError;
-                throw std::runtime_error("TODO"); // TODO
+                LogSemanticError(globals, "TODO"); // TODO
             } else if (arith_1.at(aType) == tError) {
                 arith[aType] = tError;
             } else {
@@ -1970,7 +1991,7 @@ RuleAttributes Parser::Arith(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -1994,7 +2015,7 @@ RuleAttributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2007,7 +2028,7 @@ RuleAttributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2015,7 +2036,7 @@ RuleAttributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Operación aritmética incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -2041,7 +2062,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 
         const auto id = m_lastToken;
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2056,19 +2077,19 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 
                 if (!IsFunction(type)) {
                     expAtom[aType] = tError;
-                    throw std::runtime_error("TODO: NO SE PUEDE LLAMAR USAR UNA VARIABLE COMO FUNCIÓN"); // TODO
+                    LogSemanticError(globals, "TODO: NO SE PUEDE LLAMAR USAR UNA VARIABLE COMO FUNCIÓN"); // TODO
                 } else if (idVal.at(aType) == tError) {
                     expAtom[aType] = tError;
                 } else if (idVal.at(aType) == GetFunctionArgsType(type)) {
                     expAtom[aType] = GetFunctionReturnType(type);
                 } else {
                     expAtom[aType] = tError;
-                    throw std::runtime_error("TODO: NO COINCIDEN LOS TIPOS EN LA LLAMADA A LA FUNCIÓN"); // TODO
+                    LogSemanticError(globals, "TODO: NO COINCIDEN LOS TIPOS EN LA LLAMADA A LA FUNCIÓN"); // TODO
                 }
             } else {
                 if (IsFunction(type)) {
                     expAtom[aType] = tError;
-                    throw std::runtime_error("TODO: NO SE PUEDE USAR UNA FUNCIÓN COMO VARIABLE"); // TODO
+                    LogSemanticError(globals, "TODO: NO SE PUEDE USAR UNA FUNCIÓN COMO VARIABLE"); // TODO
                 } else if (type == tInt) {
                     expAtom[aType] = tInt;
                 } else if (type == tStr) {
@@ -2077,7 +2098,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                     expAtom[aType] = tLog;
                 } else {
                     expAtom[aType] = tError;
-                    throw std::runtime_error("TODO: TIPO DE VARIABLE ILEGAL"); // TODO
+                    LogSemanticError(globals, "TODO: TIPO DE VARIABLE ILEGAL"); // TODO
                 }
             }
         }
@@ -2093,7 +2114,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2111,7 +2132,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
             "Falta el paréntesis de cierre."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2128,7 +2149,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
             expAtom[aType] = tInt;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2145,7 +2166,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
             expAtom[aType] = tStr;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2162,7 +2183,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
             expAtom[aType] = tLog;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2179,7 +2200,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
             expAtom[aType] = tLog;
         }
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2187,7 +2208,7 @@ RuleAttributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Elemento de tipo «{}» inesperado.",
@@ -2211,7 +2232,7 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2230,7 +2251,7 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
             "Falta el paréntesis de cierre."
         );
 
-        m_lastToken = m_lexer.GetToken(globals);
+        GetNextToken(globals);
 
         // ------ //
 
@@ -2261,7 +2282,7 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
     }
 
     default:
-        ThrowError(
+        ThrowSyntaxError(
             std::format(
                 "Expresión incorrecta: "
                 "Se esperaba alguna acción sobre el identificador.",
@@ -2275,12 +2296,15 @@ RuleAttributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
 
 // HECHO
 void Parser::Parse(std::ostream& output, GlobalState& globals) {
+    globals.errorManager.SetLexicalRecoveryMode(LexicalRecoveryMode::SkipChar);
+
     globals.globalTable = SymbolTable(0);
     globals.tableCounter = 1;
     globals.globalOffset = 0;
     globals.implicitDeclaration = true;
 
-    m_lastToken = m_lexer.GetToken(globals);
+    GetNextToken(globals);
+
     (void) Axiom(output, globals);
 }
 

@@ -12,7 +12,7 @@ void Lexer::ReadDelAndComments() {
 
             // 15 : * : 16
             if (m_lastChar != '*')
-                ThrowError(LexicalError::MISSING_COMMENT_START);
+                ThrowLexicalError(LexicalError::MISSING_COMMENT_START);
 
             Read();
 
@@ -21,7 +21,7 @@ void Lexer::ReadDelAndComments() {
             bool m_awaitExit = false;
             while (m_loop) {
                 if (m_lastChar == EOF)
-                    ThrowError(LexicalError::MISSING_COMMENT_END);
+                    ThrowLexicalError(LexicalError::MISSING_COMMENT_END);
 
                 if (m_awaitExit) {
                     // 17 : / : 0
@@ -118,7 +118,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         // 3 : oc : 4
         if (numberTooBig)
-            ThrowError(LexicalError::INT_TOO_BIG);
+            ThrowLexicalError(LexicalError::INT_TOO_BIG);
 
         return CreateToken(TokenType::CINT, static_cast<int16_t>(num));
     }
@@ -131,7 +131,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         while (m_lastChar != '\'') {
             if (m_lastChar == static_cast<char32_t>(EOF))
-                ThrowError(LexicalError::MISSING_STRING_END);
+                ThrowLexicalError(LexicalError::MISSING_STRING_END);
 
             // 5 : \ : 6
             if (m_lastChar == '\\') {
@@ -142,7 +142,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
                 // Carácter ilegal.
                 if (escapedChar == -1)
-                    ThrowError(LexicalError::STRING_ESCAPE_SEQUENCE);
+                    ThrowLexicalError(LexicalError::STRING_ESCAPE_SEQUENCE);
 
                 str += CodepointToUtf8(escapedChar);
                 counter += 1;
@@ -156,7 +156,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
             }
             // Carácter ilegal.
             else {
-                ThrowError(LexicalError::STRING_FORBIDDEN_CHARACTER);
+                ThrowLexicalError(LexicalError::STRING_FORBIDDEN_CHARACTER);
             }
         }
 
@@ -164,7 +164,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         // Comprobamos el contador y, si es mayor que 64, lanzamos un error.
         if (counter > 64)
-            ThrowError(LexicalError::STRING_TOO_LONG);
+            ThrowLexicalError(LexicalError::STRING_TOO_LONG);
 
         Read();
         return CreateToken(TokenType::CSTR, str);
@@ -213,7 +213,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         // 11 : & : 12
         if (m_lastChar != '&')
-            ThrowError(LexicalError::MISSING_OP_AND);
+            ThrowLexicalError(LexicalError::MISSING_OP_AND);
 
         Read();
         return CreateToken(TokenType::AND);
@@ -223,7 +223,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
     if (m_lastChar == '|') {
         Read();
         if (m_lastChar != '|')
-            ThrowError(LexicalError::MISSING_OP_OR);
+            ThrowLexicalError(LexicalError::MISSING_OP_OR);
 
         Read();
         return CreateToken(TokenType::OR);
@@ -270,5 +270,5 @@ Token Lexer::ReadToken(GlobalState& globals) {
         return CreateToken(TokenType::END);
 
     // Carácter desconocido.
-    ThrowError(LexicalError::UNEXPECTED_START_CHARACTER);
+    ThrowLexicalError(LexicalError::UNEXPECTED_START_CHARACTER);
 }

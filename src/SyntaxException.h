@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Token.h"
+
 #include <stdexcept>
 #include <utility>
 
@@ -37,7 +39,7 @@ public:
           m_error(error),
           m_token(std::move(token)) {}
 
-    [[nodiscard]] SyntaxError GetError() const { return m_error; }
+    [[nodiscard]] SyntaxError GetCode() const { return m_error; }
     [[nodiscard]] unsigned GetLine() const { return m_token.line; }
     [[nodiscard]] unsigned GetColumn() const { return m_token.column; }
 };

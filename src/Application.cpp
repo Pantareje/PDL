@@ -14,8 +14,6 @@ namespace {
             .globalTable = { SymbolTable(0) }
         };
 
-        int status = 0;
-
         bool isRunning = true;
         while (isRunning) {
             try {
@@ -24,18 +22,11 @@ namespace {
                 output << "<" << ToString(token.type) << ", " << content << ">" << std::endl;
                 if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
-                std::cerr << std::format(
-                    "({}:{}) LE-{:04X}: ",
-                    e.GetLine(), e.GetColumn(),
-                    static_cast<uint32_t>(e.GetError())
-                );
-                std::cerr << e.what() << std::endl;
-                lexer.SkipLine();
-                status = 1;
+                globals.errorManager.ProcessLexicalException(lexer, e);
             }
         }
 
-        return status;
+        return globals.errorManager.HasError();
     }
 
     int GenerateTokens(std::istream& input, const std::string& outputFileName) {
@@ -61,20 +52,16 @@ namespace {
             .useSemantic = useSemantic
         };
 
-        int status = 0;
-
         std::ostringstream ss;
 
         try {
             parser.Parse(ss, globals);
         } catch (const SyntaxException& e) {
-            std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
-            std::cerr << " ERROR: " << e.what() << std::endl;
-            status = 1;
+            globals.errorManager.ProcessSyntaxException(parser, e);
         }
 
         output << "Des" << ss.str() << std::endl;
-        return status;
+        return globals.errorManager.HasError();
     }
 
     int GenerateParse(std::istream& input, const std::string& outputFileName, bool useSemantic) {
@@ -109,30 +96,23 @@ namespace {
             .globalTable = { SymbolTable(0) }
         };
 
-        int status = 0;
-
         bool isRunning = true;
         while (isRunning) {
             try {
                 const auto token = lexer.GetToken(globals);
                 if (token.type == TokenType::END) isRunning = false;
             } catch (const LexicalException& e) {
-                std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
-                std::cerr << " ERROR: " << e.what() << std::endl;
-                lexer.SkipLine();
-                status = 1;
+                globals.errorManager.ProcessLexicalException(lexer, e);
             }
         }
 
         globals.globalTable->WriteTable(output);
         globals.globalTable = std::nullopt;
 
-        return status;
+        return globals.errorManager.HasError();
     }
 
     int GenerateSemanticSymbols(std::istream& input, std::ostream& output) {
-        int status = 0;
-
         Parser parser(input);
         GlobalState globals = {
             .syntaxPrint = SyntaxPrint::SYMBOLS,
@@ -144,9 +124,7 @@ namespace {
         try {
             parser.Parse(ss, globals);
         } catch (const SyntaxException& e) {
-            std::cerr << "(" << e.GetLine() << ":" << e.GetColumn() << ")";
-            std::cerr << " ERROR: " << e.what() << std::endl;
-            status = 1;
+            globals.errorManager.ProcessSyntaxException(parser, e);
         }
 
         assert(globals.globalTable.has_value());
@@ -157,7 +135,7 @@ namespace {
 
         output << ss.str();
 
-        return status;
+        return globals.errorManager.HasError();
     }
 
     int GenerateSymbols(std::istream& input, std::ostream& output, bool useSemantic) {

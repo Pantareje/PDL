@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ErrorManager.h"
 #include "SymbolTable.h"
 #include "ValueProduct.h"
 
@@ -18,6 +19,7 @@ struct GlobalState {
 
     static constexpr char PARAM_TYPE_PKEY[] = "tipoParam";
 
+    ErrorManager errorManager;
 
     SyntaxPrint syntaxPrint = SyntaxPrint::NONE;
     bool useSemantic = true;
