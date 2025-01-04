@@ -8,6 +8,7 @@ enum class TaskType {
 
 struct ApplicationAttributes {
     TaskType taskType;
+    bool useSemantic;
     std::string inputFileName;
     std::string outputFileName;
 };

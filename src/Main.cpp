@@ -1,10 +1,16 @@
-#include "Application.h"
+#include "application/Application.h"
 
 #include <stdexcept>
 #include <iostream>
 #include <format>
 
 namespace {
+    class ArgumentError final : public std::runtime_error {
+    public:
+        explicit ArgumentError(const char* message) : std::runtime_error(message) {}
+        explicit ArgumentError(const std::string& message) : std::runtime_error(message) {}
+    };
+    
     class ArgumentsReader {
         int m_argc;
         const char** m_argv;
@@ -26,50 +32,46 @@ namespace {
         ArgumentsReader(const int argc, const char* argv[]) : m_argc(argc), m_argv(argv), m_current() {}
 
         ApplicationAttributes GetAttributes() const {
-            ApplicationAttributes attributes = {};
+            ApplicationAttributes attributes = {
+                .taskType = TaskType::None,
+                .useSemantic = false
+            };
 
             m_current = 1;
 
             while (GetNextArgument()) {
                 if (m_arg == "-t") {
                     if (attributes.taskType != TaskType::None)
-                        throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
-
+                        throw ArgumentError("Ya se ha indicado un tipo de tarea a realizar.");
                     attributes.taskType = TaskType::Tokens;
                 } else if (m_arg == "-s") {
                     if (attributes.taskType != TaskType::None)
-                        throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
-
+                        throw ArgumentError("Ya se ha indicado un tipo de tarea a realizar.");
                     attributes.taskType = TaskType::Symbols;
                 } else if (m_arg == "-p") {
                     if (attributes.taskType != TaskType::None)
-                        throw std::runtime_error("Ya se ha indicado un tipo de tarea a realizar.");
-
+                        throw ArgumentError("Ya se ha indicado un tipo de tarea a realizar.");
                     attributes.taskType = TaskType::Parse;
+                } else if (m_arg == "-u") {
+                    attributes.useSemantic = true;
                 } else if (m_arg == "-i") {
                     if (!attributes.inputFileName.empty())
-                        throw std::runtime_error("Ya se ha definido un fichero de entrada.");
-
+                        throw ArgumentError("Ya se ha definido un fichero de entrada.");
                     if (!GetNextArgument())
-                        throw std::runtime_error("Después de «-i» se debe especificar un fichero de entrada.");
-
+                        throw ArgumentError("Después de «-i» se debe especificar un fichero de entrada.");
                     if (m_arg.empty())
-                        throw std::runtime_error("El nombre del fichero de entrada no puede estar vacío.");
-
+                        throw ArgumentError("El nombre del fichero de entrada no puede estar vacío.");
                     attributes.inputFileName = m_arg;
                 } else if (m_arg == "-o") {
                     if (!attributes.outputFileName.empty())
-                        throw std::runtime_error("Ya se ha definido un fichero de salida.");
-
+                        throw ArgumentError("Ya se ha definido un fichero de salida.");
                     if (!GetNextArgument())
-                        throw std::runtime_error("Después de «-o» se debe especificar un fichero de salida.");
-
+                        throw ArgumentError("Después de «-o» se debe especificar un fichero de salida.");
                     if (m_arg.empty())
-                        throw std::runtime_error("El nombre del fichero de salida no puede estar vacío.");
-
+                        throw ArgumentError("El nombre del fichero de salida no puede estar vacío.");
                     attributes.outputFileName = m_arg;
                 } else {
-                    throw std::runtime_error(std::format("El argumento «{}» es desconocido.", m_arg));
+                    throw ArgumentError(std::format("El argumento «{}» es desconocido.", m_arg));
                 }
             }
 
@@ -83,7 +85,8 @@ int main(const int argc, const char* argv[]) {
         const ApplicationAttributes attributes = ArgumentsReader(argc, argv).GetAttributes();
         const Application application(attributes);
         return application.Run();
-    } catch (const std::runtime_error& e) {
+    } catch (const ArgumentError& e) {
         std::cerr << e.what() << std::endl;
+        return 4;
     }
 }
