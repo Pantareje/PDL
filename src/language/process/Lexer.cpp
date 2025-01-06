@@ -265,8 +265,10 @@ Token Lexer::ReadToken(GlobalState& globals) {
     }
 
     // 0 : eof : 19
-    if (m_lastChar == EOF)
+    if (m_lastChar == EOF) {
+        Read();
         return CreateToken(TokenType::END);
+    }
 
     // Carácter desconocido.
     ThrowLexicalError(LexicalError::UNEXPECTED_START_CHARACTER);

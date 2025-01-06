@@ -24,7 +24,7 @@ class Lexer {
 
     template<typename T>
     constexpr Token CreateToken(TokenType tokenType, T&& attribute) {
-        assert(m_column >= m_tokenColumn);
+        assert(m_column > m_tokenColumn);
         return Token {
             .type = tokenType,
             .line = m_line,
