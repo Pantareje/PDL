@@ -915,7 +915,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
             atomStatement[aRetType] = tVoid;
 
             if (exp1.at(aType) == tError) {
-                atomStatement[aType] == tError;
+                atomStatement[aType] = tError;
             } else if (exp1.at(aType) == tStr || exp1.at(aType) == tInt) {
                 atomStatement[aType] = tOk;
             } else {
@@ -1554,7 +1554,7 @@ Parser::Attributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
                     )
                 );
             } else if (expAnd.at(aType) == tError) {
-                exp2[aType] == tError;
+                exp2[aType] = tError;
             } else {
                 exp2[aType] = tLog;
             }

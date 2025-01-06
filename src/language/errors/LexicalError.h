@@ -72,7 +72,7 @@ class LexicalException final : public std::runtime_error {
     unsigned m_columnNumber;
 
 public:
-    constexpr LexicalException(
+     LexicalException(
         const unsigned lineNumber,
         const unsigned columnNumber,
         LexicalError error,

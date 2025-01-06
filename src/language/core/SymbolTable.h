@@ -23,7 +23,7 @@ constexpr char tInt[] = "int";
 constexpr char tLog[] = "boolean";
 constexpr char tStr[] = "string";
 
-constexpr int16_t wInt = 2;
+constexpr int16_t wInt = 1;
 constexpr int16_t wLog = 1;
 constexpr int16_t wStr = 64;
 

@@ -10,8 +10,8 @@ class ValueProduct {
 public:
     ValueProduct() = default;
 
-    explicit ValueProduct(const std::string& str) : m_data(std::vector { str }) {}
-    explicit ValueProduct(int16_t value) : m_data(std::vector { value }) {}
+    explicit constexpr ValueProduct(const std::string& str) : m_data(std::vector { str }) {}
+    explicit constexpr ValueProduct(int16_t value) : m_data(std::vector { value }) {}
 
     [[nodiscard]] const auto& GetRawData() const { return m_data; }
 
