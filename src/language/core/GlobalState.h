@@ -142,7 +142,7 @@ struct GlobalState {
             AddSizeAttribute(pos, PARAM_COUNT_KEY, paramValues.size());
 
             for (size_t i = 0; i < paramValues.size(); i++) {
-                AddStringAttribute(pos, PARAM_TYPE_PKEY + std::format("{:02}", i), paramValues[i]);
+                AddStringAttribute(pos, PARAM_TYPE_PKEY + std::format("{:02}", i + 1), paramValues[i]);
             }
         }
     }
@@ -176,7 +176,7 @@ struct GlobalState {
             result.Append(GetStringAttribute(pos, RET_TYPE_KEY));
             const size_t paramCount = GetSizeAttribute(pos, PARAM_COUNT_KEY);
             for (size_t i = 0; i < paramCount; i++) {
-                result.Append(GetStringAttribute(pos, PARAM_TYPE_PKEY + std::format("{:02}", i)));
+                result.Append(GetStringAttribute(pos, PARAM_TYPE_PKEY + std::format("{:02}", i + 1)));
             }
         }
 
