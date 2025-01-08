@@ -831,7 +831,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                     atomStatement[aType] = tError;
                     LogSemanticError(
                         globals,
-                        idAct,
+                        atomStatement,
                         SemanticError::INCOHERENT_VARIABLE_AS_FUNCTION_TYPES,
                         "No se puede llamar a una variable como si fuera una función."
                     );
@@ -1660,8 +1660,7 @@ Parser::Attributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
         if (globals.useSemantic) {
             if (comp.at(aType) == tVoid) {
                 exp3[aType] = exp4.at(aType);
-            }
-            else if (exp4.at(aType) == tError) {
+            } else if (exp4.at(aType) == tError) {
                 exp3[aType] = tError;
             } else if (exp4.at(aType) != tInt) {
                 exp3[aType] = tError;
@@ -2034,7 +2033,7 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                     expAtom[aType] = tError;
                     LogSemanticError(
                         globals,
-                        idVal,
+                        expAtom,
                         SemanticError::INCOHERENT_VARIABLE_AS_FUNCTION_TYPES,
                         "No se puede llamar a una variable como si fuera una función."
                     );
