@@ -2034,8 +2034,6 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
             const auto type = globals.GetType(pos);
 
             if (idVal.at(aFunCall)) {
-                const auto a_ = GetFunctionArgsType(type);
-
                 if (!IsFunction(type)) {
                     expAtom[aType] = tError;
                     LogSemanticError(
