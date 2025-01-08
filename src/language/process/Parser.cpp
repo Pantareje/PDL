@@ -410,9 +410,7 @@ Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& glob
         const auto nextAttributes = NextAttributes(output, globals);
 
         if (globals.useSemantic) {
-            if (funAttributes.at(aType) == tError || nextAttributes.at(aType) == tError) {
-                funAttributes[aType] = tError;
-            } else if (nextAttributes.at(aType) != tVoid) {
+            if (nextAttributes.at(aType) != tVoid) {
                 funAttributes[aType] = varType.at(aType) * nextAttributes.at(aType);
             } else {
                 funAttributes[aType] = varType.at(aType);
@@ -483,9 +481,7 @@ Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& glo
         const auto nextAttributes_1 = NextAttributes(output, globals);
 
         if (globals.useSemantic) {
-            if (nextAttributes.at(aType) == tError || nextAttributes_1.at(aType) == tError) {
-                nextAttributes[aType] = tError;
-            } else if (nextAttributes_1.at(aType) != tVoid) {
+            if (nextAttributes_1.at(aType) != tVoid) {
                 nextAttributes[aType] = varType.at(aType) * nextAttributes_1.at(aType);
             } else {
                 nextAttributes[aType] = varType.at(aType);
