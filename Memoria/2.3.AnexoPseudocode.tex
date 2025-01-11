@@ -255,154 +255,114 @@ Function EXP() {
     EXP1();
 }
 \end{lstlisting}
+
 \newpage
+
 \begin{lstlisting}[language=C, caption={EXP1}]
-Function EXP1() {
-    if sig_tok ∈ {'&&', '||'} then {
-        print(33);
-        LOGOP();
-        A();
-        EXP1();
+    Function EXPOR() {
+        if sig_tok == '||' then {
+            print(33);
+            equipara(||);
+            EXP2();
+            EXPOR();
+        }
+        else if sig_tok ∈ {')', ';', ','} then {
+            print(34);
+        }
+        else error();
     }
-    else if sig_tok ∈ {')', ';', ','} then {
-        print(34);
+    \end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={EXP1}]
+    Function EXPAND() {
+        if sig_tok == '&&' then {
+            print(35);
+            equipara(&&);
+            EXP3();
+            EXPAND();
+        }
+        else if sig_tok ∈ {')', ';', ','} then {
+            print(36);
+        }
+        else error();
     }
-    else error();
-}
 \end{lstlisting}
 
-\begin{lstlisting}[language=C, caption={LOGOP}]
-Function LOGOP() {
-    if sig_tok == '&&' then {
-        print(35);
-        equipara(&&);
+\begin{lstlisting}[language=C, caption={EXP1}]
+    Function COMPOP() {
+        if sig_tok == '>' then {
+            print(40);
+            equipara(>);
+        }
+        else if sig_tok == '<' then {
+            print(41);
+            equipara(<);
+        }
+        else error();
     }
-    else if sig_tok == '||' then {
-        print(36);
-        equipara(||);
-    }
-    else error();
-}
 \end{lstlisting}
 
-\begin{lstlisting}[language=C, caption={A}]
-Function A() {
-    print(37);
-    B();
-    A1();
-}
-\end{lstlisting}
-
-\begin{lstlisting}[language=C, caption={A1}]
-Function A1() {
-    if sig_tok ∈ {'>', '<'} then {
-        print(38);
-        COMPOP();
-        B();
-        A1();
-    }
-    else if sig_tok ∈ {'&&', '||', ')', ';', ','} then {
-        print(39);
-    }
-    else error();
-}
-\end{lstlisting}
 
 \begin{lstlisting}[language=C, caption={COMPOP}]
-Function COMPOP() {
-    if sig_tok == '>' then {
-        print(40);
-        equipara(>);
+    Function ARITHMETICOP() {
+        if sig_tok == '+' then {
+            print(45);
+            equipara(+);
+        }
+        else if sig_tok == '-' then {
+            print(46);
+            equipara(-);
+        }
+        else error();
     }
-    else if sig_tok == '<' then {
-        print(41);
-        equipara(<);
-    }
-    else error();
-}
 \end{lstlisting}
 
 \begin{lstlisting}[language=C, caption={B}]
-Function B() {
-    print(42);
-    EXPATOM();
-    B1();
-}
+    Function EXPATOM() {
+        if sig_tok == 'id' then {
+            print(47);
+            equipara(id);
+            C();
+        }
+        else if sig_tok == '(' then {
+            print(48);
+            equipara(();
+            EXP();
+            equipara());
+        }
+        else if sig_tok == 'cint' then {
+            print(49);
+            equipara(cint);
+        }
+        else if sig_tok == 'cstr' then {
+            print(50);
+            equipara(cstr);
+        }
+        else if sig_tok == 'true' then {
+            print(51);
+            equipara(true);
+        }
+        else if sig_tok == 'false' then {
+            print(52);
+            equipara(false);
+        }
+        else error();
+    }
 \end{lstlisting}
 
-\begin{lstlisting}[language=C, caption={B1}]
-Function B1() {
-    if sig_tok ∈ {'+', '-'} then {
-        print(43);
-        ARITHMETICOP();
-        EXPATOM();
-        B1();
-    }
-    else if sig_tok ∈ {'&&', '||', ')', ';', ',', '<', '>'} then {
-        print(44);
-    }
-    else error();
-}
-\end{lstlisting}
-
-\begin{lstlisting}[language=C, caption={ARITHMETICOP}]
-Function ARITHMETICOP() {
-    if sig_tok == '+' then {
-        print(45);
-        equipara(+);
-    }
-    else if sig_tok == '-' then {
-        print(46);
-        equipara(-);
-    }
-    else error();
-}
-\end{lstlisting}
-
-\begin{lstlisting}[language=C, caption={EXPATOM}]
-Function EXPATOM() {
-    if sig_tok == 'id' then {
-        print(47);
-        equipara(id);
-        C();
-    }
-    else if sig_tok == '(' then {
-        print(48);
-        equipara(();
-        EXP();
-        equipara());
-    }
-    else if sig_tok == 'cint' then {
-        print(49);
-        equipara(cint);
-    }
-    else if sig_tok == 'cstr' then {
-        print(50);
-        equipara(cstr);
-    }
-    else if sig_tok == 'true' then {
-        print(51);
-        equipara(true);
-    }
-    else if sig_tok == 'false' then {
-        print(52);
-        equipara(false);
-    }
-    else error();
-}
-\end{lstlisting}
 \newpage
+
 \begin{lstlisting}[language=C, caption={C}]
-Function C() {
-    if sig_tok == '(' then {
-        print(53);
-        equipara(();
-        CALLPARAM();
-        equipara());
+    Function C() {
+        if sig_tok == '(' then {
+            print(53);
+            equipara(();
+            CALLPARAM();
+            equipara());
+        }
+        else if sig_tok ∈ {'&&', '||', ')', ';', ',', '<', '>', '+', '-'} then {
+            print(54);
+        }
+        else error();
     }
-    else if sig_tok ∈ {'&&', '||', ')', ';', ',', '<', '>', '+','-'} then {
-        print(54);
-    }
-    else error();
-}
 \end{lstlisting}
