@@ -132,6 +132,24 @@ La Tabla de Símbolos (TS) es una estructura de datos fundamental en la implemen
 
 \section{Diseño del Gestor de Errores}
 
+El gestor de errores permite identificar y manejar los problemas encontrados durante las fases de análisis léxico, sintáctico y semántico. Este diseño asegura que el compilador pueda ofrecer mensajes claros y detallados al usuario, mejorando la experiencia de depuración. El gestor de errores de nuestro procesador está diseñado para manejar los siguientes aspectos:
+
+\begin{itemize}
+    \item \textbf{Manejo de mensajes de error:} Cada error tiene un código único y un mensaje descriptivo que facilita su identificación y comprensión. Los mensajes están diseñados para proporcionar contexto sobre la causa del error, incluyendo información sobre el símbolo, línea y columna involucrados.
+    \item \textbf{Distinción entre tipos de error:} Los errores se clasifican en léxicos, sintácticos y semánticos, cada uno con un conjunto específico de códigos y mensajes, explicados en los puntos a continuación.
+    \item \textbf{Gestión del número de línea y columna:} El gestor de errores mantiene un registro del número de línea y columna mientras procesa el código fuente. Concretamente, las clases Excepción incluyen los métodos GetLine y GetColumn. Esto permite informar sobre los errores junto a su ubicación exacta en el código, lo que facilita su corrección. 
+    \item \textbf{Modos de recuperación en errores léxicos y semánticos:} El sistema puede configurarse para actuar de distintas maneras ante errores: continuar procesando al omitir un carácter, una línea completa o detenerse inmediatamente si el error es crítico. Sin embargo, no hemos implementado esta opción con los errores sintácticos al ser sus errores mucho más complejos, pues pueden afectar a muchas partes del código.
+\end{itemize}
+
+\subsection*{Lista de Códigos de Error}
+
+\input{5.1.ErroresLex}
+
+\input{5.2.ErroresSin}
+
+\input{5.3.ErroresSem}
+
+
 \section{Demostración del funcionamiento}
 
 \newpage

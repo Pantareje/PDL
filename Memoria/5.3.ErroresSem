@@ -1,0 +1,14 @@
+\subsubsection*{Errores Semánticos}
+\begin{itemize}
+    \item 0000 - IDENTIFIER\_ALREADY\_EXISTS: El identificador ya ha sido declarado en el mismo ámbito.
+    \item 0100 - INVALID\_TYPE: El tipo especificado no es válido.
+    \item 0101 - INVALID\_RETURN\_TYPE: El tipo de retorno no coincide con lo esperado.
+    \item 0102 - INVALID\_FOR\_ACTION\_TYPE: El tipo en la acción del bucle for no es válido.
+    \item 0103 - INVALID\_FOR\_CONDITION\_TYPE: El tipo en la condición del bucle for no es válido.
+    \item 0104 - INVALID\_OUTPUT\_TYPE: El tipo especificado en la salida no es válido.
+    \item 0105 - INVALID\_INPUT\_TYPE: El tipo especificado en la entrada no es válido.
+    \item 0200 - INCOHERENT\_TYPES: Incoherencia entre tipos.
+    \item 0201 - INCOHERENT\_VARIABLE\_AS\_FUNCTION\_TYPES: La variable ha sido usada como una función con tipos incoherentes.
+    \item 0202 - INCOHERENT\_FUNCTION\_AS\_VARIABLE\_TYPES: La función ha sido usada como una variable con tipos incoherentes.
+    \item 0203 - INCOHERENT\_CALL\_PARAM\_TYPES: Los parámetros de la llamada no coinciden con los tipos esperados.
+\end{itemize}

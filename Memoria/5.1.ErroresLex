@@ -1,0 +1,13 @@
+\subsubsection*{Errores Léxicos}
+\begin{itemize}
+    \item 0000 - MISSING\_COMMENT\_START: Falta el inicio del comentario de bloque.
+    \item 0001 - MISSING\_COMMENT\_END: Fin de fichero inesperado; falta el cierre del comentario de bloque.
+    \item 0010 - MISSING\_STRING\_END: Fin de fichero inesperado; falta el cierre de la cadena.
+    \item 0020 - MISSING\_OP\_AND: Falta el operador \& para formar un operador lógico.
+    \item 0021 - MISSING\_OP\_OR: Falta el operador | para formar un operador lógico.
+    \item 0100 - STRING\_FORBIDDEN\_CHARACTER: Carácter no permitido dentro de la cadena.
+    \item 0101 - STRING\_ESCAPE\_SEQUENCE: Secuencia de escape inválida en la cadena.
+    \item 0102 - STRING\_TOO\_LONG: La cadena excede la longitud máxima permitida.
+    \item 0200 - INT\_TOO\_BIG: El entero es demasiado grande para ser representado.
+    \item FF00 - UNEXPECTED\_START\_CHARACTER: Carácter inesperado al buscar el siguiente símbolo.
+\end{itemize}
