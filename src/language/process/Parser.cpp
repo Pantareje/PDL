@@ -1058,6 +1058,18 @@ Parser::Attributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
                     idAct[aType] = type;
                 } else {
                     idAct[aType] = tError;
+                    LogSemanticError(
+                        globals,
+                        exp1,
+                        SemanticError::INVALID_TYPE,
+                        std::format(
+                            "Sólo se puede incrementar con expresiones de tipo "
+                            "«int» o concatenar con expresiones de tipo "
+                            "«string». El tipo actual es {}.",
+                            type.ToReadableString(),
+                            idAct.at(aType).ToReadableString()
+                        )
+                    );
                 }
             } else {
                 idAct[aType] = type;
@@ -1135,7 +1147,7 @@ Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
                 forAct[aType] = tError;
                 LogSemanticError(
                     globals,
-                    forAct,
+                    id,
                     SemanticError::INVALID_FOR_ACTION_TYPE,
                     std::format(
                         "El tipo de una variable en «for» debe de ser «int». El tipo actual es «{}».",
@@ -1148,10 +1160,10 @@ Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
                 forAct[aType] = tError;
                 LogSemanticError(
                     globals,
-                    forAct,
+                    exp1,
                     SemanticError::INCOHERENT_TYPES,
                     std::format(
-                        "Se experaba una expresión con tipo «int». El tipo de la expresión es «{}»",
+                        "Se esperaba una expresión con tipo «int». El tipo de la expresión es «{}»",
                         exp1.at(aType).ToReadableString()
                     )
                 );
