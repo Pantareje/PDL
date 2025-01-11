@@ -643,6 +643,14 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
 
         const auto forAct_1 = ForAct(output, globals);
 
+        if (globals.useSemantic) {
+            if (forAct_1.at(aType) == tError) {
+                statement[aType] = tError;
+            } else {
+                statement[aType] = tOk;
+            }
+        }
+
         // ------ //
 
         VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_FOR_MISSING_SEMICOLON);
@@ -653,6 +661,24 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
 
         const auto exp1 = Exp1(output, globals);
 
+        if (globals.useSemantic) {
+            if (exp1.at(aType) == tError) {
+                statement[aType] = tError;
+            } else if (exp1.at(aType) != tLog) {
+                statement[aType] = tError;
+                LogSemanticError(
+                    globals,
+                    exp1,
+                    SemanticError::INVALID_FOR_CONDITION_TYPE,
+                    std::format(
+                        "El segundo argumento de «for» debe ser de tipo «boolean». El tipo "
+                        "evaluado es «{}».",
+                        exp1.at(aType).ToReadableString()
+                    )
+                );
+            }
+        }
+
         // ------ //
 
         VerifyTokenType(SEMICOLON, SyntaxError::STATEMENT_FOR_MISSING_SEMICOLON);
@@ -662,6 +688,12 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
         // ------ //
 
         const auto forAct_2 = ForAct(output, globals);
+
+        if (globals.useSemantic) {
+            if (forAct_2.at(aType) == tError) {
+                statement[aType] = tError;
+            }
+        }
 
         // ------ //
 
@@ -684,26 +716,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
         VerifyTokenType(CURLY_BRACKET_CLOSE, SyntaxError::STATEMENT_FOR_MISSING_BRACK_CLOSE);
 
         if (globals.useSemantic) {
-            if (forAct_1.at(aType) == tError) {
-                statement[aType] = tError;
-            } else if (exp1.at(aType) != tLog) {
-                statement[aType] = tError;
-                LogSemanticError(
-                    globals,
-                    exp1,
-                    SemanticError::INVALID_FOR_CONDITION_TYPE,
-                    std::format(
-                        "El segundo argumento de «for» debe ser de tipo «boolean». El tipo "
-                        "evaluado es «{}».",
-                        exp1.at(aType).ToReadableString()
-                    )
-                );
-            } else if (forAct_2.at(aType) == tError) {
-                statement[aType] = tError;
-            } else {
-                statement[aType] = body.at(aType);
-            }
-
+            statement[aType] = body.at(aType);
             statement[aRetType] = body.at(aRetType);
         }
 
