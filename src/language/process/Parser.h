@@ -32,15 +32,15 @@ class Parser {
             return (*vec)[pos];
         }
 
-        ValueProduct& operator[](const std::string& key) const {
+        [[nodiscard]] ValueProduct& operator[](const std::string& key) const {
             return (*vec)[pos][key];
         }
 
-        ValueProduct& operator[](std::string&& key) const {
+        [[nodiscard]] ValueProduct& operator[](std::string&& key) const {
             return (*vec)[pos][key];
         }
 
-        const ValueProduct& at(const std::string& key) const {
+        [[nodiscard]] const ValueProduct& at(const std::string& key) const {
             return (*vec)[pos].at(key);
         }
     };

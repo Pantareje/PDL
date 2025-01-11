@@ -58,7 +58,7 @@ namespace {
 using enum TokenType;
 
 Parser::Attributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef axiom = CreateRuleAttributes();
+    const AttributesPosRef axiom = CreateRuleAttributes();
 
     // P -> FUNCTION P | STATEMENT P | eof
     switch (m_currentToken.type) {
@@ -68,11 +68,19 @@ Parser::Attributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        (void) Function(output, globals);
+        const auto function = Function(output, globals);
 
         // ------ //
 
-        (void) Axiom(output, globals);
+        const auto axiom_1 = Axiom(output, globals);
+
+        if (globals.useSemantic) {
+            if (function.at(aType) == tError || axiom_1.at(aType) == tError) {
+                axiom[aType] = tError;
+            } else {
+                axiom[aType] = tOk;
+            }
+        }
 
         // ------ //
 
@@ -91,11 +99,19 @@ Parser::Attributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
 
         // ------ //
 
-        (void) Statement(output, globals);
+        const auto statement = Statement(output, globals);
 
         // ------ //
 
-        (void) Axiom(output, globals);
+        const auto axiom_1 = Axiom(output, globals);
+
+        if (globals.useSemantic) {
+            if (statement.at(aType) == tError || axiom_1.at(aType) == tError) {
+                axiom[aType] = tError;
+            } else {
+                axiom[aType] = tOk;
+            }
+        }
 
         // ------ //
 
@@ -105,6 +121,12 @@ Parser::Attributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
     // First (eof)
     case END: {
         WriteParse(output, globals, 3);
+
+        // ------ //
+
+        if (globals.useSemantic) {
+            axiom[aType] = tOk;
+        }
 
         // ------ //
 
@@ -119,7 +141,7 @@ Parser::Attributes Parser::Axiom(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef function = CreateRuleAttributes();
+    const AttributesPosRef function = CreateRuleAttributes();
 
     // FUNCTION -> function FUNTYPE id ( FUNATTRIBUTES ) { BODY }
 
@@ -166,6 +188,7 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
         const auto& pos = std::get<SymbolPos>(id.attribute);
 
         if (globals.HasType(pos)) {
+            function[aType] = tError;
             LogSemanticError(
                 globals,
                 id,
@@ -173,7 +196,8 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
                 "El nombre de la función ya está en uso."
             );
         } else {
-            globals.AddFunctionType(pos, funType.at(aType), funAttributes.at(aType));
+            function[aType] = funAttributes.at(aType);
+            globals.AddFunctionType(pos, funType.at(aType), funAttributes.at(aValueType));
             globals.AddFunctionTag(pos);
         }
 
@@ -201,9 +225,10 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
     VerifyTokenType(CURLY_BRACKET_CLOSE, SyntaxError::FUNCTION_MISSING_BRACK_CLOSE);
 
     if (globals.useSemantic) {
-        if (funType.at(aType) != body.at(aRetType)) {
-            const auto& pos = std::get<SymbolPos>(id.attribute);
+        if (funType.at(aType) != body.at(aValueType)) {
+            function[aType] = tError;
 
+            const auto& pos = std::get<SymbolPos>(id.attribute);
             LogSemanticError(
                 globals,
                 funType,
@@ -213,7 +238,7 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
                     "devuelto («{}»).",
                     globals.GetSymbolName(pos),
                     funType.at(aType).ToReadableString(),
-                    body.at(aRetType).ToReadableString()
+                    body.at(aValueType).ToReadableString()
                 )
             );
         }
@@ -230,9 +255,9 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
 }
 
 Parser::Attributes Parser::FunType(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef funType = CreateRuleAttributes();
+    const AttributesPosRef funType = CreateRuleAttributes();
 
-    // FUNTYPE -> [[maybe_unused]] RuleAttributesPos | VARTYPE
+    // FUNTYPE -> RuleAttributesPos | VARTYPE
     switch (m_currentToken.type) {
     // First (void)
     case VOID: {
@@ -278,7 +303,7 @@ Parser::Attributes Parser::FunType(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::VarType(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef varType = CreateRuleAttributes();
+    const AttributesPosRef varType = CreateRuleAttributes();
 
     // VARTYPE -> int | boolean | string
     switch (m_currentToken.type) {
@@ -347,9 +372,9 @@ Parser::Attributes Parser::VarType(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef funAttributes = CreateRuleAttributes();
+    const AttributesPosRef funAttributes = CreateRuleAttributes();
 
-    // FUNATTRIBUTES -> [[maybe_unused]] RuleAttributesPos | VARTYPE id NEXTATTRIBUTES
+    // FUNATTRIBUTES -> RuleAttributesPos | VARTYPE id NEXTATTRIBUTES
     switch (m_currentToken.type) {
     // First (void)
     case VOID: {
@@ -358,7 +383,8 @@ Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& glob
         // ------ //
 
         if (globals.useSemantic) {
-            funAttributes[aType] = tVoid;
+            funAttributes[aType] = tOk;
+            funAttributes[aValueType] = tVoid;
         }
 
         GetNextToken(globals);
@@ -410,10 +436,14 @@ Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& glob
         const auto nextAttributes = NextAttributes(output, globals);
 
         if (globals.useSemantic) {
-            if (nextAttributes.at(aType) != tVoid) {
-                funAttributes[aType] = varType.at(aType) * nextAttributes.at(aType);
+            if (nextAttributes.at(aType) == tError) {
+                funAttributes[aType] = tError;
+            }
+
+            if (nextAttributes.at(aValueType) != tVoid) {
+                funAttributes[aValueType] = varType.at(aType) * nextAttributes.at(aValueType);
             } else {
-                funAttributes[aType] = varType.at(aType);
+                funAttributes[aValueType] = varType.at(aType);
             }
         }
 
@@ -433,7 +463,7 @@ Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& glob
 }
 
 Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef nextAttributes = CreateRuleAttributes();
+    const AttributesPosRef nextAttributes = CreateRuleAttributes();
 
     // NEXTATTRIBUTES -> , VARTYPE id NEXTATTRIBUTES | lambda
     switch (m_currentToken.type) {
@@ -481,10 +511,14 @@ Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& glo
         const auto nextAttributes_1 = NextAttributes(output, globals);
 
         if (globals.useSemantic) {
-            if (nextAttributes_1.at(aType) != tVoid) {
-                nextAttributes[aType] = varType.at(aType) * nextAttributes_1.at(aType);
+            if (nextAttributes.at(aType) == tError) {
+                nextAttributes[aType] = tError;
+            }
+
+            if (nextAttributes_1.at(aValueType) != tVoid) {
+                nextAttributes[aValueType] = varType.at(aType) * nextAttributes_1.at(aValueType);
             } else {
-                nextAttributes[aType] = varType.at(aType);
+                nextAttributes[aValueType] = varType.at(aType);
             }
         }
 
@@ -500,7 +534,8 @@ Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& glo
         // ------ //
 
         if (globals.useSemantic) {
-            nextAttributes[aType] = tVoid;
+            nextAttributes[aType] = tOk;
+            nextAttributes[aValueType] = tVoid;
         }
 
         // ------ //
@@ -513,7 +548,7 @@ Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& glo
 }
 
 Parser::Attributes Parser::Body(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef body = CreateRuleAttributes();
+    const AttributesPosRef body = CreateRuleAttributes();
 
     // BODY -> STATEMENT BODY | lambda
     switch (m_currentToken.type) {
@@ -542,12 +577,12 @@ Parser::Attributes Parser::Body(std::ostream& output, GlobalState& globals) {
                 body[aType] = tError;
             }
 
-            if (statement.at(aRetType) == body_1.at(aRetType) || statement.at(aRetType) == tVoid) {
-                body[aRetType] = body_1.at(aRetType);
-            } else if (body_1.at(aRetType) == tVoid) {
-                body[aRetType] = statement.at(aRetType);
+            if (statement.at(aValueType) == body_1.at(aValueType) || statement.at(aValueType) == tVoid) {
+                body[aValueType] = body_1.at(aValueType);
+            } else if (body_1.at(aValueType) == tVoid) {
+                body[aValueType] = statement.at(aValueType);
             } else {
-                body[aRetType] = tError;
+                body[aValueType] = tError;
             }
         }
 
@@ -564,7 +599,7 @@ Parser::Attributes Parser::Body(std::ostream& output, GlobalState& globals) {
 
         if (globals.useSemantic) {
             body[aType] = tOk;
-            body[aRetType] = tVoid;
+            body[aValueType] = tVoid;
         }
 
         // ------ //
@@ -577,7 +612,7 @@ Parser::Attributes Parser::Body(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef statement = CreateRuleAttributes();
+    const AttributesPosRef statement = CreateRuleAttributes();
 
     // STATEMENT -> if ( EXP1 ) ATOMSTATEMENT | for ( FORACT ; EXP1 ; FORACT ) { BODY } |
     //              var VARTYPE id ; | ATOMSTATEMENT
@@ -600,6 +635,26 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
 
         const auto exp1 = Exp1(output, globals);
 
+        if (globals.useSemantic) {
+            if (exp1.at(aType) == tError) {
+                statement[aType] = tError;
+            } else if (exp1.at(aType) != tLog) {
+                LogSemanticError(
+                    globals,
+                    exp1,
+                    SemanticError::INVALID_IF_CONDITION_TYPE,
+                    std::format(
+                        "El argumento de «if» debe ser de tipo «boolean». El tipo "
+                        "evaluado es «{}».",
+                        exp1.at(aType).ToReadableString()
+                    )
+                );
+                statement[aType] = tError;
+            } else {
+                statement[aType] = tOk;
+            }
+        }
+
         // ------ //
 
         VerifyTokenType(PARENTHESIS_CLOSE, SyntaxError::STATEMENT_IF_MISSING_PAREN_CLOSE);
@@ -611,13 +666,11 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
         const auto atomStatement = AtomStatement(output, globals);
 
         if (globals.useSemantic) {
-            if (exp1.at(aType) != tLog) {
-                statement[aType] = tError;
-            } else {
+            if (statement.at(aType) != tError) {
                 statement[aType] = atomStatement.at(aType);
             }
 
-            statement[aRetType] = atomStatement.at(aRetType);
+            statement[aValueType] = atomStatement.at(aValueType);
         }
 
         // ------ //
@@ -717,7 +770,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
 
         if (globals.useSemantic) {
             statement[aType] = body.at(aType);
-            statement[aRetType] = body.at(aRetType);
+            statement[aValueType] = body.at(aValueType);
         }
 
         GetNextToken(globals);
@@ -752,7 +805,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
         if (globals.useSemantic) {
             const auto& pos = std::get<SymbolPos>(id.attribute);
 
-            statement[aRetType] = tVoid;
+            statement[aValueType] = tVoid;
 
             if (globals.HasType(pos)) {
                 statement[aType] = tError;
@@ -799,7 +852,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
 
         if (globals.useSemantic) {
             statement[aType] = atomStatement.at(aType);
-            statement[aRetType] = atomStatement.at(aRetType);
+            statement[aValueType] = atomStatement.at(aValueType);
         }
 
         // ------ //
@@ -815,7 +868,7 @@ Parser::Attributes Parser::Statement(std::ostream& output, GlobalState& globals)
 }
 
 Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef atomStatement = CreateRuleAttributes();
+    const AttributesPosRef atomStatement = CreateRuleAttributes();
 
     // ATOMSTATEMENT -> id IDACT ; | output EXP1 ; | input id ; | return RETURNEXP ;
     switch (m_currentToken.type) {
@@ -837,7 +890,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
             const auto& pos = std::get<SymbolPos>(id.attribute);
             const auto type = globals.GetType(pos);
 
-            atomStatement[aRetType] = tVoid;
+            atomStatement[aValueType] = tVoid;
 
             if (idAct.at(aFunCall)) {
                 if (!IsFunction(type)) {
@@ -921,7 +974,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
         const auto exp1 = Exp1(output, globals);
 
         if (globals.useSemantic) {
-            atomStatement[aRetType] = tVoid;
+            atomStatement[aValueType] = tVoid;
 
             if (exp1.at(aType) == tError) {
                 atomStatement[aType] = tError;
@@ -971,7 +1024,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
             const auto& pos = std::get<SymbolPos>(id.attribute);
             const auto type = globals.GetType(pos);
 
-            atomStatement[aRetType] = tVoid;
+            atomStatement[aValueType] = tVoid;
 
             if (type == tStr || type == tInt) {
                 atomStatement[aType] = tOk;
@@ -1022,7 +1075,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                 atomStatement[aType] = tError;
             }
 
-            atomStatement[aRetType] = returnExp.at(aType);
+            atomStatement[aValueType] = returnExp.at(aType);
         }
 
         // ------ //
@@ -1044,7 +1097,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
 }
 
 Parser::Attributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef idAct = CreateRuleAttributes();
+    const AttributesPosRef idAct = CreateRuleAttributes();
 
     // IDACT -> ASS EXP1 | ( CALLPARAMS )
     switch (m_currentToken.type) {
@@ -1130,7 +1183,7 @@ Parser::Attributes Parser::IdAct(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef forAct = CreateRuleAttributes();
+    const AttributesPosRef forAct = CreateRuleAttributes();
 
     // FORACT -> id ASS EXP1 | lambda
     switch (m_currentToken.type) {
@@ -1210,7 +1263,7 @@ Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Ass(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef ass = CreateRuleAttributes();
+    const AttributesPosRef ass = CreateRuleAttributes();
 
     // ASS -> = | +=
     switch (m_currentToken.type) {
@@ -1254,7 +1307,7 @@ Parser::Attributes Parser::Ass(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef callParams = CreateRuleAttributes();
+    const AttributesPosRef callParams = CreateRuleAttributes();
 
     // CALLPARAMS -> EXP1 NEXTPARAMS | lambda
     switch (m_currentToken.type) {
@@ -1310,7 +1363,7 @@ Parser::Attributes Parser::CallParams(std::ostream& output, GlobalState& globals
 }
 
 Parser::Attributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef nextParams = CreateRuleAttributes();
+    const AttributesPosRef nextParams = CreateRuleAttributes();
 
     // NEXTPARAMS -> , EXP1 NEXTPARAMS | lambda
     switch (m_currentToken.type) {
@@ -1365,7 +1418,7 @@ Parser::Attributes Parser::NextParams(std::ostream& output, GlobalState& globals
 }
 
 Parser::Attributes Parser::ReturnExp(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef returnExp = CreateRuleAttributes();
+    const AttributesPosRef returnExp = CreateRuleAttributes();
 
     // RETURNEXP -> EXP1 | lambda
     switch (m_currentToken.type) {
@@ -1411,7 +1464,7 @@ Parser::Attributes Parser::ReturnExp(std::ostream& output, GlobalState& globals)
 }
 
 Parser::Attributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef exp1 = CreateRuleAttributes();
+    const AttributesPosRef exp1 = CreateRuleAttributes();
 
     // EXP1 -> EXP2 EXPOR
     switch (m_currentToken.type) {
@@ -1469,7 +1522,7 @@ Parser::Attributes Parser::Exp1(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef expOr = CreateRuleAttributes();
+    const AttributesPosRef expOr = CreateRuleAttributes();
 
     // EXPOR -> || EXP2 EXPOR | lambda
     switch (m_currentToken.type) {
@@ -1536,7 +1589,7 @@ Parser::Attributes Parser::ExpOr(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef exp2 = CreateRuleAttributes();
+    const AttributesPosRef exp2 = CreateRuleAttributes();
 
     // EXP2 -> EXP3 EXPAND
     switch (m_currentToken.type) {
@@ -1594,7 +1647,7 @@ Parser::Attributes Parser::Exp2(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef expAnd = CreateRuleAttributes();
+    const AttributesPosRef expAnd = CreateRuleAttributes();
 
     // EXPAND -> && EXP3 EXPAND | lambda
     switch (m_currentToken.type) {
@@ -1661,7 +1714,7 @@ Parser::Attributes Parser::ExpAnd(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef exp3 = CreateRuleAttributes();
+    const AttributesPosRef exp3 = CreateRuleAttributes();
 
     // EXP3 -> EXP4 COMP
     switch (m_currentToken.type) {
@@ -1718,7 +1771,7 @@ Parser::Attributes Parser::Exp3(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Comp(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef comp = CreateRuleAttributes();
+    const AttributesPosRef comp = CreateRuleAttributes();
 
     // COMP -> COMPOP EXP4 COMP | lambda
     switch (m_currentToken.type) {
@@ -1825,7 +1878,7 @@ Parser::Attributes Parser::CompOp(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef exp4 = CreateRuleAttributes();
+    const AttributesPosRef exp4 = CreateRuleAttributes();
 
     // EXP4 -> EXPATOM ARITH
     switch (m_currentToken.type) {
@@ -1893,7 +1946,7 @@ Parser::Attributes Parser::Exp4(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::Arith(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef arith = CreateRuleAttributes();
+    const AttributesPosRef arith = CreateRuleAttributes();
 
     // ARITH -> ARITHOP EXPATOM ARITH | lambda
     switch (m_currentToken.type) {
@@ -1985,7 +2038,7 @@ Parser::Attributes Parser::Arith(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef arithOp = CreateRuleAttributes();
+    const AttributesPosRef arithOp = CreateRuleAttributes();
 
     // ARITHOP -> + | -
     switch (m_currentToken.type) {
@@ -2031,7 +2084,7 @@ Parser::Attributes Parser::ArithOp(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef expAtom = CreateRuleAttributes();
+    const AttributesPosRef expAtom = CreateRuleAttributes();
 
     // EXPATOM -> id IDVAL | ( EXP1 ) | cint | cstr | true | false
     switch (m_currentToken.type) {
@@ -2204,7 +2257,7 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 }
 
 Parser::Attributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
-    [[maybe_unused]] const AttributesPosRef idVal = CreateRuleAttributes();
+    const AttributesPosRef idVal = CreateRuleAttributes();
 
     // IDVAL -> ( CALLPARAMS ) | lambda
     switch (m_currentToken.type) {
@@ -2266,7 +2319,11 @@ void Parser::Parse(std::ostream& output, GlobalState& globals) {
 
         GetNextToken(globals);
 
-        (void) Axiom(output, globals);
+        const auto axiom = Axiom(output, globals);
+        if (globals.useSemantic && axiom.at(aType) == tError) {
+            assert(globals.errorManager.GetStatus() != 0);
+            globals.errorManager.LogError("Hay errores semánticos al procesar el programa.");
+        }
     } catch (const SyntaxException& e) {
         globals.errorManager.ProcessSyntaxException(m_lexer, e);
     }

@@ -55,9 +55,11 @@ class Lexer {
             m_currentLine += m_lastChar;
         }
 
+#ifndef NDEBUG
         if (m_lastChar == U'€') {
             m_lastChar = static_cast<char32_t>(EOF);
         }
+#endif
     }
 
     void ReadDelAndComments();

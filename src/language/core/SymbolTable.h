@@ -9,7 +9,7 @@
 
 
 constexpr char aType[] = "type";
-constexpr char aRetType[] = "ret_type";
+constexpr char aValueType[] = "value_type";
 constexpr char aWidth[] = "width";
 constexpr char aSum[] = "sum";
 constexpr char aFunCall[] = "funCall";

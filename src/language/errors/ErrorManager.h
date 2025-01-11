@@ -36,5 +36,7 @@ public:
         std::string_view message
     );
 
+    void LogError(std::string_view message);
+
     [[nodiscard]] bool GetStatus() const { return m_status; }
 };

@@ -80,3 +80,8 @@ void ErrorManager::LogSemanticError(
 
     m_status = 1;
 }
+
+void ErrorManager::LogError(std::string_view message) {
+    m_status = 1;
+    std::cerr << message << std::endl;
+}

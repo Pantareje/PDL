@@ -182,9 +182,9 @@ Application::Application(const ApplicationAttributes& attributes)
 }
 
 int Application::Run() const {
-    int result = 0;
+    const auto runTask = [this] -> int {
+        int result = 0;
 
-    try {
         switch (m_taskType) {
         case TaskType::Tokens: {
             if (m_useSemantic)
@@ -216,10 +216,22 @@ int Application::Run() const {
         case TaskType::None:
             std::unreachable();
         }
+
+        return result;
+    };
+
+    int result = 0;
+
+#ifdef NDEBUG
+    try {
+        result = runTask();
     } catch (const std::exception& e) {
         std::cerr << "ERROR INESPERADO: " << e.what() << std::endl;
         result = 3;
     }
+#else
+    result = runTask();
+#endif
 
     return result;
 }
