@@ -1,0 +1,52 @@
+\subsection*{1. Código de Ejemplo}
+\begin{verbatim}
+int x;               // Variable global
+void func1() {
+    int a;           // Variable local a func1
+    x = a + 10;      // Uso de variable global y local
+}
+void func2() {
+    int x;           // Variable local a func2 (oculta a la global)
+    x = 20;          // Uso de variable local de func2
+}
+\end{verbatim}
+
+\subsection*{2. Estructura de las Tablas de Símbolos}
+
+\paragraph{Tabla Global:} Contiene símbolos con alcance global.
+
+\vspace{1mm}
+
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Símbolo} & \textbf{Tipo} & \textbf{Información Adicional} \\
+\hline
+x       & int  & Variable global                \\
+func1   & void & Función (sin retorno)          \\
+func2   & void & Función (sin retorno)          \\
+\hline
+\end{tabular}
+
+\paragraph{Tabla Local de func1:} Contiene los símbolos declarados en func1.
+
+\vspace{1mm}
+
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Símbolo} & \textbf{Tipo} & \textbf{Información Adicional} \\
+\hline
+a       & int  & Variable local                 \\
+\hline
+\end{tabular}
+
+\paragraph{Tabla Local de func2:} Contiene los símbolos declarados en func2.
+
+\vspace{1mm}
+
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Símbolo} & \textbf{Tipo} & \textbf{Información Adicional} \\
+\hline
+x       & int  & Variable local (oculta a la global) \\
+\hline
+\end{tabular}
