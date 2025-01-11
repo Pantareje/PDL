@@ -848,7 +848,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                         std::format(
                             "Los tipos de los argumentos de llamada a la función no "
                             "coinciden con los de la definición. Se esperaba «{}», "
-                            "pero se recibió «{}»",
+                            "pero se recibió «{}».",
                             GetFunctionArgsType(type).ToReadableString(),
                             idAct.at(aType).ToReadableString()
                         )
@@ -970,7 +970,7 @@ Parser::Attributes Parser::AtomStatement(std::ostream& output, GlobalState& glob
                     SemanticError::INVALID_INPUT_TYPE,
                     std::format(
                         "Un objeto tipo «{}» no se puede usar con «input». "
-                        "«input» acepta variables de tipo «int» o «string»",
+                        "«input» acepta variables de tipo «int» o «string».",
                         type.ToReadableString()
                     )
                 );
@@ -1163,7 +1163,7 @@ Parser::Attributes Parser::ForAct(std::ostream& output, GlobalState& globals) {
                     exp1,
                     SemanticError::INCOHERENT_TYPES,
                     std::format(
-                        "Se esperaba una expresión con tipo «int». El tipo de la expresión es «{}»",
+                        "Se esperaba una expresión con tipo «int». El tipo de la expresión es «{}».",
                         exp1.at(aType).ToReadableString()
                     )
                 );
@@ -2062,7 +2062,7 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
                         std::format(
                             "Los tipos de los argumentos de llamada a la función no "
                             "coinciden con los de la definición. Se esperaba «{}», "
-                            "pero se recibió «{}»",
+                            "pero se recibió «{}».",
                             GetFunctionArgsType(type).ToReadableString(),
                             idVal.at(aType).ToReadableString()
                         )
