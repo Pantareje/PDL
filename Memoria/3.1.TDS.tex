@@ -4,12 +4,12 @@
     \>1. P → FUNCTION P\\
     \>2. P → STATEMENT P\\
     \>3. P → $eof$\\
-    \>4. FUNCTION → function FUNTYPE $id$ \textbf{\{TSL := CrearTS(); DespL := 0\}} \\
-    \>              \>( FUNATTRIBUTES ) \textbf{\{InsertaTipoTS(id.pos, }\\
+    \>4. FUNCTION → function \textbf{\{implicitDeclaration := false\}}\\
+    \>              \> FUNTYPE $id$ \textbf{\{TSL := CrearTS(); DespL := 0\}} \\
+    \>              \>( FUNATTRIBUTES \textbf{\{InsertaTipoTS(id.pos, }\\
     \>              \> \textbf{FUNATTRIBUTES.tipo → FUNTYPE.tipo);}\\
     \>           \>\textbf{InsertaEtiquetaTS(id.pos, nueva\_etiqueta())\}}\\
-    \>              \>\{ BODY \}\> \textbf{\{if (BODY.tipo != tipo\_ok) then error(000) }\\
-    \>              \>          \> \textbf{ if (FUNTYPE.tipo != BODY.tipoRet)}\\
+    \>              \>) \{ BODY \}\> \textbf{\{if (FUNTYPE.tipo != BODY.tipoRet)}\\
     \>              \>          \>             \>   \textbf{then error(101)}\\
     \>              \>          \> \textbf{DestruirTS(TSL)\}}\\
     \>5. FUNTYPE → $void$ \textbf{\{FUNTYPE.tipo := void\}}\\
@@ -18,26 +18,22 @@
     \>8. VARTYPE → $boolean$ \textbf{\{VARTYPE.tipo := log; := VARTYPE.ancho := 1\}}\\
     \>9. VARTYPE → $string$ \textbf{\{VARTYPE.tipo := str; := VARTYPE.ancho := 64\}}\\
     \>10. FUNATTRIBUTES → $void$ \textbf{\{FUNATTRIBUTES.tipo := void\}}\\
-    \>11. FUNATTRIBUTES → \>VARTYPE $id$ \textbf{\{
-    if(BuscaTipoTS(id.pos) != NULL)} \\
-    \>              \>          \>
-    \>\textbf{then error(000)}\\
-    \>              \>          \>
-    \textbf{\{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
+    \>11. FUNATTRIBUTES → \>VARTYPE $id$ \textbf{\{if (BuscaTipoTS(id.pos) != NULL) then} \\
+    \>              \>          \>    \>\textbf{FUNATTRIBUTES.tipo := tipo\_error;}\\
+    \>              \>          \>    \>\textbf{error(000)}\\
+    \>              \>          \>    \textbf{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
     \>                    \>        \>\textbf{InsertaDespTS(id.pos, DespL);}\\
-    \>                    \>        \>\textbf{DespL := DespL + VARTYPE.tipo\}}\\
+    \>                    \>        \>\textbf{DespL := DespL + VARTYPE.ancho\}}\\
     \>                    \>NEXTATTRIBUTE \textbf{\{FUNATTRIBUTES.tipo :=}\\
     \>                    \>                      \> \textbf{if (NEXTATTRIBUTE.tipo != void) then}\\
     \>                    \>                      \> \>\textbf{VARTYPE.tipo × NEXTATTRIBUTE.tipo}\\
     \>                    \>                      \> \textbf{else VARTYPE.tipo\}}\\
-    \>12. NEXTATTRIBUTE → , VARTYPE $id$ \textbf{\{
-    if(BuscaTipoTS(id.pos) != NULL)} \\
-    \>              \>          \>
-    \>\textbf{then error(000)}\\
-    \>              \>          \>
-    \textbf{\{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
+    \>12. NEXTATTRIBUTE → , VARTYPE $id$ \textbf{\{if (BuscaTipoTS(id.pos) != NULL)then} \\
+    \>              \>          \>    \>\textbf{FUNATTRIBUTES.tipo := tipo\_error;}\\
+    \>              \>          \>    \>\textbf{error(000)}\\
+    \>              \>          \>    \textbf{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
     \>                    \>        \>\textbf{InsertaDespTS(id.pos, DespL);}\\
-    \>                    \>        \>\textbf{DespL := DespL + VARTYPE.tipo\}}\\
+    \>                    \>        \>\textbf{DespL := DespL + VARTYPE.ancho\}}\\
     \>                    \>NEXTATTRIBUTE$_1$ \textbf{\{NEXTATTRIBUTE.tipo :=}\\
     \>                    \>                      \> \textbf{if (NEXTATTRIBUTE$_1$.tipo != void) then}\\
     \>                    \>                      \> \>\textbf{VARTYPE.tipo $\times$ NEXTATTRIBUTE$_1$.tipo}\\
@@ -61,12 +57,15 @@
     \>                    \> \textbf{STATEMENT.tipoRet := ATOMSTATEMENT.tipoRet\}}\\
     \\
     \\
-    \>17. STATEMENT → $for$ ( FORACT$_1$ ; EXP1 ; FORACT$_2$ ) \{ BODY \}\\
-    \>                    \> \textbf{\{STATEMENT.tipo := if (FORACT$_1$.tipo = tipo\_ok}\\
-    \>                    \> \>\textbf{and EXP1.tipo = log and FORACT$_2$.tipo = tipo\_ok)}\\
-    \>                    \> \> \>\textbf{then BODY.tipo}\\
-    \>                    \> \>\textbf{else error(103)}\\
-    \>                    \> \textbf{STATEMENT.tipoRet := BODY.tipoRet\}}\\
+    \>17. STATEMENT → $for$ ( FORACT$_1$ \textbf{\{if (FORACT$_1$.tipo != tipo\_ok) then }\\
+    \>                    \>                \>      \>\textbf{error(103)\}}\\
+    \>                    \> ; EXP1 \textbf{\{if (EXP1.tipo != log) then }\\
+    \>                    \>                \>      \>\textbf{error(103)\}}\\
+    \>                    \> ; FORACT$_2$ \textbf{\{if (FORACT$_2$.tipo != tipo\_ok) then }\\
+    \>                    \>                \>      \>\textbf{error(103)\}}\\
+    \>                    \> ) \{ BODY \} \textbf{\{STATEMENT.tipo := BODY.tipo}\\
+    \>                    \> \>\textbf{STATEMENT.tipoRet := BODY.tipoRet\}}\\
+
     \>18. STATEMENT → $var$ VARTYPE $id$ ; \textbf{\{if(BuscaTipoTS(id.pos) != NULL)} \\
     \>              \>          \>
     \>\textbf{then error(000)}\\
