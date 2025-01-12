@@ -12,7 +12,7 @@ void Lexer::ReadDelAndComments() {
 
             // 15 : * : 16
             if (m_lastChar != '*')
-                ThrowLexicalError(LexicalError::MISSING_COMMENT_START);
+                ThrowInstantLexicalError(LexicalError::MISSING_COMMENT_START);
 
             Read();
 
@@ -21,7 +21,7 @@ void Lexer::ReadDelAndComments() {
             bool m_awaitExit = false;
             while (m_loop) {
                 if (m_lastChar == EOF)
-                    ThrowLexicalError(LexicalError::MISSING_COMMENT_END);
+                    ThrowInstantLexicalError(LexicalError::MISSING_COMMENT_END);
 
                 if (m_awaitExit) {
                     // 17 : / : 0
@@ -117,7 +117,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         // 3 : oc : 4
         if (numberTooBig)
-            ThrowLexicalError(LexicalError::INT_TOO_BIG);
+            ThrowInstantLexicalError(LexicalError::INT_TOO_BIG, true);
 
         return CreateToken(TokenType::CINT, static_cast<int16_t>(num));
     }
@@ -130,7 +130,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         while (m_lastChar != '\'') {
             if (m_lastChar == static_cast<char32_t>(EOF))
-                ThrowLexicalError(LexicalError::MISSING_STRING_END);
+                ThrowInstantLexicalError(LexicalError::MISSING_STRING_END);
 
             // 5 : \ : 6
             if (m_lastChar == '\\') {
@@ -163,7 +163,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         // Comprobamos el contador y, si es mayor que 64, lanzamos un error.
         if (counter > 64)
-            ThrowLexicalError(LexicalError::STRING_TOO_LONG);
+            ThrowLexicalError(LexicalError::STRING_TOO_LONG, true);
 
         Read();
         return CreateToken(TokenType::CSTR, str);
@@ -212,7 +212,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
         // 11 : & : 12
         if (m_lastChar != '&')
-            ThrowLexicalError(LexicalError::MISSING_OP_AND);
+            ThrowInstantLexicalError(LexicalError::MISSING_OP_AND);
 
         Read();
         return CreateToken(TokenType::AND);
@@ -222,7 +222,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
     if (m_lastChar == '|') {
         Read();
         if (m_lastChar != '|')
-            ThrowLexicalError(LexicalError::MISSING_OP_OR);
+            ThrowInstantLexicalError(LexicalError::MISSING_OP_OR);
 
         Read();
         return CreateToken(TokenType::OR);
@@ -266,7 +266,7 @@ Token Lexer::ReadToken(GlobalState& globals) {
 
     // 0 : eof : 19
     if (m_lastChar == EOF) {
-        Read();
+        m_column += 1;
         return CreateToken(TokenType::END);
     }
 

@@ -40,7 +40,6 @@ void ErrorManager::ProcessLexicalException(Lexer& lexer, const LexicalException&
         break;
     case LexicalRecoveryMode::SkipChar:
         m_status = 1;
-        lexer.SkipChar();
         break;
     }
 }

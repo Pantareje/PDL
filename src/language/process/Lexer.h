@@ -18,8 +18,18 @@ class Lexer {
     unsigned m_tokenColumn = 0;
 
     [[noreturn]]
-    void ThrowLexicalError(LexicalError error) const {
-        throw LexicalException(m_line, m_column, error, m_lastChar);
+    void ThrowInstantLexicalError(LexicalError error, bool useToken = false) const {
+        throw LexicalException(m_line, useToken ? m_tokenColumn : m_column, error, m_lastChar);
+    }
+
+    [[noreturn]]
+    void ThrowLexicalError(LexicalError error, bool useToken = false) {
+        const unsigned line = m_line;
+        const unsigned column = useToken ? m_tokenColumn : m_column;
+        const char32_t c = m_lastChar;
+
+        Read();
+        throw LexicalException(line, column, error, c);
     }
 
     template<typename T>
@@ -85,10 +95,6 @@ public:
         while (m_lastChar != U'\n' && m_lastChar != EOF) {
             Read();
         }
-    }
-
-    void SkipChar() {
-        Read();
     }
 
     std::string GetCurrentLine() const {
