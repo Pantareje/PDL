@@ -1,18 +1,23 @@
 \subsubsection*{Errores Sintácticos}
 \begin{itemize}
     \item 0100 - TOP\_LEVEL\_INVALID: Elemento inesperado a nivel superior; se esperaba una declaración válida.
+
     \item 0200 - FUNCTION\_INVALID: Error genérico en la declaración de función.
     \item 0210 - FUNCTION\_MISSING\_IDENTIFIER: Falta el identificador de la función.
     \item 0211 - FUNCTION\_MISSING\_PAREN\_OPEN: Falta el paréntesis de apertura en la definición de atributos.
     \item 0212 - FUNCTION\_MISSING\_PAREN\_CLOSE: Falta el paréntesis de cierre en la definición de atributos.
     \item 0213 - FUNCTION\_MISSING\_BRACK\_OPEN: Falta la llave de apertura para el cuerpo de la función.
     \item 0214 - FUNCTION\_MISSING\_BRACK\_CLOSE: Falta la llave de cierre del cuerpo de la función.
+
     \item 0300 - FUNTYPE\_INVALID: Tipo de retorno de función no válido.
+
     \item 0400 - VARTYPE\_INVALID: Tipo de variable no válido.
     \item 0410 - VARTYPE\_VOID: Una variable no puede ser del tipo void.
+
     \item 0500 - FUNATTRIBUTES\_INVALID: Error genérico en los atributos de la función.
     \item 0510 - FUNATTRIBUTES\_EMPTY: Falta definición de atributos en la función.
     \item 0520 - FUNATTRIBUTES\_MISSING\_IDENTIFIER: Falta el nombre del atributo tras declarar su tipo.
+
     \item 0600 - STATEMENT\_INVALID: Sentencia inválida.
     \item 0610 - STATEMENT\_MISSING\_END\_SEMICOLON: Falta el punto y coma al final de la sentencia.
     \item 0620 - STATEMENT\_IF\_MISSING\_PAREN\_OPEN: Falta el paréntesis de apertura en la condición de un if.
@@ -24,4 +29,16 @@
     \item 0634 - STATEMENT\_FOR\_MISSING\_BRACK\_CLOSE: Falta la llave de cierre del cuerpo del for.
     \item 0640 - STATEMENT\_VAR\_MISSING\_IDENTIFIER: Falta el identificador tras el tipo de la variable.
     \item 0650 - STATEMENT\_INPUT\_MISSING\_IDENTIFIER: Falta el identificador para la entrada.
+
+    \item 0700 - IDACT\_INVALID: Acción de identificador inválida.
+    \item 0710 - IDACT\_CALL\_MISSING\_PAREN\_CLOSE: Falta el paréntesis de cierre en la llamada a la función.
+
+    \item 0800 - ASS\_INVALID: Asignación inválida.
+
+    \item 0900 - EXP\_INVALID: Expresión inválida.
+    \item 0901 - EXP\_MISSING\_PAREN\_CLOSE: Falta el paréntesis de cierre en la expresión.
+
+    \item 0A00 - COMP\_INVALID: Comparación inválida.
+
+    \item 0B00 - ARITH\_INVALID: Operación aritmética inválida.
 \end{itemize}
