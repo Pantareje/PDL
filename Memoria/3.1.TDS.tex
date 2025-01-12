@@ -1,244 +1,302 @@
 \begin{tabbing}
-    \hspace{1cm}\=\hspace{4.5cm}\=\hspace{2cm}\=\hspace{1cm}\=\hspace{1cm}\=\kill
+    \hspace{1cm}\=\hspace{3cm}\=\hspace{1cm}\=\hspace{1cm}\=\hspace{1cm}\=\kill
     \>0. P' → \textbf{\{TSG := CrearTS(); TSL := NULL; DespG := 0\}} P \textbf{\{DestruirTS(TSG)\}}\\
-    \>1. P → FUNCTION P\\
-    \>2. P → STATEMENT P\\
-    \>3. P → $eof$\\
-    \>4. FUNCTION → function \textbf{\{implicitDeclaration := false\}}\\
+    \>1. P → FUNCTION P$_1$ \textbf{\{P.tipo := }\\
+    \>              \> \textbf{if (FUNCTION.tipo = tipo\_error OR P$_1$.tipo = tipo\_error)}\\
+    \>              \>          \> \textbf{then tipo\_error}\\
+    \>              \> \textbf{else tipo\_ok\}}\\
+    \>2. P → STATEMENT P$_1$ \textbf{\{P.tipo := }\\
+    \>              \> \textbf{if (STATEMENT.tipo = tipo\_error OR P$_1$.tipo = tipo\_error)}\\
+    \>              \>          \> \textbf{then tipo\_error}\\
+    \>              \> \textbf{else tipo\_ok\}}\\
+    \>3. P → $eof$ \textbf{\{P.tipo := tipo\_ok\}}\\
+    \>4. FUNCTION → \>function \textbf{\{implicitDeclaration := false\}}\\
     \>              \> FUNTYPE $id$ \textbf{\{TSL := CrearTS(); DespL := 0\}} \\
-    \>              \>( FUNATTRIBUTES \textbf{\{InsertaTipoTS(id.pos, }\\
-    \>              \> \textbf{FUNATTRIBUTES.tipo → FUNTYPE.tipo);}\\
-    \>           \>\textbf{InsertaEtiquetaTS(id.pos, nueva\_etiqueta())\}}\\
-    \>              \>) \{ BODY \}\> \textbf{\{if (FUNTYPE.tipo != BODY.tipoRet)}\\
-    \>              \>          \>             \>   \textbf{then error(101)}\\
-    \>              \>          \> \textbf{DestruirTS(TSL)\}}\\
+    \>              \>( FUNATTRIBUTES\\
+    \>              \> \textbf{\{if(buscaTipoTS(id.pos) != NULL) then}\\
+    \>              \>          \> \textbf{FUNCTION.tipo := tipo\_error;}\\
+    \>              \>          \> \textbf{error(000)}\\
+    \>              \> \textbf{ else}\\
+    \>              \>          \> \textbf{FUNCTION.tipo := FUNATTRIBUTES.tipo}\\
+    \>              \>          \> \textbf{InsertaTipoTS(id.pos, FUNATTRIBUTES.tipoValor → FUNTYPE.tipo);}\\
+    \>              \>          \> \textbf{InsertaEtiquetaTS(id.pos, nueva\_etiqueta())}\\
+    \>              \>\textbf{implicitDeclaration := true\}}\\
+    \>              \>) \{ BODY \}\\
+    \>              \> \textbf{\{if (FUNTYPE.tipo != BODY.tipoRet)}\\
+    \>              \>          \> \textbf{then error(101)}\\
+    \>              \> \textbf{DestruirTS(TSL)\}}\\
     \>5. FUNTYPE → $void$ \textbf{\{FUNTYPE.tipo := void\}}\\
     \>6. FUNTYPE → VARTYPE \textbf{\{FUNTYPE.tipo := VARTYPE.tipo\}}\\
     \>7. VARTYPE → $int$ \textbf{\{VARTYPE.tipo := int; := VARTYPE.ancho := 1\}}\\
     \>8. VARTYPE → $boolean$ \textbf{\{VARTYPE.tipo := log; := VARTYPE.ancho := 1\}}\\
     \>9. VARTYPE → $string$ \textbf{\{VARTYPE.tipo := str; := VARTYPE.ancho := 64\}}\\
-    \>10. FUNATTRIBUTES → $void$ \textbf{\{FUNATTRIBUTES.tipo := void\}}\\
-    \>11. FUNATTRIBUTES → \>VARTYPE $id$ \textbf{\{if (BuscaTipoTS(id.pos) != NULL) then} \\
-    \>              \>          \>    \>\textbf{FUNATTRIBUTES.tipo := tipo\_error;}\\
-    \>              \>          \>    \>\textbf{error(000)}\\
-    \>              \>          \>    \textbf{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
-    \>                    \>        \>\textbf{InsertaDespTS(id.pos, DespL);}\\
-    \>                    \>        \>\textbf{DespL := DespL + VARTYPE.ancho\}}\\
-    \>                    \>NEXTATTRIBUTE \textbf{\{FUNATTRIBUTES.tipo :=}\\
-    \>                    \>                      \> \textbf{if (NEXTATTRIBUTE.tipo != void) then}\\
-    \>                    \>                      \> \>\textbf{VARTYPE.tipo × NEXTATTRIBUTE.tipo}\\
-    \>                    \>                      \> \textbf{else VARTYPE.tipo\}}\\
-    \>12. NEXTATTRIBUTE → , VARTYPE $id$ \textbf{\{if (BuscaTipoTS(id.pos) != NULL)then} \\
-    \>              \>          \>    \>\textbf{FUNATTRIBUTES.tipo := tipo\_error;}\\
-    \>              \>          \>    \>\textbf{error(000)}\\
-    \>              \>          \>    \textbf{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
-    \>                    \>        \>\textbf{InsertaDespTS(id.pos, DespL);}\\
-    \>                    \>        \>\textbf{DespL := DespL + VARTYPE.ancho\}}\\
-    \>                    \>NEXTATTRIBUTE$_1$ \textbf{\{NEXTATTRIBUTE.tipo :=}\\
-    \>                    \>                      \> \textbf{if (NEXTATTRIBUTE$_1$.tipo != void) then}\\
-    \>                    \>                      \> \>\textbf{VARTYPE.tipo $\times$ NEXTATTRIBUTE$_1$.tipo}\\
-    \>                    \>                      \> \textbf{else VARTYPE.tipo\}}\\
-    \>13. NEXTATTRIBUTE → $\lambda$ \textbf{\{NEXTATTRIBUTE.tipo := void\}}\\
+    \>10. FUNATTRIBUTES → $void$ \textbf{\{FUNATTRIBUTES.tipo := tipo\_ok;}\\
+    \>              \> \textbf{FUNATTRIBUTES.tipoValor := void\}}\\
+    \>11. FUNATTRIBUTES → VARTYPE $id$\\
+    \>              \>          \> \textbf{\{if (BuscaTipoTS(id.pos) != NULL) then} \\
+    \>              \>          \>      \>\textbf{FUNATTRIBUTES.tipo := tipo\_error;}\\
+    \>              \>          \>      \>\textbf{error(000);}\\
+    \>              \>          \> \textbf{ else}\\
+    \>              \>          \>      \>\textbf{FUNATTRIBUTES.tipo := tipo\_ok;}\\
+    \>              \>          \>      \>\textbf{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
+    \>              \>          \>      \>\textbf{InsertaDespTS(id.pos, DespL);}\\
+    \>              \>          \>      \>\textbf{DespL := DespL + VARTYPE.ancho\}}\\
+    \>              \>NEXTATTRIBUTE\\
+    \>              \>          \> \textbf{\{if (NEXTATTRIBUTE.tipo = tipo\_error) then}\\
+    \>              \>          \>      \>\textbf{FUNATTRIBUTES.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{ FUNATTRIBUTES.tipoValor := }\\
+    \>              \>          \>      \> \textbf{if (NEXTATTRIBUTE.tipoValor != void) then}\\
+    \>              \>          \>      \>  \>\textbf{VARTYPE.tipo × NEXTATTRIBUTE.tipoValor}\\
+    \>              \>          \>      \> \textbf{else VARTYPE.tipoValor\}}\\
+    \\
+    \>12. NEXTATTRIBUTE → , VARTYPE $id$\\
+    \>              \>          \> \textbf{\{if (BuscaTipoTS(id.pos) != NULL) then} \\
+    \>              \>          \>      \>\textbf{NEXTATTRIBUTE.tipo := tipo\_error;}\\
+    \>              \>          \>      \>\textbf{error(000);}\\
+    \>              \>          \> \textbf{ else}\\
+    \>              \>          \>      \>\textbf{NEXTATTRIBUTE.tipo := tipo\_ok;}\\
+    \>              \>          \>      \>\textbf{InsertaTipoTS(id.pos, VARTYPE.tipo);}\\
+    \>              \>          \>      \>\textbf{InsertaDespTS(id.pos, DespL);}\\
+    \>              \>          \>      \>\textbf{DespL := DespL + VARTYPE.ancho\}}\\
+    \>              \>NEXTATTRIBUTE$_1$\\
+    \>              \>          \> \textbf{\{if (NEXTATTRIBUTE$_1$.tipo = tipo\_error) then}\\
+    \>              \>          \>      \>\textbf{NEXTATTRIBUTE.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{ NEXTATTRIBUTE.tipoValor := }\\
+    \>              \>          \>      \> \textbf{if (NEXTATTRIBUTE$_1$.tipoValor != void) then}\\
+    \>              \>          \>      \>  \>\textbf{VARTYPE.tipo × NEXTATTRIBUTE$_1$.tipoValor}\\
+    \>              \>          \>      \> \textbf{else VARTYPE.tipoValor\}}\\
+    \>13. NEXTATTRIBUTE → $\lambda$ \textbf{\{NEXTATTRIBUTE.tipo := tipo\_ok;}\\
+    \>              \>\textbf{NEXTATTRIBUTE.tipoValor := void\}}\\
     \>14. BODY → STATEMENT BODY$_1$\\
-    \>                    \>\textbf{\{BODY.tipo := if (STATEMENT.tipo = tipo\_ok)}\\
-    \>                    \>           \>          \>\textbf{then BODY$_1$.tipo}\\
-    \>                    \>           \>\textbf{else tipo\_error}\\
-    \>                    \>\textbf{BODY.tipoRet := if(STATEMENT.tipoRet = BODY$_1$.tipoRet}\\
-    \>                    \>           \>\textbf{or STATEMENT.tipoRet = void) then}\\
-    \>                    \>           \>          \>\textbf{BODY$_1$.tipoRet}\\
-    \>                    \>           \>\textbf{else if (BODY$_1$.tipoRet = void) then}\\
-    \>                    \>           \>          \>\textbf{STATEMENT.tipoRet}\\
-    \>                    \>           \>\textbf{else tipo\_error\}}\\
+    \>              \>\textbf{\{BODY.tipo := if (STATEMENT.tipo = tipo\_ok)}\\
+    \>              \>          \>          \>\textbf{then BODY$_1$.tipo}\\
+    \>              \>          \>\textbf{else tipo\_error}\\
+    \>              \>\textbf{BODY.tipoRet := if(STATEMENT.tipoRet = BODY$_1$.tipoRet}\\
+    \>              \>          \>\textbf{OR STATEMENT.tipoRet = void) then}\\
+    \>              \>          \>          \>\textbf{BODY$_1$.tipoRet}\\
+    \>              \>          \>\textbf{else if (BODY$_1$.tipoRet = void) then}\\
+    \>              \>          \>          \>\textbf{STATEMENT.tipoRet}\\
+    \>              \>          \>\textbf{else tipo\_error\}}\\
     \>15. BODY → $\lambda$ \textbf{\{BODY.tipo := tipo\_ok; BODY.tipoRet := void\}}\\
-    \>16. STATEMENT → $if$ ( EXP1 ) ATOMSTATEMENT\\
-    \>                    \> \textbf{\{STATEMENT.tipo := if (EXP1.tipo != log)}\\
-    \>                    \> \> \>\textbf{then tipo\_error}\\
-    \>                    \> \> \textbf{else ATOMSTATEMENT.tipo}\\
-    \>                    \> \textbf{STATEMENT.tipoRet := ATOMSTATEMENT.tipoRet\}}\\
+    \>16. STATEMENT → $if$ ( EXP1 \\
+    \>              \>\textbf{\{if (EXP1.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{STATEMENT.tipo := tipo\_error}\\
+    \>              \> \textbf{ else if (EXP1.tipo != log) then}\\
+    \>              \>          \> \textbf{STATEMENT.tipo := tipo\_error;}\\
+    \>              \>          \> \textbf{error(102);}\\
+    \>              \> \textbf{else STATEMENT.tipo := tipo\_ok\}}\\
+    \>              \> ) ATOMSTATEMENT\\
+    \>              \> \textbf{\{STATEMENT.tipo := if (STATEMENT.tipo != tipo\_error)}\\
+    \>              \>          \> \textbf{then ATOMSTATEMENT.tipo}\\
+    \>              \> \textbf{STATEMENT.tipoRet := ATOMSTATEMENT.tipoRet\}}\\
+    \>17. STATEMENT → $for$ ( FORACT$_1$ \textbf{\{STATEMENT.tipo := if (FORACT$_1$.tipo = tipo\_error) }\\
+    \>              \>          \>      \>\textbf{ then tipo\_error;} \\
+    \>              \>          \> \textbf{else tipo\_ok;\}}\\
+    \>              \> ; EXP1 \textbf{\{if (EXP1.tipo = tipo\_error) then }\\
+    \>              \>          \>      \> \textbf{ STATEMENT.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{ else if (EXP1.tipo != log) then }\\
+    \>              \>          \>      \> \textbf{STATEMENT.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(104)\}}\\
+    \>              \> ; FORACT$_2$\\
+    \>              \>          \> \textbf{\{STATEMENT.tipo := if (FORACT$_2$.tipo = tipo\_error) }\\
+    \>              \>          \>      \>\textbf{ then tipo\_error;} \\
+    \>              \> ) \{ BODY \} \textbf{\{STATEMENT.tipo := BODY.tipo}\\
+    \>              \>          \>\textbf{STATEMENT.tipoRet := BODY.tipoRet\}}\\
     \\
-    \\
-    \>17. STATEMENT → $for$ ( FORACT$_1$ \textbf{\{if (FORACT$_1$.tipo != tipo\_ok) then }\\
-    \>                    \>                \>      \>\textbf{error(103)\}}\\
-    \>                    \> ; EXP1 \textbf{\{if (EXP1.tipo != log) then }\\
-    \>                    \>                \>      \>\textbf{error(103)\}}\\
-    \>                    \> ; FORACT$_2$ \textbf{\{if (FORACT$_2$.tipo != tipo\_ok) then }\\
-    \>                    \>                \>      \>\textbf{error(103)\}}\\
-    \>                    \> ) \{ BODY \} \textbf{\{STATEMENT.tipo := BODY.tipo}\\
-    \>                    \> \>\textbf{STATEMENT.tipoRet := BODY.tipoRet\}}\\
-
-    \>18. STATEMENT → $var$ VARTYPE $id$ ; \textbf{\{if(BuscaTipoTS(id.pos) != NULL)} \\
-    \>              \>          \>
-    \>\textbf{then error(000)}\\
-    \>                    \> \textbf{insertaTipoTS(id.pos, VARTYPE.tipo)}\\
-    \>                    \> \textbf{if(TSL != NULL) then }\\
-    \>                    \> \> \textbf{insertaDespTS(id.pos,despG)}\\
-    \>                    \> \> \textbf{despG := despG + VARTYPE.ancho}\\
-    \>                    \> \textbf{else}\\
-    \>                    \> \> \textbf{insertaDespTS(id.pos,despL)}\\
-    \>                    \> \> \textbf{despL := despL + VARTYPE.ancho}\\
-    \>                    \> \textbf{STATEMENT.tipo := tipo\_ok\}}\\
+    \>18. STATEMENT → $var$ \textbf{\{implicitDeclaration := false\}}\\
+    \>              \> VARTYPE $id$ ; \textbf{\{if(BuscaTipoTS(id.pos) != NULL)} \\
+    \>              \>          \>      \>\textbf{then STATEMENT.tipo := tipo\_error;}\\
+    \>              \>          \>      \>\textbf{error(000);}\\
+    \>              \> \textbf{ else}\\
+    \>              \>          \>\textbf{insertaTipoTS(id.pos, VARTYPE.tipo)}\\
+    \>              \>          \>\textbf{if (TSL != NULL) then }\\
+    \>              \>          \>      \>\textbf{insertaDespTS(id.pos,despG)}\\
+    \>              \>          \>      \>\textbf{despG := despG + VARTYPE.ancho}\\
+    \>              \>          \>\textbf{else}\\
+    \>              \>          \>      \>\textbf{insertaDespTS(id.pos,despL)}\\
+    \>              \>          \>      \>\textbf{despL := despL + VARTYPE.ancho}\\
+    \>              \>          \>\textbf{STATEMENT.tipo := tipo\_ok}\\
+    \>              \> \textbf{implicitDeclaration := true\}}\\
     \>19. STATEMENT → ATOMSTATEMENT \textbf{\{STATEMENT.tipo := ATOMSTATEMENT.tipo}\\
     \>                    \> \textbf{STATEMENT.tipoRet := ATOMSTATEMENT.tipoRet\}}\\
-
-    \>20. ATOMSTATEMENT → $id$ IDACT ; \> \> \textbf{\{if(IDACT.funCall)\{}\\
-    \> \> \> \textbf{if (id.tipo != R $\rightarrow$ T) then}\\
-    \> \> \> \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
-    \> \> \> \> \textbf{error(201)}\\
-    \> \> \> \textbf{else if (IDACT.tipo = tipo\_error)}\\
-    \> \> \> \> \textbf{then ATOMSTATEMENT = tipo\_error}\\
-    \> \> \> \textbf{else if (IDACT.tipo = R.tipo)}\\
-    \> \> \> \> \textbf{then ATOMSTATEMENT = tipo\_ok}\\
-    \> \> \> \textbf{else}\\
-    \> \> \> \> \textbf{ATOMSTATEMENT = tipo\_error}\\
-    \> \> \> \> \textbf{error(203)}\\
-    \> \> \textbf{\} else \{}\\
-    \> \> \> \textbf{if (id.tipo = R $\rightarrow$ T) then}\\
-    \> \> \> \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
-    \> \> \> \> \textbf{error(202)}\\
-    \> \> \> \textbf{else if (IDACT.tipo = tipo\_error)}\\
-    \> \> \> \> \textbf{then ATOMSTATEMENT = tipo\_error}\\
-    \> \> \> \textbf{else if (IDACT.tipo = R.tipo)}\\
-    \> \> \> \> \textbf{then ATOMSTATEMENT = tipo\_ok}\\
-    \> \> \> \textbf{else}\\
-    \> \> \> \> \textbf{ATOMSTATEMENT = tipo\_error}\\
-    \> \> \> \> \textbf{error(200)}\\
-    \>21. ATOMSTATEMENT → $output$ EXP1 ; \textbf{\{if (EXP1.tipo $\in$ \{int, str\}) then}\\
-    \>                    \> \> \> \textbf{ATOMSTATEMENT.tipo := tipo\_ok}\\
-    \>                    \> \>\textbf{else} \\
-    \> \> \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
-    \> \> \> \textbf{error(104)}\\
-    \>                    \> \textbf{ATOMSTATEMENT.tipoRet := void\}}\\
+    \>20. ATOMSTATEMENT → $id$ IDACT ; \textbf{\{id.tipo := buscaTipoTS(id.pos)}\\
+    \>              \> \textbf{if (IDACT.funCall)\{}\\
+    \>              \>          \> \textbf{if (id.tipo != R $\rightarrow$ T) then}\\
+    \>              \>          \>      \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(201)}\\
+    \>              \>          \> \textbf{else if (IDACT.tipo = tipo\_error)}\\
+    \>              \>          \>      \> \textbf{then ATOMSTATEMENT = tipo\_error}\\
+    \>              \>          \> \textbf{else if (IDACT.tipo = R.tipo)}\\
+    \>              \>          \>      \> \textbf{then ATOMSTATEMENT = tipo\_ok}\\
+    \>              \>          \> \textbf{else}\\
+    \>              \>          \>      \> \textbf{ATOMSTATEMENT = tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(203)}\\
+    \>              \> \textbf{\} else \{}\\
+    \>              \>          \> \textbf{if (id.tipo = R $\rightarrow$ T) then}\\
+    \>              \>          \>      \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(202)}\\
+    \>              \>          \> \textbf{else if (IDACT.tipo = tipo\_error)}\\
+    \>              \>          \>      \> \textbf{then ATOMSTATEMENT = tipo\_error}\\
+    \>              \>          \> \textbf{else if (IDACT.tipo = R.tipo)}\\
+    \>              \>          \>      \> \textbf{then ATOMSTATEMENT = tipo\_ok}\\
+    \>              \>          \> \textbf{else}\\
+    \>              \>          \>      \> \textbf{ATOMSTATEMENT = tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(200)}\\
+    \>              \> \textbf{\} ATOMSTATEMENT.tipoRet := void\}}\\
+    \>21. ATOMSTATEMENT → $output$ EXP1 ; \textbf{\{if (EXP1.tipo = tipo\_error) then}\\
+    \>              \>          \>      \>\textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
+    \>              \>          \>\textbf{ else if (EXP1.tipo $\in$ \{int, str\}) then}\\
+    \>              \>          \>      \> \textbf{ATOMSTATEMENT.tipo := tipo\_ok}\\
+    \>              \>          \>\textbf{else} \\
+    \>              \>          \>      \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(105)}\\
+    \>              \>          \> \textbf{ATOMSTATEMENT.tipoRet := void\}}\\
     \>22. ATOMSTATEMENT → $input$ $id$ ; \textbf{\{if (buscaTipoTS(id.pos) $\in$ \{int, str\})}\\
-    \>                    \> \>\textbf{then ATOMSTATEMENT.tipo := tipo\_ok}\\
-    \>                    \> \textbf{else} \\
-    \> \> \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
-    \> \> \> \textbf{error(105)}\\
-    \>                    \> \textbf{ATOMSTATEMENT.tipoRet := void\}}\\
+    \>              \>          \>\textbf{then ATOMSTATEMENT.tipo := tipo\_ok}\\
+    \>              \> \textbf{else} \\
+    \>              \>          \> \textbf{ATOMSTATEMENT.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(106)}\\
+    \>              \> \textbf{ATOMSTATEMENT.tipoRet := void\}}\\
     \>23. ATOMSTATEMENT → $return$ RETURNEXP ; \textbf{\{ATOMSTATEMENT.tipo :=}\\
-    \>                    \> \textbf{if (RETURNEXP.tipo != tipo\_error) then tipo\_ok}\\
-    \>                    \> \textbf{else tipo\_error}\\
-    \>                    \> \textbf{ATOMSTATEMENT.tipoRet := RETURNEXP.tipo\}}\\
-    \\
-    \>24. IDACT → ASS EXP1 \textbf{\{IDACT.tipo :=}\\
-    \>                    \> \textbf{if ((ASS.sum = true AND EXP1.tipo $\in$ \{int, str\})}\\
-    \>                    \> \>\textbf{OR ASS.sum = false) then EXP1.tipo}\\
-    \>                    \> \textbf{else tipo\_error\}}\\
-    \>25. IDACT → ( CALLPARAM ) \textbf{\{IDACT.tipo := CALLPARAM.tipo\}}\\
+    \>              \> \textbf{if (RETURNEXP.tipo != tipo\_error) then tipo\_ok}\\
+    \>              \> \textbf{else tipo\_error}\\
+    \>              \> \textbf{ATOMSTATEMENT.tipoRet := RETURNEXP.tipo\}}\\
+    \>24. IDACT → ASS EXP1 \textbf{\{IDACT.funCall := false}\\
+    \>              \> \textbf{if ((ASS.sum = true AND EXP1.tipo $\in$ \{int, str\})}\\
+    \>              \>          \>\textbf{OR ASS.sum = false) then IDACT.tipo := EXP1.tipo}\\
+    \>              \> \textbf{else IDACT.tipo := tipo\_error; error(100)\}}\\
+    \>25. IDACT → ( CALLPARAM ) \textbf{\{IDACT.funCall := false; IDACT.tipo := CALLPARAM.tipo\}}\\
     \>26. FORACT → $id$ ASS EXP1 \textbf{\{if (buscaTipoTS(id.pos) != int)}\\
-    \> \> \> \textbf{FORACT.tipo := tipo\_error}\\
-    \> \> \> \textbf{error(102)}\\
-    \> \> \textbf{else if EXP1.tipo = tipo\_error}\\
-    \> \> \> \textbf{FORACT.tipo := tipo\_error}\\
-    \> \> \textbf{else if EXP1.tipo != int} \\
-        \> \> \> \textbf{FORACT.tipo := tipo\_error}\\
-    \> \> \> \textbf{error(200)}\\
-    \> \> \textbf{else FORACT.tipo := tipo\_ok}\\
+    \>              \>          \> \textbf{FORACT.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(103)}\\
+    \>              \> \textbf{else if EXP1.tipo = tipo\_error}\\
+    \>              \>          \> \textbf{FORACT.tipo := tipo\_error}\\
+    \>              \> \textbf{else if EXP1.tipo != int} \\
+    \>              \>          \> \textbf{FORACT.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(200)}\\
+    \>              \> \textbf{else FORACT.tipo := tipo\_ok}\\
     \>27. FORACT → $\lambda$ \textbf{\{FORACT.tipo := tipo\_ok\}}\\
     \>28. ASS → = \textbf{\{ASS.sum = false\}}\\
     \>29. ASS → += \textbf{\{ASS.sum = true\}}\\
     \>30. CALLPARAM → EXP1 NEXTPARAM \textbf{\{CALLPARAM.tipo :=}\\
-    \>                    \> \textbf{if (EXP1.tipo = tipo\_error}\\
-    \>                    \> \textbf{OR NEXTPARAM.tipo == tipo\_error) then}\\
-    \>                    \> \> \textbf{tipo\_error}\\
-    \>                    \> \textbf{else if (NEXTPARAM.tipo != void) then}\\
-    \>                    \> \>\textbf{EXP1.tipo $\times$ NEXTPARAM.tipo}\\
-    \>                    \> \textbf{else tipo\_error\}}\\ 
+    \>              \> \textbf{if (EXP1.tipo = tipo\_error}\\
+    \>              \> \textbf{OR NEXTPARAM.tipo == tipo\_error) then}\\
+    \>              \>          \> \textbf{tipo\_error}\\
+    \>              \> \textbf{else if (NEXTPARAM.tipo != void) then}\\
+    \>              \>          \>\textbf{EXP1.tipo $\times$ NEXTPARAM.tipo}\\
+    \>              \> \textbf{else EXP1.tipo\}}\\
     \>31. CALLPARAM → $\lambda$ \textbf{\{CALLPARAM.tipo := void\}}\\
     \>32. NEXTPARAM → , EXP1 NEXTPARAM$_1$ \textbf{\{CALLPARAM.tipo :=}\\
-    \>                    \> \textbf{if (EXP1.tipo = tipo\_error}\\
-    \>                    \> \textbf{OR NEXTPARAM$_1$.tipo == tipo\_error) then}\\
-    \>                    \> \> \textbf{tipo\_error}\\
-    \>                    \> \textbf{else if (NEXTPARAM$_1$.tipo != void) then}\\
-    \>                    \> \>\textbf{EXP1.tipo $\times$ NEXTPARAM$_1$.tipo}\\
-    \>                    \> \textbf{else tipo\_error\}}\\ 
+    \>              \> \textbf{if (EXP1.tipo = tipo\_error}\\
+    \>              \> \textbf{OR NEXTPARAM$_1$.tipo == tipo\_error) then}\\
+    \>              \>          \> \textbf{tipo\_error}\\
+    \>              \> \textbf{else if (NEXTPARAM$_1$.tipo != void) then}\\
+    \>              \>          \>\textbf{EXP1.tipo $\times$ NEXTPARAM$_1$.tipo}\\
+    \>              \> \textbf{else tipo\_error\}}\\
     \>33. NEXTPARAM → $\lambda$ \textbf{\{NEXTPARAM.tipo := void\}}\\
     \>34. RETURNEXP → EXP1 \textbf{RETURNEXP.tipo := EXP1.tipo}\\
     \>35. RETURNEXP → $\lambda$ \textbf{RETURNEXP.tipo := void}\\
-    \>36. EXP1 → EXP2 EXPOR \>\textbf{\{if (EXPOR.tipo = void) then EXP1.tipo := EXP2.tipo}\\
-    \>                     \> \textbf{else if (EXP2.tipo != log OR EXPOR.tipo = tipo\_error) then}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \>                     \> \> \textbf{EXP1.tipo := tipo\_error}\\
-    \>                     \> \textbf{else EXP1.tipo := log\}}\\
+    \>36. EXP1 → EXP2 EXPOR \textbf{\{if (EXPOR.tipo = void) then EXP1.tipo := EXP2.tipo}\\
+    \>              \> \textbf{else if (EXP2.tipo = tipo\_error OR EXPOR.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{EXP1.tipo := tipo\_error}\\
+    \>              \> \textbf{else if (EXP2.tipo != log) then}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>          \> \textbf{EXP1.tipo := tipo\_error}\\
+    \>              \> \textbf{else EXP1.tipo := log\}}\\
     \>37. EXPOR → \verb!||! EXP2 EXPOR$_1$\\
-    \>                     \>\textbf{\{if (EXP2.tipo != log OR EXPOR$_1$.tipo = tipo\_error) then}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \>                     \> \> \textbf{EXPOR.tipo := tipo\_error}\\
-    \>                     \> \textbf{else EXPOR.tipo := logico\}}\\
+    \>              \>\textbf{\{if (EXP2.tipo = tipo\_error OR EXPOR$_1$.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{EXPOR.tipo := tipo\_error}\\
+    \>              \>\textbf{ else if (EXP2.tipo != log) then}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>          \> \textbf{EXPOR.tipo := tipo\_error}\\
+    \>              \> \textbf{else EXPOR.tipo := logico\}}\\
     \>38. EXPOR → $\lambda$ \textbf{\{EXPOR.tipo := void\}}\\
     \>39. EXP2 → EXP3 EXPAND\\
-    \>                     \>\textbf{\{if (EXPAND.tipo = void) then EXP2.tipo := EXP3.tipo}\\
-    \>                     \> \textbf{else if (EXP3.tipo != log OR EXPAND.tipo = tipo\_error) then}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \>                     \> \> \textbf{EXP2.tipo := tipo\_error}\\
-    \>                     \> \textbf{else EXP2.tipo := log\}}\\
+    \>              \> \textbf{\{if (EXPAND.tipo = void) then}\\
+    \>              \>          \> \textbf{EXP2.tipo := EXP3.tipo}\\
+    \>              \> \textbf{else if (EXP3.tipo = tipo\_error OR EXPAND.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{EXP2.tipo := tipo\_error}\\
+    \>              \> \textbf{else if (EXP3.tipo != log) then}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>          \> \textbf{EXP2.tipo := tipo\_error}\\
+    \>              \> \textbf{else EXP2.tipo := log\}}\\
     \>40. EXPAND → \verb!&&! EXP3 EXPAND$_1$\\
-    \>                     \>\textbf{\{if (EXP3.tipo != log OR EXPAND$_1$.tipo = tipo\_error) then}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \>                     \> \> \textbf{EXPAND.tipo := tipo\_error}\\
-    \>                     \> \textbf{else EXPAND.tipo := logico\}}\\
+    \>              \>\textbf{\{if (EXP3.tipo = tipo\_error OR EXPAND$_1$.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{EXPAND.tipo := tipo\_error}\\
+    \>              \>\textbf{ else if (EXP3.tipo != log) then}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>          \> \textbf{EXPAND.tipo := tipo\_error}\\
+    \>              \> \textbf{else EXPAND.tipo := log\}}\\
     \>41. EXPAND → $\lambda$ \textbf{\{EXPAND.tipo := void\}}\\
-    \\
-    \>42. EXP3 → EXP4 COMP \>\textbf{\{if (COMP.tipo = void) then EXP3.tipo := EXP4.tipo}\\
-    \>                     \> \textbf{else if (EXP4.tipo != int OR COMP.tipo = tipo\_error) then}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \>                     \> \> \textbf{EXP3.tipo := tipo\_error}\\
-    \>                     \> \textbf{else EXP3.tipo := log\}}\\
+    \>42. EXP3 → EXP4 COMP\\
+    \>              \> \textbf{\{if (COMP.tipo = void) then}\\
+    \>              \>          \> \textbf{EXP3.tipo := EXP4.tipo}\\
+    \>              \> \textbf{else if (EXP4.tipo = tipo\_error OR COMP.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{EXP3.tipo := tipo\_error}\\
+    \>              \> \textbf{else if (EXP4.tipo != ent) then}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>          \> \textbf{EXP3.tipo := tipo\_error}\\
+    \>              \> \textbf{else EXP3.tipo := log\}}\\
     \>43. COMP → COMPOP EXP4 COMP$_1$\\
-    \>                     \>\textbf{\{if (EXP4.tipo != int OR COMP$_1$.tipo = tipo\_error) then}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \>                     \> \> \textbf{COMP.tipo := tipo\_error}\\
-    \>                     \> \textbf{else COMP.tipo := logico\}}\\
+    \>              \>\textbf{\{if (EXP4.tipo = tipo\_error OR COMP$_1$.tipo = tipo\_error) then}\\
+    \>              \>          \> \textbf{COMP.tipo := tipo\_error}\\
+    \>              \>\textbf{ else if (EXP4.tipo != int) then}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>          \> \textbf{COMP.tipo := tipo\_error}\\
+    \>              \> \textbf{else COMP.tipo := log\}}\\
     \>44. COMP → $\lambda$ \textbf{\{COMP.tipo := void\}}\\
     \>45. COMPOP → >\\
     \>46. COMPOP → <\\
     \>47. EXP4 → EXPATOM ARITH\\
-    \>                     \>\textbf{\{if (ARITH.tipo = void) then EXP4.tipo := EXPATOM.tipo}\\
-    \>                     \>\textbf{\{else if (EXPATOM.tipo != int AND EXPATOM.tipo != string) then}\\
-    \> \> \> \textbf{EXP4.tipo := tipo\_error}\\
-    \> \> \> \textbf{error(100)}\\
-    \>                     \> \textbf{else if (ARITH.tipo = tipo\_error) then EXP4.tipo := tipo\_error}\\
-    \>                     \> \textbf{else if (EXPATOM != ARITH.tipo) then}\\ 
-    \> \> \> \textbf{EXP4.tipo := tipo\_error}\\
-    \>                     \> \> \textbf{error(200)}\\
-    \>                     \> \textbf{else EXP4.tipo := ARITH.tipo\}}\\
+    \>              \>\textbf{\{if (ARITH.tipo = void) then EXP4.tipo := EXPATOM.tipo}\\
+    \>              \>\textbf{\{else if (EXPATOM.tipo != int AND EXPATOM.tipo != string) then}\\
+    \>              \>          \> \textbf{EXP4.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \> \textbf{else if (ARITH.tipo = tipo\_error) then EXP4.tipo := tipo\_error}\\
+    \>              \> \textbf{else if (EXPATOM != ARITH.tipo) then}\\
+    \>              \>          \> \textbf{EXP4.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(200)}\\
+    \>              \> \textbf{else EXP4.tipo := ARITH.tipo\}}\\
     \>48. ARITH → ARITHOP EXPATOM ARITH$_1$\\
-    \>                     \>\textbf{\{if (ARITHOP.sum = false AND EXPATOM.tipo != int) then}\\
-    \>                     \> \> \textbf{ARITH.tipo := tipo\_error}\\
-    \>                     \> \> \textbf{error(100)}\\
-    \> \>\textbf{else if (ARITHOP.sum = true AND EXPATOM.tipo != int}\\
-    \> \> \>\textbf{AND EXPATOM.tipo != string) then}\\     
-    \> \> \> \> \textbf{ARITH.tipo := tipo\_error}\\
-    \> \> \> \> \textbf{error(100)}\\
-    \>                     \> \textbf{else if (ARITH$_1$.tipo = tipo\_error)}\\     \> \> \> \textbf{ARITH.tipo := tipo\_error}\\
-    \>                     \> \textbf{else if (ARITH$_1$.tipo != void AND EXPATOM.tipo != ARITH$_1$.tipo) then}\\ 
-    \> \> \> \textbf{ARITH.tipo := tipo\_error}\\
-    \>                     \> \> \textbf{error(200)}\\
-    \>                     \> \textbf{else ARITH.tipo := EXPATOM.tipo\}}\\
+    \>              \>\textbf{\{if (ARITHOP.sum = false AND EXPATOM.tipo != int) then}\\
+    \>              \>          \> \textbf{ARITH.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(100)}\\
+    \>              \>\textbf{else if (ARITHOP.sum = true AND EXPATOM.tipo != int}\\
+    \>              \>          \>\textbf{AND EXPATOM.tipo != string) then}\\
+    \>              \>          \>      \> \textbf{ARITH.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(100)}\\
+    \>              \> \textbf{else if (ARITH$_1$.tipo = tipo\_error)}\\
+    \>              \>          \> \textbf{ARITH.tipo := tipo\_error}\\
+    \>              \> \textbf{else if (ARITH$_1$.tipo != void AND EXPATOM.tipo != ARITH$_1$.tipo) then}\\
+    \>              \>          \> \textbf{ARITH.tipo := tipo\_error}\\
+    \>              \>          \> \textbf{error(200)}\\
+    \>              \> \textbf{else ARITH.tipo := EXPATOM.tipo\}}\\
     \>49. ARITH → $\lambda$ \textbf{\{ARITH.tipo := void\}}\\
-    \>50. ARITHOP → +\\
-    \>51. ARITHOP → -\\
-    \>52. EXPATOM → $id$ IDVAL \textbf{\{if(IDVAL.funCall)\{}\\
-    \> \> \> \textbf{if (id.tipo != R $\rightarrow$ T) then}\\
-    \> \> \> \> \textbf{EXPATOM.tipo := tipo\_error}\\
-    \> \> \> \> \textbf{error(201)}\\
-    \> \> \> \textbf{else if (IDVAL.tipo = tipo\_error)}\\
-    \> \> \> \> \textbf{then EXPATOM = tipo\_error}\\
-    \> \> \> \textbf{else if (IDVAL.tipo = R.tipo)}\\
-    \> \> \> \> \textbf{then EXPATOM = T.tipo}\\
-    \> \> \> \textbf{else}\\
-    \> \> \> \> \textbf{EXPATOM = tipo\_error}\\
-    \> \> \> \> \textbf{error(203)}\\
-    \> \> \textbf{\} else \{}\\
-    \> \> \> \textbf{if (id.tipo = R $\rightarrow$ T) then}\\
-    \> \> \> \> \textbf{EXPATOM.tipo := tipo\_error}\\
-    \> \> \> \> \textbf{error(202)}\\
-    \> \> \> \textbf{else}\\
-    \> \> \> \> \textbf{EXPATOM = id.tipo}\\
-    \>53. EXPATOM → ( EXP1 ) \>\textbf{\{EXPATOM.tipo := EXP1.tipo\}}\\
-    \>54. EXPATOM → cint \>\textbf{\{EXPATOM.tipo := int\}}\\
-    \>55. EXPATOM → cstr \>\textbf{\{EXPATOM.tipo := str\}}\\
-    \>56. EXPATOM → true \>\textbf{\{EXPATOM.tipo := log\}}\\
-    \>57. EXPATOM → false \>\textbf{\{EXPATOM.tipo := log\}}\\
-    \>58. IDVAL → ( CALLPARAM )\\
-    \>59. IDVAL → $\lambda$\\
+    \>50. ARITHOP → + \textbf{\{ARITHOP.sum := true\}}\\
+    \>51. ARITHOP → - \textbf{\{ARITHOP.sum := false\}}\\
+    \>52. EXPATOM → $id$ IDVAL \textbf{\{id.tipo := buscaTipoTS(id.pos)}\\
+    \>              \> \textbf{if(IDVAL.funCall)\{}\\
+    \>              \>          \> \textbf{if (id.tipo != R $\rightarrow$ T) then}\\
+    \>              \>          \>      \> \textbf{EXPATOM.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(201)}\\
+    \>              \>          \> \textbf{else if (IDVAL.tipo = tipo\_error)}\\
+    \>              \>          \>      \> \textbf{then EXPATOM = tipo\_error}\\
+    \>              \>          \> \textbf{else if (IDVAL.tipo = R.tipo)}\\
+    \>              \>          \>      \> \textbf{then EXPATOM = T.tipo}\\
+    \>              \>          \> \textbf{else}\\
+    \>              \>          \>      \> \textbf{EXPATOM = tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(203)}\\
+    \>              \> \textbf{\} else \{}\\
+    \>              \>          \> \textbf{if (id.tipo = R $\rightarrow$ T) then}\\
+    \>              \>          \>      \> \textbf{EXPATOM.tipo := tipo\_error}\\
+    \>              \>          \>      \> \textbf{error(202)}\\
+    \>              \>          \> \textbf{else}\\
+    \>              \>          \>      \> \textbf{EXPATOM = id.tipo}\\
+    \>53. EXPATOM → ( EXP1 ) \textbf{\{EXPATOM.tipo := EXP1.tipo\}}\\
+    \>54. EXPATOM → cint \textbf{\{EXPATOM.tipo := int\}}\\
+    \>55. EXPATOM → cstr \textbf{\{EXPATOM.tipo := str\}}\\
+    \>56. EXPATOM → true \textbf{\{EXPATOM.tipo := log\}}\\
+    \>57. EXPATOM → false \textbf{\{EXPATOM.tipo := log\}}\\
+    \>58. IDVAL → ( CALLPARAM ) \textbf{\{IDVAL.funCall := true; IDVAL.tipo := CALLPARAM.tipo\}}\\
+    \>59. IDVAL → $\lambda$ \textbf{\{IDVAL.funCall := false; IDVAL.tipo := void\}}\\
 \end{tabbing}

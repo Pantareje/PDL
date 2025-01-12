@@ -257,7 +257,7 @@ Parser::Attributes Parser::Function(std::ostream& output, GlobalState& globals) 
 Parser::Attributes Parser::FunType(std::ostream& output, GlobalState& globals) {
     const AttributesPosRef funType = CreateRuleAttributes();
 
-    // FUNTYPE -> RuleAttributesPos | VARTYPE
+    // FUNTYPE -> void | VARTYPE
     switch (m_currentToken.type) {
     // First (void)
     case VOID: {
@@ -374,7 +374,7 @@ Parser::Attributes Parser::VarType(std::ostream& output, GlobalState& globals) {
 Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& globals) {
     const AttributesPosRef funAttributes = CreateRuleAttributes();
 
-    // FUNATTRIBUTES -> RuleAttributesPos | VARTYPE id NEXTATTRIBUTES
+    // FUNATTRIBUTES -> void | VARTYPE id NEXTATTRIBUTE
     switch (m_currentToken.type) {
     // First (void)
     case VOID: {
@@ -394,7 +394,7 @@ Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& glob
         break;
     }
 
-    // First (VARTYPE id NEXTATTRIBUTES)
+    // First (VARTYPE id NEXTATTRIBUTE)
     case INT:
     case BOOL:
     case STRING: {
@@ -465,9 +465,9 @@ Parser::Attributes Parser::FunAttributes(std::ostream& output, GlobalState& glob
 Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& globals) {
     const AttributesPosRef nextAttributes = CreateRuleAttributes();
 
-    // NEXTATTRIBUTES -> , VARTYPE id NEXTATTRIBUTES | lambda
+    // NEXTATTRIBUTE -> , VARTYPE id NEXTATTRIBUTE | lambda
     switch (m_currentToken.type) {
-    // First (, VARTYPE id NEXTATTRIBUTES)
+    // First (, VARTYPE id NEXTATTRIBUTE)
     case COMMA: {
         WriteParse(output, globals, 12);
 
@@ -527,7 +527,7 @@ Parser::Attributes Parser::NextAttributes(std::ostream& output, GlobalState& glo
         break;
     }
 
-    // Como NEXTATTRIBUTES -> lambda, Follow (NEXTATTRIBUTES)
+    // Como NEXTATTRIBUTE -> lambda, Follow (NEXTATTRIBUTE)
     default: {
         WriteParse(output, globals, 13);
 
@@ -1309,9 +1309,9 @@ Parser::Attributes Parser::Ass(std::ostream& output, GlobalState& globals) {
 Parser::Attributes Parser::CallParams(std::ostream& output, GlobalState& globals) {
     const AttributesPosRef callParams = CreateRuleAttributes();
 
-    // CALLPARAMS -> EXP1 NEXTPARAMS | lambda
+    // CALLPARAM -> EXP1 NEXTPARAM | lambda
     switch (m_currentToken.type) {
-    // First (EXP1 NEXTPARAMS)
+    // First (EXP1 NEXTPARAM)
     case PARENTHESIS_OPEN:
     case CINT:
     case CSTR:
@@ -1343,7 +1343,7 @@ Parser::Attributes Parser::CallParams(std::ostream& output, GlobalState& globals
         break;
     }
 
-    // Como CALLPARAMS -> lambda, Follow (CALLPARAMS)
+    // Como CALLPARAM -> lambda, Follow (CALLPARAM)
     default: {
         WriteParse(output, globals, 31);
 
@@ -1365,9 +1365,9 @@ Parser::Attributes Parser::CallParams(std::ostream& output, GlobalState& globals
 Parser::Attributes Parser::NextParams(std::ostream& output, GlobalState& globals) {
     const AttributesPosRef nextParams = CreateRuleAttributes();
 
-    // NEXTPARAMS -> , EXP1 NEXTPARAMS | lambda
+    // NEXTPARAM -> , EXP1 NEXTPARAM | lambda
     switch (m_currentToken.type) {
-    // First (EXP1 NEXTPARAMS)
+    // First (EXP1 NEXTPARAM)
     case COMMA: {
         WriteParse(output, globals, 32);
 
@@ -1398,7 +1398,7 @@ Parser::Attributes Parser::NextParams(std::ostream& output, GlobalState& globals
         break;
     }
 
-    // Como NEXTPARAMS -> lambda, Follow (NEXTPARAMS)
+    // Como NEXTPARAM -> lambda, Follow (NEXTPARAM)
     default: {
         WriteParse(output, globals, 33);
 
@@ -2259,9 +2259,9 @@ Parser::Attributes Parser::ExpAtom(std::ostream& output, GlobalState& globals) {
 Parser::Attributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
     const AttributesPosRef idVal = CreateRuleAttributes();
 
-    // IDVAL -> ( CALLPARAMS ) | lambda
+    // IDVAL -> ( CALLPARAM ) | lambda
     switch (m_currentToken.type) {
-    // First (( CALLPARAMS ))
+    // First (( CALLPARAM ))
     case PARENTHESIS_OPEN: {
         WriteParse(output, globals, 58);
 
@@ -2297,6 +2297,7 @@ Parser::Attributes Parser::IdVal(std::ostream& output, GlobalState& globals) {
 
         if (globals.useSemantic) {
             idVal[aFunCall] = false;
+            idVal[aType] = tVoid; // TODO: esto es asi?? (faltaba inicializar este valor)
         }
 
         // ------ //
