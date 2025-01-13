@@ -151,6 +151,37 @@ El gestor de errores permite identificar y manejar los problemas encontrados dur
 
 
 \section{Demostración del funcionamiento}
+El programa realizado toma como entrada los tokens generados por el Analizador Léxico y los organiza siguiendo las reglas gramaticales que hemos definido previamente. Este proceso verifica que el código fuente cumple con la estructura sintáctica esperada, generando un fichero de parse o detectando errores. Gracias a la herramienta VASt y la gramática es posible visualizar los árboles sintácticos.
+
+En el \textbf{Anexo A} es posible encontrar múltiples ejemplos que demuestran el funcionamiento correcto del programa. A continuación incluimos una breve explicación de cada uno:
+
+\begin{itemize}
+    \item \textbf{Caso 1:} Con este caso demostramos el correcto funcionamiento de la declaración de funciones y de variables (tanto globales como locales). Además, puede apreciarse cómo estructuras como el bucle for o 'output' funcionan adecuadamente.
+
+    \item \textbf{Caso 2:} En este ejemplo mostramos cómo pasar como parámetro una variable sin inicializar se trata de un error detectado en tiempo de ejecución o un comportamiento indefinido, así que no nos afecta.
+    
+    \item \textbf{Caso 3:} Este caso demuestra cómo el programa respeta el orden de prioridad de las operaciones.
+    
+    \item \textbf{Caso 4:} Con este ejemplo queda constancia de cómo la estructura for funciona apropiadamente (incluso con una sentencia vacía en la inicialización). También mostramos la correcta implementación de la estructura if, y la posibilidad de existir varios valores de retorno en una función.
+    
+    \item \textbf{Caso 5:} Finalmente, ilustramos cómo los operadores '+' y '+=' concatenan adecuadamente cadenas. También queda probado con este último ejemplo el correcto funcionamiento de la declaración implícita de variables.
+\end{itemize}
+
+En el \textbf{Anexo B} pueden verse otra serie de ejemplos que muestran el proceder del programa ante distintos tipos de errores. A continuación incluimos una breve explicación de cada uno:
+
+\begin{itemize}
+    \item \textbf{Caso 6:} Con este caso demostramos cómo se producen errores semánticos si tratamos de declarar de nuevo una variable con el mismo nombre o si tenemos un valor de retorno incorrecto en una función. Además, finalmente se produce un error sintáctico y crítico debido a la falta del tipo de retorno de una función.
+
+    \item \textbf{Caso 7:} En este ejemplo, hay múltiples errores semánticos. Finalmente, muestra cómo el analizador detecta un error léxico al intentar escribir un comentario sin cerrarlo.
+    
+    \item \textbf{Caso 8:} Demostramos con este caso cómo al declarar una variable implícitamente, su tipo se vuelve entero. Esto hace que surja un error semántico si tratamos de igualarla a otro tipo de dato, pues sucede un conflicto de tipos. Finalmente, surgirá otro error sintáctico crítico al intentar utilizar la palabra 'bulean' como un tipo de variable. De este modo, lo termina considerando un identificador y al faltar su tipo, genera el error.
+
+    \item \textbf{Caso 9:} Ilustramos cómo operaciones entre tipos disjuntos producen un error semántico.
+    
+    \item \textbf{Caso 10:} Mostramos de nuevo cómo si intentamos sumar un valor lógico a una variable entera, se produce un error semántico. En caso de que un entero exceda el límite permitido, también se producirá un error léxico. Y, finalmente, la aparición de caracteres no imprimibles en una cadena (como un salto de línea) también provoca un error léxico.
+\end{itemize}
+
+Con esto demostramos el funcionamiento del Procesador por completo, poniendo en manifiesto su capacidad de procesar correctamente código y de identificar errores con mensajes claros y precisos. 
 
 \newpage
 \input{Anexo.tex}
