@@ -14,40 +14,90 @@
     \item \textbf{Caso 1:} Funcionamiento correcto
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-/* Declaraciones válidas */
-var boolean a;
-var int b;
-var string d;
+/*
+  Ejemplo de funcionamiento correcto.
+  Se declara una variable global entera 'a'.
+  Se declara una función con un parámetro entero y valor de retorno vacío.
+  Dentro de la función se declara una variable de tipo cadena, llamada j.
+  Se puede apreciar también el correcto funcionamiento de estructuras como
+  el bucle for o "output".
+  Tras declarar la función, y por tanto destruir la tabla de símbolos local,
+  se declara implícitamente una nueva variable global llamada j.
+  Finalmente se llama a la función previamente declarada.
+*/
 
-/* Se vuelve a declarar la variable «a», pero no es error léxico. */
-var int a;
+var
 
-/* El tipo «bool» no existe, se trata como identificador. */
-var bool err;
+int
+                a       ;
+
+function void hello_world(int i) {
+      var string j;
+      j = 'Hello ';
+            for (a = 0; a < i + 3; a += 1) {
+                output j + 'world';
+            }
+}
+
+j = 3;
+hello_world(j);
         \end{lstlisting}
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
         \begin{lstlisting}
 <var, >
-<bool, >
-<id, 0>
-<scol, >
-<var, >
 <int, >
-<id, 1>
+<id, g0>
 <scol, >
+<fn, >
+<void, >
+<id, g1>
+<po, >
+<int, >
+<id, g2>
+<pc, >
+<cbo, >
 <var, >
 <str, >
-<id, 2>
+<id, g3>
 <scol, >
-<var, >
-<int, >
-<id, 0>
+<id, g3>
+<ass, >
+<cstr, "Hello ">
 <scol, >
-<var, >
-<id, 3>
-<id, 4>
+<for, >
+<po, >
+<id, g0>
+<ass, >
+<cint, 0>
+<scol, >
+<id, g0>
+<ls, >
+<id, g2>
+<sum, >
+<cint, 3>
+<scol, >
+<id, g0>
+<cumass, >
+<cint, 1>
+<pc, >
+<cbo, >
+<out, >
+<id, g3>
+<sum, >
+<cstr, "world">
+<scol, >
+<cbc, >
+<cbc, >
+<id, g3>
+<ass, >
+<cint, 3>
+<scol, >
+<id, g1>
+<po, >
+<id, g3>
+<pc, >
 <scol, >
 <eof, >
         \end{lstlisting}
@@ -55,14 +105,1504 @@ var bool err;
 
     \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
         \begin{lstlisting}
-Tabla Global #0:
+#0:
 *'a'
-*'b'
-*'d'
-*'bool'
-*'err'
++despl:0
++tipo:'int'
+*'hello_world'
++etiqFuncion:'hello_world'
++numParam:1
++tipo:'function'
++tipoParam01:'int'
++tipoRetorno:'void'
+*'j'
++despl:1
++tipo:'int'
+
+#1:
+*'i'
++despl:0
++tipo:'int'
+*'j'
++despl:1
++tipo:'string'
         \end{lstlisting}
     \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del parse}, colback=white]
+        \begin{lstlisting}
+Des 2 18 7 1 4 5 11 7 13 14 18 9 14 19 20 24 28 36 39 42 47 55 49 44 41 38 14 17 26 28 36 39 42 47
+54 49 44 41 38 36 39 42 47 52 59 49 43 46 47 52 59 48 50 54 49 44 41 38 26 29 36 39 42 47 54 49 44
+41 38 14 19 21 36 39 42 47 52 59 48 50 55 49 44 41 38 15 15 2 19 20 24 28 36 39 42 47 54 49 44 41
+38 2 19 20 25 30 36 39 42 47 52 59 49 44 41 38 33 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico}, colback=white, breakable]
+        \begin{lstlisting}
+· P (2)
+  · STATEMENT (18)
+    · var
+    · VARTYPE (7)
+      · int
+    · id
+    · ;
+  · P (1)
+    · FUNCTION (4)
+      · function
+      · FUNTYPE (5)
+        · void
+      · id
+      · (
+      · FUNATTRIBUTES (11)
+        · VARTYPE (7)
+          · int
+        · id
+        · NEXTATTRIBUTE (13)
+          · lambda
+      · )
+      · {
+      · BODY (14)
+        · STATEMENT (18)
+          · var
+          · VARTYPE (9)
+            · string
+          · id
+          · ;
+        · BODY (14)
+          · STATEMENT (19)
+            · ATOMSTATEMENT (20)
+              · id
+              · IDACT (24)
+                · ASS (28)
+                  · =
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (55)
+                          · cstr
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · ;
+          · BODY (14)
+            · STATEMENT (17)
+              · for
+              · (
+              · FORACT (26)
+                · id
+                · ASS (28)
+                  · =
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (54)
+                          · cint
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · ;
+              · EXP1 (36)
+                · EXP2 (39)
+                  · EXP3 (42)
+                    · EXP4 (47)
+                      · EXPATOM (52)
+                        · id
+                        · IDVAL (59)
+                          · lambda
+                      · ARITH (49)
+                        · lambda
+                    · COMP (43)
+                      · COMPOP (46)
+                        · <
+                      · EXP4 (47)
+                        · EXPATOM (52)
+                          · id
+                          · IDVAL (59)
+                            · lambda
+                        · ARITH (48)
+                          · ARITHOP (50)
+                            · +
+                          · EXPATOM (54)
+                            · cint
+                          · ARITH (49)
+                            · lambda
+                      · COMP (44)
+                        · lambda
+                  · EXPAND (41)
+                    · lambda
+                · EXPOR (38)
+                  · lambda
+              · ;
+              · FORACT (26)
+                · id
+                · ASS (29)
+                  · +=
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (54)
+                          · cint
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · )
+              · {
+              · BODY (14)
+                · STATEMENT (19)
+                  · ATOMSTATEMENT (21)
+                    · output
+                    · EXP1 (36)
+                      · EXP2 (39)
+                        · EXP3 (42)
+                          · EXP4 (47)
+                            · EXPATOM (52)
+                              · id
+                              · IDVAL (59)
+                                · lambda
+                            · ARITH (48)
+                              · ARITHOP (50)
+                                · +
+                              · EXPATOM (55)
+                                · cstr
+                              · ARITH (49)
+                                · lambda
+                          · COMP (44)
+                            · lambda
+                        · EXPAND (41)
+                          · lambda
+                      · EXPOR (38)
+                        · lambda
+                    · ;
+                · BODY (15)
+                  · lambda
+              · }
+            · BODY (15)
+              · lambda
+      · }
+    · P (2)
+      · STATEMENT (19)
+        · ATOMSTATEMENT (20)
+          · id
+          · IDACT (24)
+            · ASS (28)
+              · =
+            · EXP1 (36)
+              · EXP2 (39)
+                · EXP3 (42)
+                  · EXP4 (47)
+                    · EXPATOM (54)
+                      · cint
+                    · ARITH (49)
+                      · lambda
+                  · COMP (44)
+                    · lambda
+                · EXPAND (41)
+                  · lambda
+              · EXPOR (38)
+                · lambda
+          · ;
+      · P (2)
+        · STATEMENT (19)
+          · ATOMSTATEMENT (20)
+            · id
+            · IDACT (25)
+              · (
+              · CALLPARAM (30)
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (52)
+                          · id
+                          · IDVAL (59)
+                            · lambda
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+                · NEXTPARAM (33)
+                  · lambda
+              · )
+            · ;
+        · P (3)
+          · eof
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+    \item \textbf{Caso 2:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/*ejemplo_correcto2
+
+*/
+
+
+var string cadena;
+
+function void print(string cad) {
+	output (cad);
+	return;
+}
+
+/* Pasamos como parámetro una variable sin inicializar, pero eso será
+un error detectado en tiempo de ejecución o un comportamiento indefinido,
+así que no afecta en nada a nuestro ejemplo*/
+print			(cadena + '\n');
+
+output (cadena);
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        \begin{lstlisting}
+<var, >
+<str, >
+<id, g0>
+<scol, >
+<fn, >
+<void, >
+<id, g1>
+<po, >
+<str, >
+<id, g2>
+<pc, >
+<cbo, >
+<out, >
+<po, >
+<id, g2>
+<pc, >
+<scol, >
+<ret, >
+<scol, >
+<cbc, >
+<id, g1>
+<po, >
+<id, g0>
+<sum, >
+<cstr, "\n">
+<pc, >
+<scol, >
+<out, >
+<po, >
+<id, g0>
+<pc, >
+<scol, >
+<eof, >
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        \begin{lstlisting}
+#0:
+*'cadena'
++despl:0
++tipo:'string'
+*'print'
++etiqFuncion:'print'
++numParam:1
++tipo:'function'
++tipoParam01:'string'
++tipoRetorno:'void'
+
+#1:
+*'cad'
++despl:0
++tipo:'string'
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del parse}, colback=white]
+        \begin{lstlisting}
+Des 2 18 9 1 4 5 11 9 13 14 19 21 36 39 42 47 53 36 39 42 47 52 59 49 44 41 38 49 44 41 38 14 19
+23 35 15 2 19 20 25 30 36 39 42 47 52 59 48 50 55 49 44 41 38 33 2 19 21 36 39 42 47 53 36 39 42
+47 52 59 49 44 41 38 49 44 41 38 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico}, colback=white, breakable]
+        \begin{lstlisting}
+· P (2)
+  · STATEMENT (18)
+    · var
+    · VARTYPE (9)
+      · string
+    · id
+    · ;
+  · P (1)
+    · FUNCTION (4)
+      · function
+      · FUNTYPE (5)
+        · void
+      · id
+      · (
+      · FUNATTRIBUTES (11)
+        · VARTYPE (9)
+          · string
+        · id
+        · NEXTATTRIBUTE (13)
+          · lambda
+      · )
+      · {
+      · BODY (14)
+        · STATEMENT (19)
+          · ATOMSTATEMENT (21)
+            · output
+            · EXP1 (36)
+              · EXP2 (39)
+                · EXP3 (42)
+                  · EXP4 (47)
+                    · EXPATOM (53)
+                      · (
+                      · EXP1 (36)
+                        · EXP2 (39)
+                          · EXP3 (42)
+                            · EXP4 (47)
+                              · EXPATOM (52)
+                                · id
+                                · IDVAL (59)
+                                  · lambda
+                              · ARITH (49)
+                                · lambda
+                            · COMP (44)
+                              · lambda
+                          · EXPAND (41)
+                            · lambda
+                        · EXPOR (38)
+                          · lambda
+                      · )
+                    · ARITH (49)
+                      · lambda
+                  · COMP (44)
+                    · lambda
+                · EXPAND (41)
+                  · lambda
+              · EXPOR (38)
+                · lambda
+            · ;
+        · BODY (14)
+          · STATEMENT (19)
+            · ATOMSTATEMENT (23)
+              · return
+              · RETURNEXP (35)
+                · lambda
+              · ;
+          · BODY (15)
+            · lambda
+      · }
+    · P (2)
+      · STATEMENT (19)
+        · ATOMSTATEMENT (20)
+          · id
+          · IDACT (25)
+            · (
+            · CALLPARAM (30)
+              · EXP1 (36)
+                · EXP2 (39)
+                  · EXP3 (42)
+                    · EXP4 (47)
+                      · EXPATOM (52)
+                        · id
+                        · IDVAL (59)
+                          · lambda
+                      · ARITH (48)
+                        · ARITHOP (50)
+                          · +
+                        · EXPATOM (55)
+                          · cstr
+                        · ARITH (49)
+                          · lambda
+                    · COMP (44)
+                      · lambda
+                  · EXPAND (41)
+                    · lambda
+                · EXPOR (38)
+                  · lambda
+              · NEXTPARAM (33)
+                · lambda
+            · )
+          · ;
+      · P (2)
+        · STATEMENT (19)
+          · ATOMSTATEMENT (21)
+            · output
+            · EXP1 (36)
+              · EXP2 (39)
+                · EXP3 (42)
+                  · EXP4 (47)
+                    · EXPATOM (53)
+                      · (
+                      · EXP1 (36)
+                        · EXP2 (39)
+                          · EXP3 (42)
+                            · EXP4 (47)
+                              · EXPATOM (52)
+                                · id
+                                · IDVAL (59)
+                                  · lambda
+                              · ARITH (49)
+                                · lambda
+                            · COMP (44)
+                              · lambda
+                          · EXPAND (41)
+                            · lambda
+                        · EXPOR (38)
+                          · lambda
+                      · )
+                    · ARITH (49)
+                      · lambda
+                  · COMP (44)
+                    · lambda
+                · EXPAND (41)
+                  · lambda
+              · EXPOR (38)
+                · lambda
+            · ;
+        · P (3)
+          · eof
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 3:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/*En este ejemplo se aprecia que se respeta el orden de prioridad de las operaciones*/
+
+var int a;
+var int b;
+var int c;
+
+a = 2;
+b = 100;
+c = 15;
+
+var boolean resultado;
+resultado = a > b && a < 9 || b > c || (a > b && a > c);
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        \begin{lstlisting}
+<var, >
+<int, >
+<id, g0>
+<scol, >
+<var, >
+<int, >
+<id, g1>
+<scol, >
+<var, >
+<int, >
+<id, g2>
+<scol, >
+<id, g0>
+<ass, >
+<cint, 2>
+<scol, >
+<id, g1>
+<ass, >
+<cint, 100>
+<scol, >
+<id, g2>
+<ass, >
+<cint, 15>
+<scol, >
+<var, >
+<bool, >
+<id, g3>
+<scol, >
+<id, g3>
+<ass, >
+<id, g0>
+<gr, >
+<id, g1>
+<and, >
+<id, g0>
+<ls, >
+<cint, 9>
+<or, >
+<id, g1>
+<gr, >
+<id, g2>
+<or, >
+<po, >
+<id, g0>
+<gr, >
+<id, g1>
+<and, >
+<id, g0>
+<gr, >
+<id, g2>
+<pc, >
+<scol, >
+<eof, >
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        \begin{lstlisting}
+#0:
+*'a'
++despl:0
++tipo:'int'
+*'b'
++despl:1
++tipo:'int'
+*'c'
++despl:2
++tipo:'int'
+*'resultado'
++despl:3
++tipo:'boolean'
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del parse}, colback=white]
+        \begin{lstlisting}
+Des 2 18 7 2 18 7 2 18 7 2 19 20 24 28 36 39 42 47 54 49 44 41 38 2 19 20 24 28 36 39 42 47 54 49
+44 41 38 2 19 20 24 28 36 39 42 47 54 49 44 41 38 2 18 8 2 19 20 24 28 36 39 42 47 52 59 49 43 45
+47 52 59 49 44 40 42 47 52 59 49 43 46 47 54 49 44 41 37 39 42 47 52 59 49 43 45 47 52 59 49 44 41
+37 39 42 47 53 36 39 42 47 52 59 49 43 45 47 52 59 49 44 40 42 47 52 59 49 43 45 47 52 59 49 44 41
+38 49 44 41 38 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico}, colback=white, breakable]
+        \begin{lstlisting}
+· P (2)
+  · STATEMENT (18)
+    · var
+    · VARTYPE (7)
+      · int
+    · id
+    · ;
+  · P (2)
+    · STATEMENT (18)
+      · var
+      · VARTYPE (7)
+        · int
+      · id
+      · ;
+    · P (2)
+      · STATEMENT (18)
+        · var
+        · VARTYPE (7)
+          · int
+        · id
+        · ;
+      · P (2)
+        · STATEMENT (19)
+          · ATOMSTATEMENT (20)
+            · id
+            · IDACT (24)
+              · ASS (28)
+                · =
+              · EXP1 (36)
+                · EXP2 (39)
+                  · EXP3 (42)
+                    · EXP4 (47)
+                      · EXPATOM (54)
+                        · cint
+                      · ARITH (49)
+                        · lambda
+                    · COMP (44)
+                      · lambda
+                  · EXPAND (41)
+                    · lambda
+                · EXPOR (38)
+                  · lambda
+            · ;
+        · P (2)
+          · STATEMENT (19)
+            · ATOMSTATEMENT (20)
+              · id
+              · IDACT (24)
+                · ASS (28)
+                  · =
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (54)
+                          · cint
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · ;
+          · P (2)
+            · STATEMENT (19)
+              · ATOMSTATEMENT (20)
+                · id
+                · IDACT (24)
+                  · ASS (28)
+                    · =
+                  · EXP1 (36)
+                    · EXP2 (39)
+                      · EXP3 (42)
+                        · EXP4 (47)
+                          · EXPATOM (54)
+                            · cint
+                          · ARITH (49)
+                            · lambda
+                        · COMP (44)
+                          · lambda
+                      · EXPAND (41)
+                        · lambda
+                    · EXPOR (38)
+                      · lambda
+                · ;
+            · P (2)
+              · STATEMENT (18)
+                · var
+                · VARTYPE (8)
+                  · boolean
+                · id
+                · ;
+              · P (2)
+                · STATEMENT (19)
+                  · ATOMSTATEMENT (20)
+                    · id
+                    · IDACT (24)
+                      · ASS (28)
+                        · =
+                      · EXP1 (36)
+                        · EXP2 (39)
+                          · EXP3 (42)
+                            · EXP4 (47)
+                              · EXPATOM (52)
+                                · id
+                                · IDVAL (59)
+                                  · lambda
+                              · ARITH (49)
+                                · lambda
+                            · COMP (43)
+                              · COMPOP (45)
+                                · >
+                              · EXP4 (47)
+                                · EXPATOM (52)
+                                  · id
+                                  · IDVAL (59)
+                                    · lambda
+                                · ARITH (49)
+                                  · lambda
+                              · COMP (44)
+                                · lambda
+                          · EXPAND (40)
+                            · &&
+                            · EXP3 (42)
+                              · EXP4 (47)
+                                · EXPATOM (52)
+                                  · id
+                                  · IDVAL (59)
+                                    · lambda
+                                · ARITH (49)
+                                  · lambda
+                              · COMP (43)
+                                · COMPOP (46)
+                                  · <
+                                · EXP4 (47)
+                                  · EXPATOM (54)
+                                    · cint
+                                  · ARITH (49)
+                                    · lambda
+                                · COMP (44)
+                                  · lambda
+                            · EXPAND (41)
+                              · lambda
+                        · EXPOR (37)
+                          · ||
+                          · EXP2 (39)
+                            · EXP3 (42)
+                              · EXP4 (47)
+                                · EXPATOM (52)
+                                  · id
+                                  · IDVAL (59)
+                                    · lambda
+                                · ARITH (49)
+                                  · lambda
+                              · COMP (43)
+                                · COMPOP (45)
+                                  · >
+                                · EXP4 (47)
+                                  · EXPATOM (52)
+                                    · id
+                                    · IDVAL (59)
+                                      · lambda
+                                  · ARITH (49)
+                                    · lambda
+                                · COMP (44)
+                                  · lambda
+                            · EXPAND (41)
+                              · lambda
+                          · EXPOR (37)
+                            · ||
+                            · EXP2 (39)
+                              · EXP3 (42)
+                                · EXP4 (47)
+                                  · EXPATOM (53)
+                                    · (
+                                    · EXP1 (36)
+                                      · EXP2 (39)
+                                        · EXP3 (42)
+                                          · EXP4 (47)
+                                            · EXPATOM (52)
+                                              · id
+                                              · IDVAL (59)
+                                                · lambda
+                                            · ARITH (49)
+                                              · lambda
+                                          · COMP (43)
+                                            · COMPOP (45)
+                                              · >
+                                            · EXP4 (47)
+                                              · EXPATOM (52)
+                                                · id
+                                                · IDVAL (59)
+                                                  · lambda
+                                              · ARITH (49)
+                                                · lambda
+                                            · COMP (44)
+                                              · lambda
+                                        · EXPAND (40)
+                                          · &&
+                                          · EXP3 (42)
+                                            · EXP4 (47)
+                                              · EXPATOM (52)
+                                                · id
+                                                · IDVAL (59)
+                                                  · lambda
+                                              · ARITH (49)
+                                                · lambda
+                                            · COMP (43)
+                                              · COMPOP (45)
+                                                · >
+                                              · EXP4 (47)
+                                                · EXPATOM (52)
+                                                  · id
+                                                  · IDVAL (59)
+                                                    · lambda
+                                                · ARITH (49)
+                                                  · lambda
+                                              · COMP (44)
+                                                · lambda
+                                          · EXPAND (41)
+                                            · lambda
+                                      · EXPOR (38)
+                                        · lambda
+                                    · )
+                                  · ARITH (49)
+                                    · lambda
+                                · COMP (44)
+                                  · lambda
+                              · EXPAND (41)
+                                · lambda
+                            · EXPOR (38)
+                              · lambda
+                    · ;
+                · P (3)
+                  · eof
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 4:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/*Ejemplo correcto de uso de if y for, con varios valores de retorno */
+
+
+function int Prueba_1 (string cad, int a, boolean val) {
+	/* Se declara implícitamente una variable global k*/
+	k = 3;
+	for(; k < 100; k += 20 + 7) {
+		if (k > 57 || val) output cad;
+		val = k <63;
+		if (val) return k;
+	}
+
+	return k + 9;
+}
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        \begin{lstlisting}
+<fn, >
+<int, >
+<id, g0>
+<po, >
+<str, >
+<id, g1>
+<com, >
+<int, >
+<id, g2>
+<com, >
+<bool, >
+<id, g3>
+<pc, >
+<cbo, >
+<id, g4>
+<ass, >
+<cint, 3>
+<scol, >
+<for, >
+<po, >
+<scol, >
+<id, g4>
+<ls, >
+<cint, 100>
+<scol, >
+<id, g4>
+<cumass, >
+<cint, 20>
+<sum, >
+<cint, 7>
+<pc, >
+<cbo, >
+<if, >
+<po, >
+<id, g4>
+<gr, >
+<cint, 57>
+<or, >
+<id, g3>
+<pc, >
+<out, >
+<id, g1>
+<scol, >
+<id, g3>
+<ass, >
+<id, g4>
+<ls, >
+<cint, 63>
+<scol, >
+<if, >
+<po, >
+<id, g3>
+<pc, >
+<ret, >
+<id, g4>
+<scol, >
+<cbc, >
+<ret, >
+<id, g4>
+<sum, >
+<cint, 9>
+<scol, >
+<cbc, >
+<eof, >
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        \begin{lstlisting}
+#0:
+*'Prueba_1'
++etiqFuncion:'Prueba_1'
++numParam:3
++tipo:'function'
++tipoParam01:'string'
++tipoParam02:'int'
++tipoParam03:'boolean'
++tipoRetorno:'int'
+*'k'
++despl:0
++tipo:'int'
+
+#1:
+*'cad'
++despl:0
++tipo:'string'
+*'a'
++despl:64
++tipo:'int'
+*'val'
++despl:65
++tipo:'boolean'
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del parse}, colback=white]
+        \begin{lstlisting}
+Des 1 4 6 7 11 9 12 7 12 8 13 14 19 20 24 28 36 39 42 47 54 49 44 41 38 14 17 27 36 39 42 47 52 59
+49 43 46 47 54 49 44 41 38 26 29 36 39 42 47 54 48 50 54 49 44 41 38 14 16 36 39 42 47 52 59 49 43
+45 47 54 49 44 41 37 39 42 47 52 59 49 44 41 38 21 36 39 42 47 52 59 49 44 41 38 14 19 20 24 28 36
+39 42 47 52 59 49 43 46 47 54 49 44 41 38 14 16 36 39 42 47 52 59 49 44 41 38 23 34 36 39 42 47 52
+59 49 44 41 38 15 14 19 23 34 36 39 42 47 52 59 48 50 54 49 44 41 38 15 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico}, colback=white, breakable]
+        \begin{lstlisting}
+· P (1)
+  · FUNCTION (4)
+    · function
+    · FUNTYPE (6)
+      · VARTYPE (7)
+        · int
+    · id
+    · (
+    · FUNATTRIBUTES (11)
+      · VARTYPE (9)
+        · string
+      · id
+      · NEXTATTRIBUTE (12)
+        · ,
+        · VARTYPE (7)
+          · int
+        · id
+        · NEXTATTRIBUTE (12)
+          · ,
+          · VARTYPE (8)
+            · boolean
+          · id
+          · NEXTATTRIBUTE (13)
+            · lambda
+    · )
+    · {
+    · BODY (14)
+      · STATEMENT (19)
+        · ATOMSTATEMENT (20)
+          · id
+          · IDACT (24)
+            · ASS (28)
+              · =
+            · EXP1 (36)
+              · EXP2 (39)
+                · EXP3 (42)
+                  · EXP4 (47)
+                    · EXPATOM (54)
+                      · cint
+                    · ARITH (49)
+                      · lambda
+                  · COMP (44)
+                    · lambda
+                · EXPAND (41)
+                  · lambda
+              · EXPOR (38)
+                · lambda
+          · ;
+      · BODY (14)
+        · STATEMENT (17)
+          · for
+          · (
+          · FORACT (27)
+            · lambda
+          · ;
+          · EXP1 (36)
+            · EXP2 (39)
+              · EXP3 (42)
+                · EXP4 (47)
+                  · EXPATOM (52)
+                    · id
+                    · IDVAL (59)
+                      · lambda
+                  · ARITH (49)
+                    · lambda
+                · COMP (43)
+                  · COMPOP (46)
+                    · <
+                  · EXP4 (47)
+                    · EXPATOM (54)
+                      · cint
+                    · ARITH (49)
+                      · lambda
+                  · COMP (44)
+                    · lambda
+              · EXPAND (41)
+                · lambda
+            · EXPOR (38)
+              · lambda
+          · ;
+          · FORACT (26)
+            · id
+            · ASS (29)
+              · +=
+            · EXP1 (36)
+              · EXP2 (39)
+                · EXP3 (42)
+                  · EXP4 (47)
+                    · EXPATOM (54)
+                      · cint
+                    · ARITH (48)
+                      · ARITHOP (50)
+                        · +
+                      · EXPATOM (54)
+                        · cint
+                      · ARITH (49)
+                        · lambda
+                  · COMP (44)
+                    · lambda
+                · EXPAND (41)
+                  · lambda
+              · EXPOR (38)
+                · lambda
+          · )
+          · {
+          · BODY (14)
+            · STATEMENT (16)
+              · if
+              · (
+              · EXP1 (36)
+                · EXP2 (39)
+                  · EXP3 (42)
+                    · EXP4 (47)
+                      · EXPATOM (52)
+                        · id
+                        · IDVAL (59)
+                          · lambda
+                      · ARITH (49)
+                        · lambda
+                    · COMP (43)
+                      · COMPOP (45)
+                        · >
+                      · EXP4 (47)
+                        · EXPATOM (54)
+                          · cint
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                  · EXPAND (41)
+                    · lambda
+                · EXPOR (37)
+                  · ||
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (52)
+                          · id
+                          · IDVAL (59)
+                            · lambda
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · )
+              · ATOMSTATEMENT (21)
+                · output
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (52)
+                          · id
+                          · IDVAL (59)
+                            · lambda
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+                · ;
+            · BODY (14)
+              · STATEMENT (19)
+                · ATOMSTATEMENT (20)
+                  · id
+                  · IDACT (24)
+                    · ASS (28)
+                      · =
+                    · EXP1 (36)
+                      · EXP2 (39)
+                        · EXP3 (42)
+                          · EXP4 (47)
+                            · EXPATOM (52)
+                              · id
+                              · IDVAL (59)
+                                · lambda
+                            · ARITH (49)
+                              · lambda
+                          · COMP (43)
+                            · COMPOP (46)
+                              · <
+                            · EXP4 (47)
+                              · EXPATOM (54)
+                                · cint
+                              · ARITH (49)
+                                · lambda
+                            · COMP (44)
+                              · lambda
+                        · EXPAND (41)
+                          · lambda
+                      · EXPOR (38)
+                        · lambda
+                  · ;
+              · BODY (14)
+                · STATEMENT (16)
+                  · if
+                  · (
+                  · EXP1 (36)
+                    · EXP2 (39)
+                      · EXP3 (42)
+                        · EXP4 (47)
+                          · EXPATOM (52)
+                            · id
+                            · IDVAL (59)
+                              · lambda
+                          · ARITH (49)
+                            · lambda
+                        · COMP (44)
+                          · lambda
+                      · EXPAND (41)
+                        · lambda
+                    · EXPOR (38)
+                      · lambda
+                  · )
+                  · ATOMSTATEMENT (23)
+                    · return
+                    · RETURNEXP (34)
+                      · EXP1 (36)
+                        · EXP2 (39)
+                          · EXP3 (42)
+                            · EXP4 (47)
+                              · EXPATOM (52)
+                                · id
+                                · IDVAL (59)
+                                  · lambda
+                              · ARITH (49)
+                                · lambda
+                            · COMP (44)
+                              · lambda
+                          · EXPAND (41)
+                            · lambda
+                        · EXPOR (38)
+                          · lambda
+                    · ;
+                · BODY (15)
+                  · lambda
+          · }
+        · BODY (14)
+          · STATEMENT (19)
+            · ATOMSTATEMENT (23)
+              · return
+              · RETURNEXP (34)
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (52)
+                          · id
+                          · IDVAL (59)
+                            · lambda
+                        · ARITH (48)
+                          · ARITHOP (50)
+                            · +
+                          · EXPATOM (54)
+                            · cint
+                          · ARITH (49)
+                            · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · ;
+          · BODY (15)
+            · lambda
+    · }
+  · P (3)
+    · eof
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 5:} Funcionamiento correcto
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/* Se pueden concatenar cadenas con el operador "+" */
+
+var string cad1;
+var string cad2;
+
+cad1 = 'Hola' + 'mundo';
+cad2 = 'Hello' + ' ' + 'world';
+
+cad1 += cad2;
+
+output (cad1 + cad2);
+input cad1;
+
+/*Declaración implícita de una nueva variable global de tipo entero*/
+input nueva_variable;
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de tokens}, colback=white]
+        \begin{lstlisting}
+<var, >
+<str, >
+<id, g0>
+<scol, >
+<var, >
+<str, >
+<id, g1>
+<scol, >
+<id, g0>
+<ass, >
+<cstr, "Hola">
+<sum, >
+<cstr, "mundo">
+<scol, >
+<id, g1>
+<ass, >
+<cstr, "Hello">
+<sum, >
+<cstr, " ">
+<sum, >
+<cstr, "world">
+<scol, >
+<id, g0>
+<cumass, >
+<id, g1>
+<scol, >
+<out, >
+<po, >
+<id, g0>
+<sum, >
+<id, g1>
+<pc, >
+<scol, >
+<in, >
+<id, g0>
+<scol, >
+<in, >
+<id, g2>
+<scol, >
+<eof, >
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del fichero de la tabla de símbolos}, colback=white]
+        \begin{lstlisting}
+#0:
+*'cad1'
++despl:0
++tipo:'string'
+*'cad2'
++despl:64
++tipo:'string'
+*'nueva_variable'
++despl:128
++tipo:'int'
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Volcado del parse}, colback=white]
+        \begin{lstlisting}
+Des 2 18 9 2 18 9 2 19 20 24 28 36 39 42 47 55 48 50 55 49 44 41 38 2 19 20 24 28 36 39 42 47 55
+8 50 55 48 50 55 49 44 41 38 2 19 20 24 29 36 39 42 47 52 59 49 44 41 38 2 19 21 36 39 42 47 53 36
+39 42 47 52 59 48 50 52 59 49 44 41 38 49 44 41 38 2 19 22 2 19 22 3
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Árbol sintáctico}, colback=white, breakable]
+        \begin{lstlisting}
+· P (2)
+  · STATEMENT (18)
+    · var
+    · VARTYPE (9)
+      · string
+    · id
+    · ;
+  · P (2)
+    · STATEMENT (18)
+      · var
+      · VARTYPE (9)
+        · string
+      · id
+      · ;
+    · P (2)
+      · STATEMENT (19)
+        · ATOMSTATEMENT (20)
+          · id
+          · IDACT (24)
+            · ASS (28)
+              · =
+            · EXP1 (36)
+              · EXP2 (39)
+                · EXP3 (42)
+                  · EXP4 (47)
+                    · EXPATOM (55)
+                      · cstr
+                    · ARITH (48)
+                      · ARITHOP (50)
+                        · +
+                      · EXPATOM (55)
+                        · cstr
+                      · ARITH (49)
+                        · lambda
+                  · COMP (44)
+                    · lambda
+                · EXPAND (41)
+                  · lambda
+              · EXPOR (38)
+                · lambda
+          · ;
+      · P (2)
+        · STATEMENT (19)
+          · ATOMSTATEMENT (20)
+            · id
+            · IDACT (24)
+              · ASS (28)
+                · =
+              · EXP1 (36)
+                · EXP2 (39)
+                  · EXP3 (42)
+                    · EXP4 (47)
+                      · EXPATOM (55)
+                        · cstr
+                      · ARITH (48)
+                        · ARITHOP (50)
+                          · +
+                        · EXPATOM (55)
+                          · cstr
+                        · ARITH (48)
+                          · ARITHOP (50)
+                            · +
+                          · EXPATOM (55)
+                            · cstr
+                          · ARITH (49)
+                            · lambda
+                    · COMP (44)
+                      · lambda
+                  · EXPAND (41)
+                    · lambda
+                · EXPOR (38)
+                  · lambda
+            · ;
+        · P (2)
+          · STATEMENT (19)
+            · ATOMSTATEMENT (20)
+              · id
+              · IDACT (24)
+                · ASS (29)
+                  · +=
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (52)
+                          · id
+                          · IDVAL (59)
+                            · lambda
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+              · ;
+          · P (2)
+            · STATEMENT (19)
+              · ATOMSTATEMENT (21)
+                · output
+                · EXP1 (36)
+                  · EXP2 (39)
+                    · EXP3 (42)
+                      · EXP4 (47)
+                        · EXPATOM (53)
+                          · (
+                          · EXP1 (36)
+                            · EXP2 (39)
+                              · EXP3 (42)
+                                · EXP4 (47)
+                                  · EXPATOM (52)
+                                    · id
+                                    · IDVAL (59)
+                                      · lambda
+                                  · ARITH (48)
+                                    · ARITHOP (50)
+                                      · +
+                                    · EXPATOM (52)
+                                      · id
+                                      · IDVAL (59)
+                                        · lambda
+                                    · ARITH (49)
+                                      · lambda
+                                · COMP (44)
+                                  · lambda
+                              · EXPAND (41)
+                                · lambda
+                            · EXPOR (38)
+                              · lambda
+                          · )
+                        · ARITH (49)
+                          · lambda
+                      · COMP (44)
+                        · lambda
+                    · EXPAND (41)
+                      · lambda
+                  · EXPOR (38)
+                    · lambda
+                · ;
+            · P (2)
+              · STATEMENT (19)
+                · ATOMSTATEMENT (22)
+                  · input
+                  · id
+                  · ;
+              · P (2)
+                · STATEMENT (19)
+                  · ATOMSTATEMENT (22)
+                    · input
+                    · id
+                    · ;
+                · P (3)
+                  · eof
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
 
 \end{enumerate}
 
@@ -71,25 +1611,232 @@ Tabla Global #0:
 
 \section{Anexo - Casos de funcionamiento erróneo}
 \begin{enumerate}
-    \item \textbf{Caso 5:} Funcionamiento erróneo
+
+
+
+
+
+    \item \textbf{Caso 6:} Funcionamiento erróneo
     \begin{tcolorbox}[title={Código fuente}, colback=white]
         \begin{lstlisting}
-/* Hay algunos símbolos por los que un token no puede empezar. */
-$ % @ # ?
+/* ejemplo_error1
 
-/* En especial, las variables no pueden empezar con «_». */
-var int _error;
+
+            */
+
+var boolean a;
+var int b;
+var string c;
+/* Declarar de nuevo una variable es error semántico.*/
+var int a;
+
+/* Ejemplo de valor de retorno incorrecto. Error semántico*/
+function int func1on (void) {
+    return 'Esto es una cadena';
+}
+
+/* Falta el tipo de retorno de la función. Error sintáctico*/
+function println(string s) {
+  output s +   '\n'
+  ;
+}
+
+println('¡Hola mundo!');
         \end{lstlisting}      
     \end{tcolorbox}
 
     \begin{tcolorbox}[title={Errores detectados}, colback=white]
         \begin{lstlisting}
-(2:1) ERROR: Carácter inesperado al buscar el siguiente símbolo («$», U+0024).
-(2:3) ERROR: Carácter inesperado al buscar el siguiente símbolo («%», U+0025).
-(2:5) ERROR: Carácter inesperado al buscar el siguiente símbolo («@», U+0040).
-(2:7) ERROR: Carácter inesperado al buscar el siguiente símbolo («#», U+0023).
-(2:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («?», U+003F).
-(5:9) ERROR: Carácter inesperado al buscar el siguiente símbolo («_», U+005F).
+(10:9) UE-0000: El nombre de la variable a declarar ya está en uso.
+ ->   var int a;
+              ^
+(13:10) UE-0101: El tipo de retorno de la función «func1on» («int») no coincide con el devuelto
+(«string»).
+(18:10) SE-0300: Elemento de tipo «identificador» inesperado. Se esperaba el tipo de retorno de la
+ función («int», «boolean», «string» o «void»).
+ ->   function println(string s) {
+               ^^^^^^^
+ERROR CRÍTICO: Error irrecuperable al procesar la entrada.
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 7:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+
+
+var boolean este;
+var int programa;
+var int parece_correcto;
+
+function boolean sin_emb4rgo   (void) {
+    input este;
+
+}
+
+var string programa;
+
+programa = '¡Contiene múltiples errores!';
+
+
+
+/*
+Finalizamos con un comentario sin cerrar
+
+que generará un error léxico
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(8:11) UE-0106: Un objeto tipo «boolean» no se puede usar con «input». «input» acepta variables de
+ tipo «int» o «string».
+ ->       input este;
+                ^^^^
+(7:10) UE-0101: El tipo de retorno de la función «sin_emb4rgo» («boolean») no coincide con el
+devuelto («void»).
+(12:12) UE-0000: El nombre de la variable a declarar ya está en uso.
+ ->   var string programa;
+                 ^^^^^^^^
+(14:10) UE-0200: Los tipos a ambos lados de la asignación no coinciden. La variable es de tipo
+«int», pero la expresión es «string».
+ ->   programa = '¡Contiene múltiples errores!';
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(22:1) LE-0001: Fin de fichero inesperado. Se esperaba «*/» para cerrar el comentario de bloque.
+ ->   �
+      ^
+Hay errores semánticos al procesar el programa.
+
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 8:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+
+var int a;
+var int b;
+
+a = 2;
+b = 100;
+
+/* Al declarar implícitamente la variable resultado, esta será de tipo entero,
+ lo cual generará un error semántico.
+ */
+resultado = a > b && a < 9;
+
+/*Error sintáctico, pues el analizador léxico entenderá la palabra "bulean" como un
+identificador*/
+var bulean resultado;
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(11:11) UE-0200: Los tipos a ambos lados de la asignación no coinciden. La variable es de tipo
+«int», pero la expresión es «boolean».
+ ->   resultado = a > b && a < 9;
+                ^^^^^^^^^^^^^^^^
+(15:5) SE-0400: Elemento de tipo «identificador» inesperado. Se esperaba un tipo de variable
+válido («int», «boolean» o «string»).
+ ->   var bulean resultado;
+          ^^^^^^
+ERROR CRÍTICO: Error irrecuperable al procesar la entrada.
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 9:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+/*Ejemplo erróneo de operaciones y asignaciones entre tipos disjuntos. */
+
+
+function int Prueba_2 (string cad, int a, boolean val) {
+    /* Se declara implícitamente una variable global k*/
+    k = 9 > 2;
+    for(; k < 100 && 'Una cadena aquí no tiene sentido'; k += true) {
+        if (k > 57 || val) output cad;
+        val = k <63 && false;
+        if (val) return k + '3?';
+    }
+
+    return k < 9;
+}
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(6:7) UE-0200: Los tipos a ambos lados de la asignación no coinciden. La variable es de tipo
+«int», pero la expresión es «boolean».
+ ->       k = 9 > 2;
+            ^^^^^^^
+(7:22) UE-0100: Para poder aplicar un operador lógico, la expresión debe ser de tipo «boolean». El
+ tipo de la expresión es «string».
+ ->       for(; k < 100 && 'Una cadena aquí no tiene sentido';
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(7:63) UE-0200: Se esperaba una expresión con tipo «int». El tipo de la expresión es «boolean».
+ ->       for(; k < 100 && 'Una cadena aquí no tiene sentido'; k += true)
+                                                                    ^^^^
+(10:25) UE-0200: Los tipos no concuerdan. Los tipos de las expresiones son «int» y «string».
+ ->           if (val) return k + '3?';
+                              ^^^^^^^^
+(4:10) UE-0101: El tipo de retorno de la función «Prueba_2» («int») no coincide con el devuelto
+(«type_error»).
+Hay errores semánticos al procesar el programa.
+        \end{lstlisting}
+    \end{tcolorbox}
+
+
+
+
+
+    \item \textbf{Caso 10:} Funcionamiento erróneo
+    \begin{tcolorbox}[title={Código fuente}, colback=white]
+        \begin{lstlisting}
+k = 3;
+
+/* No tiene sentido tratar de sumar un valor lógico */
+k += a > b;
+
+k += 9000;
+
+
+/* El entero excede el límite*/
+k += 9999999999999999999999;
+
+/* Tampoco puede aparecer ningún carácter no imprimible en una cadena*/
+
+output 'Érase un hombre a una nariz pegado,
+        érase una nariz        superlativa; érase una nariz sayón y escriba; ';
+        \end{lstlisting}
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[title={Errores detectados}, colback=white]
+        \begin{lstlisting}
+(4:6) UE-0100: Sólo se puede incrementar con expresiones de tipo «int» o concatenar con
+expresiones de tipo «string». El tipo actual es boolean.
+ ->   k += a > b;
+           ^^^^^
+(10:28) LE-0200: El valor del entero es demasiado grande (máximo 32767).
+ ->   k += 9999999999999999999999;
+                                 ^
+(14:1) SE-0900: Elemento de tipo «out» inesperado. Una expresión formada así no es correcta.
+ ->   output 'Érase un hombre a una nariz pegado,
+      ^^^^^^
+ERROR CRÍTICO: Error irrecuperable al procesar la entrada.
         \end{lstlisting}
     \end{tcolorbox}
 \end{enumerate}
